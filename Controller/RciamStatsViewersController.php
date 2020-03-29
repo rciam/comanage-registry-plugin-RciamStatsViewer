@@ -31,9 +31,7 @@ class RciamStatsViewersController extends StandrardController
     $p = array();
   
     // Determine what operations this user can perform
-    $p['configure'] = ($roles['cmadmin'] || $roles['coadmin']);
-    $p['edit'] = true;
-    $p['logout'] = true;
+    $p['edit'] = ($roles['cmadmin'] || $roles['coadmin']);
     $this->set('permissions', $p);
     
     return($p[$this->action]);

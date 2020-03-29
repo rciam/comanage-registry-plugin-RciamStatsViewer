@@ -29,7 +29,7 @@
   // Determine if fields are editable
   $e = false;
   
-  if(($this->action == "add" && $permissions['add']) || ($this->action == "edit" && $permissions['edit']))
+  if($this->action == "edit" && $permissions['edit'])
     $e = true;
     
   // We shouldn't get here if we don't have at least read permission, but check just in case
@@ -40,16 +40,12 @@
   // Add breadcrumbs
   print $this->element("coCrumb");
 
-  $args = array();
-  $args['plugin'] = null;
-  $args['controller'] = 'rciam_stats_viewers';
-  $args['action'] = 'index';
-  $args['co'] = $cur_co['Co']['id'];
-  $this->Html->addCrumb(_txt('ct.rciam_stats_viewers.pl'), $args);
+  $model = $this->name;
+  $controller = Inflector::underscore(Inflector::pluralize($model));
 
   $args = array();
   $args['plugin'] = null;
-  $args['controller'] = 'rciam_stats_viewers';
+  $args['controller'] = $controller;
   $args['action'] = 'edit';
   $args[] = $cur_co['Co']['id'];//not sure
   $this->Html->addCrumb($rciam_stats_viewers[0]['Co']['description'], $args);
