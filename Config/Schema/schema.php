@@ -11,7 +11,7 @@ class AppSchema extends CakeSchema
     {
     }
 
-    public $rciam_stats_viewer = array(
+    public $rciam_stats_viewers = array(
         'id' => array('type' => 'integer', 'autoIncrement' => true, 'null' => false, 'default' => null, 'length' => 10, 'key' => 'primary'),
         'co_id' => array('type' => 'integer', 'null' => true, 'length' => 10),
         'host_name' => array('type' => 'string','null' => false,  'length' => 256),
@@ -26,6 +26,6 @@ class AppSchema extends CakeSchema
 /**
 
 // Console/cake schema create --file schema.php --path /srv/comanage/comanage-registry-current/local/Plugin/RciamStatsViewer/Config/Schema
-ALTER TABLE ONLY public.cm_rciam_stats_viewer ADD CONSTRAINT cm_rciam_stats_viewer_co_id_fkey FOREIGN KEY (co_id) REFERENCES public.cm_cos(id);
-GRANT SELECT ON TABLE public.cm_rciam_stats_viewer TO rciam_registry_user_proxy;
+ALTER TABLE ONLY public.cm_rciam_stats_viewers ADD CONSTRAINT cm_rciam_stats_viewers_co_id_fkey FOREIGN KEY (co_id) REFERENCES public.cm_cos(id);
+GRANT SELECT ON TABLE public.cm_rciam_stats_viewers TO rciam_registry_user_proxy;
 */
