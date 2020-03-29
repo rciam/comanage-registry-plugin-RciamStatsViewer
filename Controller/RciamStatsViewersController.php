@@ -14,6 +14,53 @@ class RciamStatsViewersController extends StandrardController
     "Co",
   );
 
+  public function edit() {
+    $configData = $this->RciamStatsViewer->getConfiguration($this->cur_co['Co']['id']);
+    $id = isset($configData['RciamStatsViewer']) ? $configData['RciamStatsViewer']['id'] : -1;
+    
+    if($this->request->is('post')) {
+      // We're processing an update
+      // if i had already set configuration before, now retrieve the entry and update
+      if($id > 0){
+        $this->RciamStatsViewer->id = $id;
+        $this->request->data['RciamStatsViewer']['id'] = $id;
+      }
+      
+      try {
+        /*
+         * The check of the fields' values happen in two phases.
+         * 1. The framework is responsible to ensure the presentation of all the keys
+         * everytime i make a post. We achieve this by setting the require field to true.
+         * 2. On the other hand not all fields are required to have a value for all cases. So we apply logic and apply the notEmpty logic
+         * in the frontend through Javascript.
+         * */
+        $save_options = array(
+          'validate'  => true,
+          'atomic' => true,
+          'provisioning' => false,
+        );
+        
+        if($this->RciamStatsViewer->save($this->request->data, $save_options)){
+          $this->Flash->set(_txt('rs.saved'), array('key' => 'success'));
+        } else {
+          $invalidFields = $this->RciamStatsViewer->invalidFields();
+          $this->log(__METHOD__ . "::exception error => ".print_r($invalidFields, true), LOG_DEBUG);
+          $this->Flash->set(_txt('rs.rciam_stats_viewer.error'), array('key' => 'error'));
+        }
+      }
+      catch(Exception $e) {
+        $this->log(__METHOD__ . "::exception error => ".$e, LOG_DEBUG);
+        $this->Flash->set($e->getMessage(), array('key' => 'error'));
+      }
+      // Redirect back to a GET
+      $this->redirect(array('action' => 'edit', 'co' => $this->cur_co['Co']['id']));
+    } else {
+      
+     // $this->set('vv_enrollments_list', $vv_enrollments_list);
+      // Return the settings
+      $this->set('rciam_stats_viewers', $configData);
+    }
+  }
     /**
    * Authorization for this Controller, called by Auth component
    * - precondition: Session.Auth holds data used for auth decisions
