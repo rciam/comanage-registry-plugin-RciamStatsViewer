@@ -46,5 +46,8 @@ $cm_rciam_stats_viewer_texts['en_US'] = array(
   'pl.rciamstatsviewer.host_name'       => 'Hostname',
   'pl.rciamstatsviewer.host_name.desc'  => 'Hostname of the external database you want to access',
   'pl.rciamstatsviewer.stats_type'      => 'Type of Statistics',
-  'pl.rciamstatsviewer.stats_type.desc' => 'Select the type of statistics you want'
+  'pl.rciamstatsviewer.stats_type.desc' => 'Select the type of statistics you want',
+
+  //Database
+  'rs.rciam_stats_viewer.error' => 'Save failed'
 );
