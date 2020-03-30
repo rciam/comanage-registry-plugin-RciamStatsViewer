@@ -2,8 +2,10 @@
 
 class RciamStatsViewer extends AppModel
 {
+    // Required by COmanage Plugins
     public $cmPluginType= 'other';
-
+     // Default display field for cake generated views
+    public $displayField = 'name';
     /**
      * Expose menu items.
      *
@@ -19,6 +21,24 @@ class RciamStatsViewer extends AppModel
         );
     }
 
+    /**
+     * @param Integer $co_id
+     * @return array|null
+     */
+    public function getConfiguration($co_id) {
+        // Get all the config data. Even the EOFs that i have now deleted
+        $args = array();
+        $args['conditions']['RciamStatsViewer.co_id'] = $co_id;
+        
+        $data = $this->find('first', $args);
+        // There is no configuration available for the plugin. Abort
+        if(empty($data)) {
+        return null;
+        }
+        
+        return $data;
+    }
+
     public $validate = array(
         'co_id'=> array(
             'rule' => 'numeric',
@@ -29,8 +49,8 @@ class RciamStatsViewer extends AppModel
             'rule' => array(
                 'inList',
                 array(
-                    "RciamStatsViewerStatsTypeEnum::PieChart",
-                    "RciamStatsViewerStatsTypeEnum::LineChart"
+                    "QN",
+                    "QL"
                 ),
             ),
             'required' => true,

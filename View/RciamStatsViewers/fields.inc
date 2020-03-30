@@ -48,7 +48,7 @@
   $args['controller'] = $controller;
   $args['action'] = 'edit';
   $args[] = $cur_co['Co']['id'];//not sure
-  $this->Html->addCrumb($rciam_stats_viewers[0]['Co']['description'], $args);
+ // $this->Html->addCrumb($rciam_stats_viewers[0]['Co']['description'], $args);
 
   $crumbTxt = _txt('op.config');
   $this->Html->addCrumb($crumbTxt);
@@ -67,7 +67,11 @@
       <div class="field-desc"><?php print _txt('pl.rciamstatsviewer.host_name.desc'); ?></div>
     </div>
     <div class="field-info">
-      <?php print ($e ? $this->Form->input('host_name', array('size' => 50)) : filter_var($rciam_stats_viewers[0]['rciamstatsviewer']['host_name'],FILTER_SANITIZE_SPECIAL_CHARS)); ?>
+      <?php 
+       $value = empty($rciam_stats_viewers['RciamStatsViewer']['host_name']) ? ""
+              : filter_var($rciam_stats_viewers['RciamStatsViewer']['host_name'],FILTER_SANITIZE_SPECIAL_CHARS);
+       print $this->Form->input('host_name', array('size' => 50,'value' => $value)); 
+      ?>
     </div>
   </li>
   <li>
@@ -79,7 +83,14 @@
       <div class="field-desc"><?php print _txt('pl.rciamstatsviewer.stats_type.desc'); ?></div>
     </div>
     <div class="field-info">
-      <?php print ($e ? $this->Form->input('stats_type', array('size' => 50)) : filter_var($rciam_stats_viewers[0]['rciamstatsviewer']['stats_type'],FILTER_SANITIZE_SPECIAL_CHARS)); ?>
+      <?php 
+        $attrs=array();
+        $attrs['value'] = (isset($rciam_stats_viewers['RciamStatsViewer']['stats_type'])
+          ? $rciam_stats_viewers['RciamStatsViewer']['stats_type']
+          : "");
+        //$attrs['empty'] = false;
+        print $this->Form->select('stats_type',$vv_stats_type_list,$attrs); 
+      ?>
     </div>
   </li>
   
