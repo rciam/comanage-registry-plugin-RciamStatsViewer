@@ -25,7 +25,7 @@
   must be specified in raw SQL, which needs the prefixed table name.
 -->
 <schema version="0.3">
-    <table name="rciam_stats_viewer">
+    <table name="rciam_stats_viewers">
         <field name="id" type="I">
             <key />
             <autoincrement />

@@ -2,10 +2,10 @@
 
 class RciamStatsViewerStatsTypeEnum
 {
-    const PieChart = 'P';
-    const LineChart= 'L';
+    const Quantitative = 'QN';
+    const Qualitative= 'QL';
     const type      = array(
-        'P' => 'Pie Chart',
-        'L' => 'Line Chart'
+        'QN' => 'Quantitative',
+        'QL' => 'Qualitative'
     );
 }
