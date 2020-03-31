@@ -33,7 +33,6 @@
     $e = true;
     
   // We shouldn't get here if we don't have at least read permission, but check just in case
-  
   if(!$e && !$permissions['view'])
     return false;
   
@@ -43,19 +42,10 @@
   $model = $this->name;
   $controller = Inflector::underscore(Inflector::pluralize($model));
 
-  $args = array();
-  $args['plugin'] = null;
-  $args['controller'] = $controller;
-  $args['action'] = 'edit';
-  $args[] = $cur_co['Co']['id'];//not sure
- // $this->Html->addCrumb($rciam_stats_viewers[0]['Co']['description'], $args);
-
-  $crumbTxt = _txt('op.config');
+  $crumbTxt = _txt('op.config')." "._txt('ct.rciam_stats_viewers.1');
   $this->Html->addCrumb($crumbTxt);
   
   print $this->Form->hidden('co_id', array('default' => $cur_co['Co']['id'])) . "\n";
-  
-  $l = 1;
 ?>
 <ul id="<?php print $this->action; ?>_rciam_stats_viewer" class="fields form-list">
   <li>
@@ -88,7 +78,7 @@
         $attrs['value'] = (isset($rciam_stats_viewers['RciamStatsViewer']['stats_type'])
           ? $rciam_stats_viewers['RciamStatsViewer']['stats_type']
           : "");
-        //$attrs['empty'] = false;
+        $attrs['empty'] = false;
         print $this->Form->select('stats_type',$vv_stats_type_list,$attrs); 
       ?>
     </div>

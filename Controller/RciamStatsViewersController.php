@@ -15,8 +15,8 @@ class RciamStatsViewersController extends StandardController
   );
 
   public function edit($id=null) {
+    //Get data if any for the configuration of RciamStatsViewer  
     $configData = $this->RciamStatsViewer->getConfiguration($this->cur_co['Co']['id']);
-    
     $id = isset($configData['RciamStatsViewer']) ? $configData['RciamStatsViewer']['id'] : -1;
     
     if($this->request->is('post')) {
@@ -28,13 +28,7 @@ class RciamStatsViewersController extends StandardController
       }
       
       try {
-        /*
-         * The check of the fields' values happen in two phases.
-         * 1. The framework is responsible to ensure the presentation of all the keys
-         * everytime i make a post. We achieve this by setting the require field to true.
-         * 2. On the other hand not all fields are required to have a value for all cases. So we apply logic and apply the notEmpty logic
-         * in the frontend through Javascript.
-         * */
+        
         $save_options = array(
           'validate'  => true,
         );
@@ -54,9 +48,9 @@ class RciamStatsViewersController extends StandardController
       // Redirect back to a GET
       $this->redirect(array('action' => 'edit', 'co' => $this->cur_co['Co']['id']));
     } else {
-      
-     $this->set('vv_stats_type_list', RciamStatsViewerStatsTypeEnum::type);
-      // Return the settings
+      // Return the list of stats type
+      $this->set('vv_stats_type_list', RciamStatsViewerStatsTypeEnum::type);
+      // Return the existing data if any
       $this->set('rciam_stats_viewers', $configData);
     }
   }

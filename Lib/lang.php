@@ -36,12 +36,6 @@ $cm_rciam_stats_viewer_texts['en_US'] = array(
   'ct.rciam_stats_viewers.1'  => 'Statistics Viewer',
   'ct.rciam_stats_viewers.pl' => 'Statistics Viewers',
   
-  // Error messages
-  /*'er.rciamstatsviewer.code'       => 'Error exchanging code for ORCID and access token: %1$s',
-  'er.rciamstatsviewer.search'     => 'Search request returned %1$s',
-  'er.rciamstatsviewer.token.api'  => 'Access token not found in API response',
-  'er.rciamstatsviewer.token.none' => 'Access token not configured (try resaving configuration)',
-  */
   // Plugin texts
   'pl.rciamstatsviewer.host_name'       => 'Hostname',
   'pl.rciamstatsviewer.host_name.desc'  => 'Hostname of the external database you want to access',
