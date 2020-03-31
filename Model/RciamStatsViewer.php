@@ -6,12 +6,14 @@ class RciamStatsViewer extends AppModel
     public $cmPluginType= 'other';
      // Default display field for cake generated views
     public $displayField = 'name';
+
     /**
      * Expose menu items.
      *
      * @ since COmanage Registry v2.0.0
      * @ return Array with menu location type as key and array of labels, controllers, actions as values.
      */
+
     public function cmPluginMenus() {
         $this->log(__METHOD__ . '::@', LOG_DEBUG);
         return array(
@@ -25,6 +27,7 @@ class RciamStatsViewer extends AppModel
      * @param Integer $co_id
      * @return array|null
      */
+
     public function getConfiguration($co_id) {
         // Get all the config data. Even the EOFs that i have now deleted
         $args = array();
@@ -33,7 +36,7 @@ class RciamStatsViewer extends AppModel
         $data = $this->find('first', $args);
         // There is no configuration available for the plugin. Abort
         if(empty($data)) {
-        return null;
+            return null;
         }
         
         return $data;
