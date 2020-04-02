@@ -1,9 +1,15 @@
 <?php 
 
+//App::import('Model', 'ConnectionManager');
+
 class RciamStatsViewer extends AppModel
 {
     // Required by COmanage Plugins
     public $cmPluginType= 'other';
+
+    // Association rules from this model to other models
+//    public $belongsTo = array("Server");
+
      // Default display field for cake generated views
     public $displayField = 'name';
 
@@ -19,7 +25,10 @@ class RciamStatsViewer extends AppModel
         return array(
         'coconfig' => array(_txt('ct.rciam_stats_viewers.1') =>
             array('controller' => 'rciam_stats_viewers',
-                  'action'     => 'edit'))
+                  'action'     => 'edit')),
+       /* 'copeople' => array(_txt('ct.rciam_stats_viewer_services.pl') =>
+            array('controller' => "rciam_stats_viewer_services",
+                  'action' => 'index'))          */
         );
     }
 
@@ -48,6 +57,37 @@ class RciamStatsViewer extends AppModel
             'required' => true,
             'message' => 'A CO ID must be provided',
         ),
+        'type' => array(
+            'rule' => array(
+              'inList',
+              array(
+                RciamStatsViewerDBDriverTypeEnum::Mysql,
+                RciamStatsViewerDBDriverTypeEnum::Postgres 
+              )
+            ),
+            'required' => true
+        ),
+        'hostname' => array(
+            'rule' => 'notBlank',
+            'required' => true,
+            'allowEmpty' => false
+        ),
+        'username' => array(
+            'rule' => 'notBlank',
+            'required' => false,
+            'allowEmpty' => true
+        ),
+        'password' => array(
+            'rule' => 'notBlank',
+            'required' => false,
+            'allowEmpty' => true
+        ),
+        // 'database' is a MySQL reserved keyword
+        'databas' => array(
+            'rule' => 'notBlank',
+            'required' => false,
+            'allowEmpty' => true
+        ),
         'stats_type'=>array(
             'rule' => array(
                 'inList',
@@ -60,4 +100,5 @@ class RciamStatsViewer extends AppModel
             'message' => 'A valid type must be selected'
         )
     );
+
 }

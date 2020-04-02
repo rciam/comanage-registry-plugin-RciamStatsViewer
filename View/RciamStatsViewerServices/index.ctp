@@ -1,6 +1,6 @@
 <?php
 /**
- * COmanage Registry Rciam Stats Viewer Plugin Language File
+ * COmanage Registry CO Service Tokens Index View
  *
  * Portions licensed to the University Corporation for Advanced Internet
  * Development, Inc. ("UCAID") under one or more contributor license agreements.
@@ -18,31 +18,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  * @link          http://www.internet2.edu/comanage COmanage Project
- * @package       registry-plugin
+ * @package       registry
  * @since         COmanage Registry v2.0.0
  * @license       Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
  */
-  
-global $cm_lang, $cm_texts;
 
-// When localizing, the number in format specifications (eg: %1$s) indicates the argument
-// position as passed to _txt.  This can be used to process the arguments in
-// a different order than they were passed.
+// Get a pointer to our model
+$model = $this->name;
+$req = Inflector::singularize($model);
 
-$cm_rciam_stats_viewer_texts['en_US'] = array(
-  // Titles, per-controller
-  'ct.rciam_stats_viewers.1'          => 'Statistics Viewer',
-  'ct.rciam_stats_viewers.pl'         => 'Statistics Viewers',
-  'ct.rciam_stats_viewer_services.pl' => 'Statistics Viewer',
-  
-  // Plugin texts
-  'pl.rciamstatsviewer.hostname'       => 'Hostname',
-  'pl.rciamstatsviewer.hostname.desc'  => 'Hostname of the external database you want to access',
-  'pl.rciamstatsviewer.stats_type'      => 'Type of Statistics',
-  'pl.rciamstatsviewer.stats_type.desc' => 'Select the type of statistics you want',
+$this->Html->addCrumb(_txt('ct.rciam_stats_viewer_services.pl'));
 
-  //Database
-  'rs.rciam_stats_viewer.error' => 'Save failed'
-);
+// Add page title
+$params = array();
+$params['title'] = _txt('ct.rciam_stats_viewer_services.pl');
+?>

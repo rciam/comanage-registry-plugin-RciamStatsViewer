@@ -51,16 +51,79 @@
   <li>
     <div class="field-name">
       <div class="field-title">
-        <?php print _txt('pl.rciamstatsviewer.host_name'); ?>
+        <?php print _txt('pl.rciamstatsviewer.hostname'); ?>
         <span class="required">*</span>
       </div>
-      <div class="field-desc"><?php print _txt('pl.rciamstatsviewer.host_name.desc'); ?></div>
+      <div class="field-desc"><?php print _txt('pl.rciamstatsviewer.hostname.desc'); ?></div>
     </div>
     <div class="field-info">
       <?php 
-       $value = empty($rciam_stats_viewers['RciamStatsViewer']['host_name']) ? ""
-              : filter_var($rciam_stats_viewers['RciamStatsViewer']['host_name'],FILTER_SANITIZE_SPECIAL_CHARS);
-       print $this->Form->input('host_name', array('size' => 50,'value' => $value)); 
+       $value = empty($rciam_stats_viewers['RciamStatsViewer']['hostname']) ? ""
+              : filter_var($rciam_stats_viewers['RciamStatsViewer']['hostname'],FILTER_SANITIZE_SPECIAL_CHARS);
+       print $this->Form->input('hostname', array('size' => 50,'value' => $value)); 
+      ?>
+    </div>
+  </li>
+  <li>
+    <div class="field-name">
+      <?php print ($e ? $this->Form->label('type', _txt('fd.type')) : _txt('fd.type')); ?><span class="required">*</span>
+    </div>
+    <div class="field-info">
+      <?php
+        global $cm_lang, $cm_texts;
+        $attrs = array();
+        //var_dump($rciam_stats_viewers['RciamStatsViewer']['databas']);
+        //var_dump( filter_var($rciam_stats_viewers['RciamStatsViewer']['databas'],FILTER_SANITIZE_SPECIAL_CHARS));
+        $attrs['value'] = (isset($rciam_stats_viewers) ? $rciam_stats_viewers['RciamStatsViewer']['type'] : "");
+        $attrs['empty'] = false;
+
+        if($e) {
+          print $this->Form->select('type',
+                                    $vv_dbdriver_type_list,
+                                    $attrs);
+
+          if($this->Form->isFieldError('type')) {
+            print $this->Form->error('type');
+          }
+        } else {
+          print _txt('en.server.sql', null, $rciam_stats_viewers['RciamStatsViewer']['type']);
+        }
+      ?>
+    </div>
+  </li>
+  <li>
+    <div class="field-name">
+      <?php print $this->Form->label('username',_txt('fd.server.username')); ?>
+    </div>
+    <div class="field-info">
+      <?php 
+        $value = empty($rciam_stats_viewers['RciamStatsViewer']['username']) ? ""
+        : filter_var($rciam_stats_viewers['RciamStatsViewer']['username'],FILTER_SANITIZE_SPECIAL_CHARS);
+        print $this->Form->input('username', array('size' => 50,'value' => $value)); 
+      ?>
+    </div>
+  </li>
+  <li>
+    <div class="field-name">
+      <?php print $this->Form->label('password',_txt('fd.password')); ?>
+    </div>
+    <div class="field-info">
+      <?php 
+        $value = empty($rciam_stats_viewers['RciamStatsViewer']['password']) ? ""
+        : filter_var($rciam_stats_viewers['RciamStatsViewer']['password'],FILTER_SANITIZE_SPECIAL_CHARS);
+        print $this->Form->input('password', array('size' => 50,'value' => $value));   
+      ?>
+    </div>
+  </li>
+  <li>
+    <div class="field-name">
+      <?php print $this->Form->label('databas',_txt('fd.server.sql.database')); ?>
+    </div>
+    <div class="field-info">
+      <?php 
+        $value = empty($rciam_stats_viewers['RciamStatsViewer']['databas']) ? ""
+        : filter_var($rciam_stats_viewers['RciamStatsViewer']['databas'],FILTER_SANITIZE_SPECIAL_CHARS);
+        print $this->Form->input('databas', array('size' => 50,'value' => $value)); 
       ?>
     </div>
   </li>

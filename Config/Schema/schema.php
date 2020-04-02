@@ -14,8 +14,12 @@ class AppSchema extends CakeSchema
     public $rciam_stats_viewers = array(
         'id' => array('type' => 'integer', 'autoIncrement' => true, 'null' => false, 'default' => null, 'length' => 10, 'key' => 'primary'),
         'co_id' => array('type' => 'integer', 'null' => true, 'length' => 10),
-        'host_name' => array('type' => 'string','null' => false,  'length' => 256),
+        'type' => array('type' => 'string','null' => false,  'length' => 2),
+        'hostname' => array('type' => 'string','null' => false,  'length' => 128),
+        'username' => array('type' => 'string','null' => false,  'length' => 128),
+        'password' => array('type' => 'string','null' => false,  'length' => 80),
         'stats_type' => array('type' => 'string','null' => false,  'length' => 2),
+        'databas' => array('type' => 'string','null' => false,  'length' => 128),
         'created' => array('type' => 'datetime', 'null' => true),
         'modified' => array('type' => 'datetime', 'null' => true),
         'indexes' => array(

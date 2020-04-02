@@ -33,8 +33,13 @@
         <field name="co_id" type="I">
             <constraint>REFERENCES cm_cos(id)</constraint>
         </field>
-        <field name="host_name" type="C" size="256"/>
+        <field name="type" type="C" size="2" />
+        <field name="hostname" type="C" size="128" />
+        <field name="username" type="C" size="120" />
+        <field name="password" type="C" size="80" />
         <field name="stats_type" type="C" size="2"/>
+        <!-- "database" is reserved by MySQL -->
+        <field name="databas" type="C" size="128" />
         <field name="created" type="T" />
         <field name="modified" type="T" />
     </table>

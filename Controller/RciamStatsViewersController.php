@@ -50,6 +50,10 @@ class RciamStatsViewersController extends StandardController
     } else {
       // Return the list of stats type
       $this->set('vv_stats_type_list', RciamStatsViewerStatsTypeEnum::type);
+
+      // Return the list of dbdriver type
+      $this->set('vv_dbdriver_type_list', RciamStatsViewerDBDriverTypeEnum::type);
+
       // Return the existing data if any
       $this->set('rciam_stats_viewers', $configData);
     }
