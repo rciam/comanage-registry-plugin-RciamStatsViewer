@@ -1,6 +1,6 @@
 <?php 
 
-//App::import('Model', 'ConnectionManager');
+App::import('Model', 'ConnectionManager');
 
 class RciamStatsViewer extends AppModel
 {
@@ -26,9 +26,9 @@ class RciamStatsViewer extends AppModel
         'coconfig' => array(_txt('ct.rciam_stats_viewers.1') =>
             array('controller' => 'rciam_stats_viewers',
                   'action'     => 'edit')),
-       /* 'copeople' => array(_txt('ct.rciam_stats_viewer_services.pl') =>
+        'copeople' => array(_txt('ct.rciam_stats_viewer_services.pl') =>
             array('controller' => "rciam_stats_viewer_services",
-                  'action' => 'index'))          */
+                  'action' => 'index'))          
         );
     }
 
@@ -101,4 +101,50 @@ class RciamStatsViewer extends AppModel
         )
     );
 
+  /**
+   * Establish a connection (via Cake's ConnectionManager) to the specified SQL server.
+   *
+   * @since  COmanage Registry v3.2.0
+   * @param  Integer $serverId Server ID (NOT RciamStatsViewerId)
+   * @param  String  $name     Connection name, used for subsequent access via Models
+   * @return Boolean true on success
+   * @throws Exception
+   */
+  
+  public function connect($coId) {
+    // Get our connection information
+    $args = array();
+    $args['conditions']['RciamStatsViewer.co_id'] = $coId;
+    $args['contain'] = false;
+    
+    $rciamstatsviewer = $this->find('first', $args);
+   
+    if(empty($rciamstatsviewer)) {
+      throw new InvalidArgumentException(_txt('er.notfound', array(_txt('ct.rciam_stats_viewers.1'), $coId)));
+    }
+  
+
+    $dbmap = array(
+      RciamStatsViewerDBDriverTypeEnum::Mysql     => 'Mysql',
+      RciamStatsViewerDBDriverTypeEnum::Postgres  => 'Postgres'
+    );
+   
+
+    $dbconfig = array(
+      'datasource' => 'Database/' . $dbmap[ $rciamstatsviewer['RciamStatsViewer']['type'] ],
+      'persistent' => false,
+      'host' => $rciamstatsviewer['RciamStatsViewer']['hostname'],
+      'login' => $rciamstatsviewer['RciamStatsViewer']['username'],
+      'password' => $rciamstatsviewer['RciamStatsViewer']['password'],
+      'database' => $rciamstatsviewer['RciamStatsViewer']['databas'],
+//    'prefix' => '',
+//    'encoding' => 'utf8',
+    );
+    
+    $datasource = ConnectionManager::create('connection_'.$coId, $dbconfig);
+    //var_dump($datasource);
+    //$conn = ConnectionManager::get(); #Remote D
+    //var_dump($conn);
+    return $datasource;
+  }
 }
