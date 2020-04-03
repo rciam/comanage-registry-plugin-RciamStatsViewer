@@ -1,6 +1,6 @@
 <?php
 App::uses("StandardController","Controller");
-
+require('/srv/comanage/comanage-registry-Fix_regex_PCRE_group_error/local/Plugin/RciamStatsViewer/Lib/utils.php');
 class RciamStatsViewerServicesController extends StandardController
 {
   // Class name, used by Cake
@@ -8,8 +8,24 @@ class RciamStatsViewerServicesController extends StandardController
 
   public $requires_co = true;
 
+  public $uses = array(
+    "RciamStatsViewer.RciamStatsViewer",
+    "Co",
+    "RciamStatsViewer.RciamStatsViewerUtils"
+  );
+
   public function index() {
+    //Get data if any for the configuration of RciamStatsViewer  
+    $configData = $this->RciamStatsViewer->getConfiguration($this->cur_co['Co']['id']);
     
+    $conn=$this->RciamStatsViewer->connect($this->cur_co['Co']['id']);
+   
+    $utils = new RciamStatsViewerUtils();
+   $vv_logincount_per_day = $utils->getLoginCountPerDay($conn,0);
+    // Return the existing data if any
+    $this->set('vv_logincount_per_day', $vv_logincount_per_day);
+    $this->set('rciam_stats_viewers', $configData);
+   // $this->set('vv_conn',$conn);
   }
 
   function isAuthorized() {

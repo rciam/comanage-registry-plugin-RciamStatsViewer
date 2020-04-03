@@ -34,4 +34,47 @@ $this->Html->addCrumb(_txt('ct.rciam_stats_viewer_services.pl'));
 // Add page title
 $params = array();
 $params['title'] = _txt('ct.rciam_stats_viewer_services.pl');
+
+//var_dump($vv_logincount_per_day);
 ?>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+
+    google.charts.load('current', {'packages':['corechart', 'controls', 'table']});
+    google.charts.setOnLoadCallback(drawLoginsChart);
+
+    function drawLoginsChart() {
+        var data = google.visualization.arrayToDataTable([
+            ['Date', 'Count'],
+            <?php 
+                foreach ($vv_logincount_per_day as $record){
+                     echo "[new Date(".$record[0]["year"].",". ($record[0]["month"] - 1 ). ", ".$record[0]["day"]."), {v:".$record[0]["count"]."}],";
+                 }
+            ?>
+        ]);
+
+        var dashboard = new google.visualization.Dashboard(document.getElementById('loginsDashboard'));
+
+        var chartRangeFilter=new google.visualization.ControlWrapper({
+            'controlType': 'ChartRangeFilter',
+            'containerId': 'control_div',
+            'options': {
+                'filterColumnLabel': 'Date'
+            }
+        });
+        var chart = new google.visualization.ChartWrapper({
+            'chartType' : 'LineChart',
+            'containerId' : 'line_div',
+            'options':{
+                'legend' : 'none'
+            }
+        });
+        dashboard.bind(chartRangeFilter, chart);
+        dashboard.draw(data);
+    }
+
+</script>
+<div id="loginsDashboard" >
+    <div id="line_div"></div>
+    <div id="control_div"></div>
+</div>
