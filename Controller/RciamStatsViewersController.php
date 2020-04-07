@@ -48,6 +48,13 @@ class RciamStatsViewersController extends StandardController
       // Redirect back to a GET
       $this->redirect(array('action' => 'edit', 'co' => $this->cur_co['Co']['id']));
     } else {
+    
+      // Return the olist of persistent values
+      $this->set('vv_encoding_list', RciamStatsViewerDBEncodingTypeEnum::type);
+
+      // Return the olist of persistent values
+      $this->set('vv_persistent_list', array(true => 'true', false => 'false'));
+
       // Return the list of stats type
       $this->set('vv_stats_type_list', RciamStatsViewerStatsTypeEnum::type);
 

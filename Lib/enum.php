@@ -19,3 +19,11 @@ class RciamStatsViewerDBDriverTypeEnum
         'PG' => 'Postgres'
     );
 }
+
+class RciamStatsViewerDBEncodingTypeEnum
+{
+    const utf_8     = 'utf-8';
+    const type      = array(
+        'utf-8' => 'utf-8',
+    );
+}

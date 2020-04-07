@@ -23,6 +23,7 @@ class RciamStatsViewerServicesController extends StandardController
     $utils = new RciamStatsViewerUtils();
    $vv_logincount_per_day = $utils->getLoginCountPerDay($conn,0);
     // Return the existing data if any
+    
     $this->set('vv_logincount_per_day', $vv_logincount_per_day);
     $this->set('rciam_stats_viewers', $configData);
    // $this->set('vv_conn',$conn);

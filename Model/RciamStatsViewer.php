@@ -7,10 +7,7 @@ class RciamStatsViewer extends AppModel
     // Required by COmanage Plugins
     public $cmPluginType= 'other';
 
-    // Association rules from this model to other models
-//    public $belongsTo = array("Server");
-
-     // Default display field for cake generated views
+    // Default display field for cake generated views
     public $displayField = 'name';
 
     /**
@@ -72,6 +69,11 @@ class RciamStatsViewer extends AppModel
             'required' => true,
             'allowEmpty' => false
         ),
+        'port' => array(
+            'rule' => 'notBlank',
+            'required' => false,
+            'allowEmpty' => true
+        ),
         'username' => array(
             'rule' => 'notBlank',
             'required' => false,
@@ -88,13 +90,34 @@ class RciamStatsViewer extends AppModel
             'required' => false,
             'allowEmpty' => true
         ),
-        'stats_type'=>array(
+        'db_prefix' => array(
+            'rule' => 'notBlank',
+            'required' => false,
+            'allowEmpty' => true
+        ),
+        'persistent' => array(
+            'rule' => 'boolean',
+            'required' => true,
+            'allowEmpty' => false
+        ),
+        'encoding' => array(
             'rule' => array(
                 'inList',
                 array(
-                    "QN",
-                    "QL"
-                ),
+                  RciamStatsViewerDBEncodingTypeEnum::utf_8,          
+                )
+              ),
+            'required' => true,
+            'allowEmpty' => false
+        ),
+        'stats_type'=>array(
+            'rule' => array(
+                'inList', 
+                array(
+                    RciamStatsViewerStatsTypeEnum::Quantitative,
+                    RciamStatsViewerStatsTypeEnum::Qualitative
+                )
+                 
             ),
             'required' => true,
             'message' => 'A valid type must be selected'
@@ -103,12 +126,6 @@ class RciamStatsViewer extends AppModel
 
   /**
    * Establish a connection (via Cake's ConnectionManager) to the specified SQL server.
-   *
-   * @since  COmanage Registry v3.2.0
-   * @param  Integer $serverId Server ID (NOT RciamStatsViewerId)
-   * @param  String  $name     Connection name, used for subsequent access via Models
-   * @return Boolean true on success
-   * @throws Exception
    */
   
   public function connect($coId) {
@@ -123,7 +140,6 @@ class RciamStatsViewer extends AppModel
       throw new InvalidArgumentException(_txt('er.notfound', array(_txt('ct.rciam_stats_viewers.1'), $coId)));
     }
   
-
     $dbmap = array(
       RciamStatsViewerDBDriverTypeEnum::Mysql     => 'Mysql',
       RciamStatsViewerDBDriverTypeEnum::Postgres  => 'Postgres'
@@ -132,19 +148,25 @@ class RciamStatsViewer extends AppModel
 
     $dbconfig = array(
       'datasource' => 'Database/' . $dbmap[ $rciamstatsviewer['RciamStatsViewer']['type'] ],
-      'persistent' => false,
-      'host' => $rciamstatsviewer['RciamStatsViewer']['hostname'],
-      'login' => $rciamstatsviewer['RciamStatsViewer']['username'],
-      'password' => $rciamstatsviewer['RciamStatsViewer']['password'],
-      'database' => $rciamstatsviewer['RciamStatsViewer']['databas'],
-//    'prefix' => '',
-//    'encoding' => 'utf8',
+      'persistent' => $rciamstatsviewer['RciamStatsViewer']['persistent'],
+      'host'       => $rciamstatsviewer['RciamStatsViewer']['hostname'],
+      'login'      => $rciamstatsviewer['RciamStatsViewer']['username'],
+      'password'   => $rciamstatsviewer['RciamStatsViewer']['password'],
+      'database'   => $rciamstatsviewer['RciamStatsViewer']['databas'],
+      'prefix'     => $rciamstatsviewer['RciamStatsViewer']['db_prefix'],
+      'encoding'   => $rciamstatsviewer['RciamStatsViewer']['encoding'],
     );
+
+    // Port Value
+    if (!isset($rciamstatsviewer['RciamStatsViewer']['port']) || $rciamstatsviewer['RciamStatsViewer']['port']==""){
+        if($dbconfig['datasource'] == "Mysql")
+            $dbconfig['port'] = "3306";
+        else if($dbconfig['datasource'] == "Postgres")
+            $dbconfig['port'] = "5432";
+    }
     
     $datasource = ConnectionManager::create('connection_'.$coId, $dbconfig);
-    //var_dump($datasource);
-    //$conn = ConnectionManager::get(); #Remote D
-    //var_dump($conn);
+    
     return $datasource;
   }
 }
