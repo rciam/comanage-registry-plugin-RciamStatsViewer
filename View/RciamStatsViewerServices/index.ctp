@@ -37,7 +37,24 @@ $params['title'] = _txt('ct.rciam_stats_viewer_services.pl');
 
 //var_dump($vv_logincount_per_day);
 ?>
+<style>
+#control_div {
+    height:50px;
+    
+}
+#control_div *{
+    font-size: 0.98em!important;
+    
+}
+
+
+</style>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script>
+  $( function() {
+    $( "#tabs" ).tabs();
+  } );
+  </script>
 <script type="text/javascript">
 
     google.charts.load('current', {'packages':['corechart', 'controls', 'table']});
@@ -56,11 +73,29 @@ $params['title'] = _txt('ct.rciam_stats_viewer_services.pl');
         var dashboard = new google.visualization.Dashboard(document.getElementById('loginsDashboard'));
 
         var chartRangeFilter=new google.visualization.ControlWrapper({
-            'controlType': 'ChartRangeFilter',
-            'containerId': 'control_div',
-            'options': {
-                'filterColumnLabel': 'Date'
+            controlType: 'ChartRangeFilter',
+            containerId: 'control_div',
+            options: {
+                filterColumnLabel: 'Date',
+                'ui': {
+            'chartType': 'LineChart',
+            'chartOptions': {
+                'chartArea': {'width': '95%'},
+                hAxis: {
+                  title: '',
+                  textStyle: {
+                   //  color: '#01579b',
+                    // fontSize: 20,
+                     //fontName: 'Arial',
+                     bold: true,
+                     italic: true
+                  },
+ 
+               },
+              
+                },
             }
+        }
         });
         var chart = new google.visualization.ChartWrapper({
             'chartType' : 'LineChart',
@@ -74,7 +109,21 @@ $params['title'] = _txt('ct.rciam_stats_viewer_services.pl');
     }
 
 </script>
-<div id="loginsDashboard" >
+<div id="tabs">
+    <ul class="tabset_tabs" width="100px">
+        <li><a href='#loginsDashboard'>Summary</a></li>
+        <li><a href='#idpProviders'>Identity Providers Details</a></li>
+        <li><a href='#spProviders'>Service Providers Details</a></li>
+    </ul>
+    <div id="loginsDashboard" >
     <div id="line_div"></div>
     <div id="control_div"></div>
 </div>
+
+    <div id="idpProviders"> test2
+    </div>
+
+    <div id="spProviders"> Test
+    </div>
+</div>
+
