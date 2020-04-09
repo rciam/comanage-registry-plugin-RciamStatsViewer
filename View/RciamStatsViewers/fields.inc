@@ -212,6 +212,45 @@
           ?>
         </div>
       </li>
+      <li class="fields-data-container">
+        <div class="field-name">
+          <?php print $this->Form->label('statisticsTableName',_txt('pl.rciamstatsviewer.statisticsTableName')); ?>
+          <span class="required">*</span>
+        </div>
+        <div class="field-info">
+          <?php 
+            $value = empty($rciam_stats_viewers['RciamStatsViewer']['statisticsTableName']) ? ""
+            : filter_var($rciam_stats_viewers['RciamStatsViewer']['statisticsTableName'],FILTER_SANITIZE_SPECIAL_CHARS);
+            print $this->Form->input('statisticsTableName', array('size' => 50,'value' => $value)); 
+          ?>
+        </div>
+      </li>
+      <li class="fields-data-container">
+        <div class="field-name">
+          <?php print $this->Form->label('identityProvidersMapTableName',_txt('pl.rciamstatsviewer.identityProvidersMapTableName')); ?>
+          <span class="required">*</span>
+        </div>
+        <div class="field-info">
+          <?php 
+            $value = empty($rciam_stats_viewers['RciamStatsViewer']['identityProvidersMapTableName']) ? ""
+            : filter_var($rciam_stats_viewers['RciamStatsViewer']['identityProvidersMapTableName'],FILTER_SANITIZE_SPECIAL_CHARS);
+            print $this->Form->input('identityProvidersMapTableName', array('size' => 50,'value' => $value)); 
+          ?>
+        </div>
+      </li>
+      <li class="fields-data-container">
+        <div class="field-name">
+          <?php print $this->Form->label('serviceProvidersMapTableName',_txt('pl.rciamstatsviewer.databserviceProvidersMapTableNamease')); ?>
+          <span class="required">*</span>
+        </div>
+        <div class="field-info">
+          <?php 
+            $value = empty($rciam_stats_viewers['RciamStatsViewer']['serviceProvidersMapTableName']) ? ""
+            : filter_var($rciam_stats_viewers['RciamStatsViewer']['serviceProvidersMapTableName'],FILTER_SANITIZE_SPECIAL_CHARS);
+            print $this->Form->input('serviceProvidersMapTableName', array('size' => 50,'value' => $value)); 
+          ?>
+        </div>
+      </li>
     </ul>
   </li>
   <li id="fields-stats" class="fieldGroup">

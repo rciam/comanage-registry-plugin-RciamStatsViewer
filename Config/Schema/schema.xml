@@ -37,13 +37,16 @@
         <field name="hostname" type="C" size="128" />
         <field name="port" type="I" />
         <field name="username" type="C" size="120" />
-        <field name="password" type="C" size="80" />
+        <field name="password" type="C" size="256" />
         <field name="stats_type" type="C" size="2"/>
         <!-- "database" is reserved by MySQL -->
         <field name="databas" type="C" size="128" />
         <field name="db_prefix" type="C" size="128" />
         <field name="persistent" type="L" />
         <field name="encoding" type="C" size="128" />
+        <field name="statisticsTableName" type="C" size="128" />
+        <field name="identityProvidersMapTableName" type="C" size="128" />
+        <field name="serviceProvidersMapTableName" type="C" size="128" />
         <field name="created" type="T" />
         <field name="modified" type="T" />
     </table>

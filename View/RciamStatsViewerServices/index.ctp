@@ -37,6 +37,8 @@ $params['title'] = _txt('ct.rciam_stats_viewer_services.pl');
 
 //var_dump($vv_logincount_per_day);
 ?>
+<link rel="stylesheet" href="//cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css">
+<script type="text/javascript" src="//cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
 <style>
 #control_div {
     height:50px;
@@ -46,6 +48,16 @@ $params['title'] = _txt('ct.rciam_stats_viewer_services.pl');
     font-size: 0.98em!important;
     
 }
+#idpsChartDetail, #spsChartDetail{
+    padding-top:60px;
+
+}
+#idpDatatable_wrapper, #spDatatable_wrapper{
+    margin-top:100px;
+}
+#idpDatatable, #spDatatable{
+    padding-top: 15px;
+}
 
 
 </style>
@@ -53,10 +65,22 @@ $params['title'] = _txt('ct.rciam_stats_viewer_services.pl');
 <script>
   $( function() {
     $( "#tabs" ).tabs();
-  } );
-  </script>
+    $( "#idpDatatable" ).DataTable( {
+        "order": [1,'desc']
+    });
+    $( "#spDatatable" ).DataTable({
+        "order": [1,'desc']
+    });
+    
+    $( ".tabset_tabs li a" ).on("click", function(){
+        if($(this).attr("data-draw")=="drawIdpsChart")
+            drawIdpsChart();    
+        else if($(this).attr("data-draw")=="drawSpsChart")
+            drawSpsChart();    
+        })
+    } );  
+</script>
 <script type="text/javascript">
-
     google.charts.load('current', {'packages':['corechart', 'controls', 'table']});
     google.charts.setOnLoadCallback(drawLoginsChart);
 
@@ -78,24 +102,12 @@ $params['title'] = _txt('ct.rciam_stats_viewer_services.pl');
             options: {
                 filterColumnLabel: 'Date',
                 'ui': {
-            'chartType': 'LineChart',
-            'chartOptions': {
-                'chartArea': {'width': '95%'},
-                hAxis: {
-                  title: '',
-                  textStyle: {
-                   //  color: '#01579b',
-                    // fontSize: 20,
-                     //fontName: 'Arial',
-                     bold: true,
-                     italic: true
-                  },
- 
-               },
-              
+                    'chartType': 'LineChart',
+                    'chartOptions': {
+                    'chartArea': {'width': '95%'},
                 },
-            }
-        }
+             }
+          }
         });
         var chart = new google.visualization.ChartWrapper({
             'chartType' : 'LineChart',
@@ -104,26 +116,167 @@ $params['title'] = _txt('ct.rciam_stats_viewer_services.pl');
                 'legend' : 'none'
             }
         });
+
         dashboard.bind(chartRangeFilter, chart);
         dashboard.draw(data);
+
+    }
+    
+    // IdP Details Tab
+
+    function drawIdpsChart() {
+        var data = google.visualization.arrayToDataTable([
+            ['sourceIdp', 'sourceIdPEntityId', 'Count'],
+            <?php 
+                foreach ($vv_logincount_per_idp as $record){
+                    echo "['" . str_replace("'", "\'", $record[0]["idpname"]) . "', '" . $record[0]["sourceidp"] . "', " . $record[0]["count"] . "],";
+                }
+            ?>
+        ]);
+
+        data.sort([{column: 2, desc: true}]);
+
+        var view = new google.visualization.DataView(data);
+
+        view.setColumns([0,2]);
+
+        var options = {
+            pieSliceText: 'value',
+            width: '100%',
+            height: '300',
+            chartArea: {
+                left: "3%",
+                top: "3%",
+                height: "94%",
+                width: "94%"
+            }
+        };
+
+        var chart = new google.visualization.PieChart(document.getElementById('idpsChartDetail'));
+        chart.draw(view, options);
+
+        google.visualization.events.addListener(chart, 'select', selectHandler);
+
+        function selectHandler() {
+            var selection = chart.getSelection();
+            if (selection.length) {
+                var entityId = data.getValue(selection[0].row, 1);
+                window.location.href = 'idpDetail.php?entityId=' + entityId;
+            }
+        }
+    }
+
+    //Sp Details
+    function drawSpsChart() {
+        var data = google.visualization.arrayToDataTable([
+            ['service', 'serviceIdentifier', 'Count'],
+            <?php 
+                foreach ($vv_logincount_per_sp as $record){
+                    //echo "['" . str_replace("'", "\'", $record[0]["idpname"]) . "', '" . $record[0]["sourceidp"] . "', " . $record[0]["count"] . "],";
+                    echo "['" . str_replace("'", "\'", $record[0]["spname"]) . "', '". $record[0]["service"] . "', " .  $record[0]["count"] . "],";
+                }
+            ?>
+        ]);
+
+        data.sort([{column: 2, desc: true}]);
+
+        var view = new google.visualization.DataView(data);
+
+        view.setColumns([0,2]);
+
+        var options = {
+            pieSliceText: 'value',
+            width: '100%',
+            height: '400',
+            chartArea: {
+                left: "3%",
+                top: "3%",
+                height: "94%",
+                width: "94%"
+            }
+        };
+
+        var chart = new google.visualization.PieChart(document.getElementById('spsChartDetail'));
+
+        chart.draw(view, options);
+
+        google.visualization.events.addListener(chart, 'select', selectHandler);
+
+        function selectHandler() {
+            var selection = chart.getSelection();
+            if (selection.length) {
+                var identifier = data.getValue(selection[0].row, 1);
+                window.location.href = 'spDetail.php?identifier=' + identifier;
+            }
+        }
     }
 
 </script>
+
 <div id="tabs">
     <ul class="tabset_tabs" width="100px">
-        <li><a href='#loginsDashboard'>Summary</a></li>
-        <li><a href='#idpProviders'>Identity Providers Details</a></li>
-        <li><a href='#spProviders'>Service Providers Details</a></li>
+        <li><a href='#dashboardTab'>Summary</a></li>
+        <li><a data-draw="drawIdpsChart" href='#idpProvidersTab'>Identity Providers Details</a></li>
+        <li><a data-draw="drawSpsChart" href='#spProvidersTab'>Service Providers Details</a></li>
     </ul>
-    <div id="loginsDashboard" >
-    <div id="line_div"></div>
-    <div id="control_div"></div>
-</div>
-
-    <div id="idpProviders"> test2
+    <div id="dashboardTab">
+        <h1>Number of Logins</h1>
+        <div class="legend-logins">
+            The chart shows overall number of logins from identity providers for each day.
+        </div>
+        <div id="loginsDashboard">
+            <div id="line_div"></div>
+            <div id="control_div"></div>
+        </div>
     </div>
 
-    <div id="spProviders"> Test
+    <div id="idpProvidersTab">
+        <h1>Identity Providers</h1>
+        <div>The chart and the table show number of logins from each identity provider in selected time range. Click a specific identity provider to view detailed statistics for that identity provider.</div>
+        <div id="idpsChartDetail" style="width:100%;"></div>
+        <!-- Create Datatable -->
+        <table id="idpDatatable" class="stripe row-border hover">
+            <thead>
+                <tr>
+                    <th>Identity Providers</th>
+                    <th>Number of Logins</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php                
+                    foreach ($vv_logincount_per_idp as $record){
+                        echo "<tr>";
+                        echo "<td>" . str_replace("'", "\'", $record[0]["idpname"]) . "</td>";
+                        echo "<td>" . $record[0]["count"] . "</td>";
+                        echo "</tr>";
+                    }
+                ?>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="spProvidersTab">
+        <h1>Service Providers</h1>
+        <div id="spsChartDetail"></div>
+          <!-- Create Datatable -->
+          <table id="spDatatable" class="stripe row-border hover">
+            <thead>
+                <tr>
+                    <th>Service Providers</th>
+                    <th>Number of Logins</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php                
+                    foreach ($vv_logincount_per_sp as $record){
+                        echo "<tr>";
+                        echo "<td>" . str_replace("'", "\'", $record[0]["spname"]) . "</td>";
+                        echo "<td>" . $record[0]["count"] . "</td>";
+                        echo "</tr>";
+                    }
+                ?>
+            </tbody>
+        </table>
     </div>
 </div>
 
