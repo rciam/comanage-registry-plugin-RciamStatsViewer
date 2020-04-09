@@ -20,13 +20,19 @@ class RciamStatsViewerServicesController extends StandardController
     
     $conn=$this->RciamStatsViewer->connect($this->cur_co['Co']['id']);
    
-    $utils = new RciamStatsViewerUtils();
-   $vv_logincount_per_day = $utils->getLoginCountPerDay($conn,0);
-    // Return the existing data if any
+    $utils = new RciamStatsViewerUtils($configData);
+    $vv_logincount_per_day = $utils->getLoginCountPerDay($conn,0);
+
+    $vv_logincount_per_idp = $utils->getLoginCountPerIdp($conn,0);
+
+    $vv_logincount_per_sp = $utils->getLoginCountPerSp($conn,0);
     
+    // Return the existing data if any
+    $this->set('vv_logincount_per_sp', $vv_logincount_per_sp);
+    $this->set('vv_logincount_per_idp', $vv_logincount_per_idp);
     $this->set('vv_logincount_per_day', $vv_logincount_per_day);
     $this->set('rciam_stats_viewers', $configData);
-   // $this->set('vv_conn',$conn);
+    // $this->set('vv_conn',$conn);
   }
 
   function isAuthorized() {

@@ -14,6 +14,7 @@ class RciamStatsViewersController extends StandardController
     "Co",
   );
 
+  
   public function edit($id=null) {
     //Get data if any for the configuration of RciamStatsViewer  
     $configData = $this->RciamStatsViewer->getConfiguration($this->cur_co['Co']['id']);

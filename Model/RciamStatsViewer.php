@@ -1,6 +1,8 @@
 <?php 
 
 App::import('Model', 'ConnectionManager');
+App::uses('Security', 'Utility');
+App::uses('Hash', 'Utility');
 
 class RciamStatsViewer extends AppModel
 {
@@ -35,6 +37,7 @@ class RciamStatsViewer extends AppModel
      */
 
     public function getConfiguration($co_id) {
+        
         // Get all the config data. Even the EOFs that i have now deleted
         $args = array();
         $args['conditions']['RciamStatsViewer.co_id'] = $co_id;
@@ -44,9 +47,22 @@ class RciamStatsViewer extends AppModel
         if(empty($data)) {
             return null;
         }
-        
+
+        Configure::write('Security.useOpenSsl', true);
+        $data["RciamStatsViewer"]["password"] = Security::decrypt(base64_decode($data["RciamStatsViewer"]["password"]),Configure::read('Security.salt'));
         return $data;
     }
+
+    
+    public function beforeSave($options = array()){
+        if(isset($this->data['RciamStatsViewer']['password'])){
+            $key = Configure::read('Security.salt');
+            Configure::write('Security.useOpenSsl', true);
+            $password = base64_encode(Security::encrypt($this->data['RciamStatsViewer']['password'],$key));
+            $this->data['RciamStatsViewer']['password'] = $password;
+            var_dump($password);
+        }
+      }
 
     public $validate = array(
         'co_id'=> array(
@@ -104,7 +120,12 @@ class RciamStatsViewer extends AppModel
             'rule' => array(
                 'inList',
                 array(
-                  RciamStatsViewerDBEncodingTypeEnum::utf_8,          
+                  RciamStatsViewerDBEncodingTypeEnum::utf_8,
+                  RciamStatsViewerDBEncodingTypeEnum::iso_8859_7,
+                  RciamStatsViewerDBEncodingTypeEnum::latin1,
+                  RciamStatsViewerDBEncodingTypeEnum::latin2,
+                  RciamStatsViewerDBEncodingTypeEnum::latin3,
+                  RciamStatsViewerDBEncodingTypeEnum::latin4
                 )
               ),
             'required' => true,
@@ -145,13 +166,13 @@ class RciamStatsViewer extends AppModel
       RciamStatsViewerDBDriverTypeEnum::Postgres  => 'Postgres'
     );
    
-
+    Configure::write('Security.useOpenSsl', true);
     $dbconfig = array(
       'datasource' => 'Database/' . $dbmap[ $rciamstatsviewer['RciamStatsViewer']['type'] ],
       'persistent' => $rciamstatsviewer['RciamStatsViewer']['persistent'],
       'host'       => $rciamstatsviewer['RciamStatsViewer']['hostname'],
       'login'      => $rciamstatsviewer['RciamStatsViewer']['username'],
-      'password'   => $rciamstatsviewer['RciamStatsViewer']['password'],
+      'password'   => Security::decrypt(base64_decode($rciamstatsviewer['RciamStatsViewer']['password']),Configure::read('Security.salt')),
       'database'   => $rciamstatsviewer['RciamStatsViewer']['databas'],
       'prefix'     => $rciamstatsviewer['RciamStatsViewer']['db_prefix'],
       'encoding'   => $rciamstatsviewer['RciamStatsViewer']['encoding'],
