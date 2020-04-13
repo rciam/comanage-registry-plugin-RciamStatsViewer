@@ -13,28 +13,35 @@ class RciamStatsViewerServicesController extends StandardController
     "Co",
     "RciamStatsViewer.RciamStatsViewerUtils"
   );
+  private $utils;
+
+  public function __construct ($request, $response){
+    parent::__construct($request, $response);
+    $co=$request->params['named']['co'];
+    $configData = $this->RciamStatsViewer->getConfiguration($request->params['named']['co']);
+    $this->utils = new RciamStatsViewerUtils($configData);
+  } 
 
   public function index()
   {
     //Get data if any for the configuration of RciamStatsViewer  
     $configData = $this->RciamStatsViewer->getConfiguration($this->cur_co['Co']['id']);
-
     $conn = $this->RciamStatsViewer->connect($this->cur_co['Co']['id']);
 
-    $utils = new RciamStatsViewerUtils($configData);
-    $vv_logincount_per_day = $utils->getLoginCountPerDay($conn, 0);
-    $vv_totalloginscount_today = $utils->getTotalLoginCounts($conn, 1);
+    //$this->utils = new RciamStatsViewerUtils($configData);
+    $vv_logincount_per_day = $this->utils->getLoginCountPerDay($conn, 0);
+    $vv_totalloginscount_today = $this->utils->getTotalLoginCounts($conn, 1);
 
     $vv_totalloginscount = array(
-      $utils->getTotalLoginCounts($conn, 1),
-      $utils->getTotalLoginCounts($conn, 7),
-      $utils->getTotalLoginCounts($conn, 30),
-      $utils->getTotalLoginCounts($conn, 365)
+      $this->utils->getTotalLoginCounts($conn, 1),
+      $this->utils->getTotalLoginCounts($conn, 7),
+      $this->utils->getTotalLoginCounts($conn, 30),
+      $this->utils->getTotalLoginCounts($conn, 365)
     );
 
-    $vv_logincount_per_idp = $utils->getLoginCountPerIdp($conn, 0);
+    $vv_logincount_per_idp = $this->utils->getLoginCountPerIdp($conn, 0);
 
-    $vv_logincount_per_sp = $utils->getLoginCountPerSp($conn, 0);
+    $vv_logincount_per_sp = $this->utils->getLoginCountPerSp($conn, 0);
 
     // Return the existing data if any
     $this->set('vv_totalloginscount', $vv_totalloginscount);
@@ -55,24 +62,24 @@ class RciamStatsViewerServicesController extends StandardController
     $type = (isset($this->request->query['type']) && $this->request->query['type'] != '' ? $this->request->query['type'] : null);
     $conn = $this->RciamStatsViewer->connect($this->request->params['named']['co']);
     $configData = $this->RciamStatsViewer->getConfiguration($this->request->params['named']['co']);
-    $utils = new RciamStatsViewerUtils($configData);
+    
     if ($type == null) {
-      $vv_logincount_per_day_range = $utils->getLoginCountPerDay($conn, $days);
-      $vv_logincount_idp_per_day = $utils->getLoginCountPerIdp($conn, $days);
-      $vv_logincount_sp_per_day = $utils->getLoginCountPerSp($conn, $days);
+      $vv_logincount_per_day_range = $this->utils->getLoginCountPerDay($conn, $days);
+      $vv_logincount_idp_per_day = $this->utils->getLoginCountPerIdp($conn, $days);
+      $vv_logincount_sp_per_day = $this->utils->getLoginCountPerSp($conn, $days);
       $vv_logincount_per_day['range'] = $vv_logincount_per_day_range;
       $vv_logincount_per_day['idps'] = $vv_logincount_idp_per_day;
       $vv_logincount_per_day['sps'] = $vv_logincount_sp_per_day;
     } else if ($type == "idp") {
-      $vv_logincount_per_day_range = $utils->getLoginCountPerDayForIdp($conn, $days, $identifier);
-      $vv_logincount_per_day['sps'] = $utils->getLoginCountPerSp($conn, $days, $identifier);
+      $vv_logincount_per_day_range = $this->utils->getLoginCountPerDayForIdp($conn, $days, $identifier);
+      $vv_logincount_per_day['sps'] = $this->utils->getLoginCountPerSp($conn, $days, $identifier);
       $vv_logincount_per_day['range'] = $vv_logincount_per_day_range;
 
-      // $vv_logincount_idp_per_day = $utils->getLoginCountPerDayForIdp($conn, $days, $identifier);    
+      // $vv_logincount_idp_per_day = $this->utils->getLoginCountPerDayForIdp($conn, $days, $identifier);    
     }
     else if ($type == "sp") {
-      $vv_logincount_per_day_range = $utils->getLoginCountPerDayForSp($conn, $days, $identifier);
-      $vv_logincount_per_day['idps'] = $utils->getLoginCountPerIdp($conn, $days, $identifier);
+      $vv_logincount_per_day_range = $this->utils->getLoginCountPerDayForSp($conn, $days, $identifier);
+      $vv_logincount_per_day['idps'] = $this->utils->getLoginCountPerIdp($conn, $days, $identifier);
       $vv_logincount_per_day['range'] = $vv_logincount_per_day_range;
 
     }
@@ -91,14 +98,11 @@ class RciamStatsViewerServicesController extends StandardController
     $conn = $this->RciamStatsViewer->connect($this->request->params['named']['co']);
     $configData = $this->RciamStatsViewer->getConfiguration($this->request->params['named']['co']);
 
-    $utils = new RciamStatsViewerUtils($configData);
-    // $this->autoRender = false;  // <-- NO RENDER THIS METHOD HAS NO VIEW VERY IMPORTANT!!!!!
-    //$this->render('index', 'ajax');
     $vv_totalloginscount = array(
-      $utils->getTotalLoginCounts($conn, 1, $sp),
-      $utils->getTotalLoginCounts($conn, 7, $sp),
-      $utils->getTotalLoginCounts($conn, 30, $sp),
-      $utils->getTotalLoginCounts($conn, 365, $sp)
+      $this->utils->getTotalLoginCounts($conn, 1, $sp),
+      $this->utils->getTotalLoginCounts($conn, 7, $sp),
+      $this->utils->getTotalLoginCounts($conn, 30, $sp),
+      $this->utils->getTotalLoginCounts($conn, 365, $sp)
     );
     $this->set('vv_totalloginscount', $vv_totalloginscount);
 
@@ -116,13 +120,11 @@ class RciamStatsViewerServicesController extends StandardController
     $conn = $this->RciamStatsViewer->connect($this->request->params['named']['co']);
     $configData = $this->RciamStatsViewer->getConfiguration($this->request->params['named']['co']);
 
-    $utils = new RciamStatsViewerUtils($configData);
-
     $vv_totalloginscount = array(
-      $utils->getTotalLoginCounts($conn, 1, null, $idp),
-      $utils->getTotalLoginCounts($conn, 7, null, $idp),
-      $utils->getTotalLoginCounts($conn, 30, null, $idp),
-      $utils->getTotalLoginCounts($conn, 365, null, $idp)
+      $this->utils->getTotalLoginCounts($conn, 1, null, $idp),
+      $this->utils->getTotalLoginCounts($conn, 7, null, $idp),
+      $this->utils->getTotalLoginCounts($conn, 30, null, $idp),
+      $this->utils->getTotalLoginCounts($conn, 365, null, $idp)
     );
     $this->set('vv_totalloginscount', $vv_totalloginscount);
 
@@ -141,10 +143,8 @@ class RciamStatsViewerServicesController extends StandardController
     $conn = $this->RciamStatsViewer->connect($this->request->params['named']['co']);
     $configData = $this->RciamStatsViewer->getConfiguration($this->request->params['named']['co']);
 
-    $utils = new RciamStatsViewerUtils($configData);
-
-    $vv_logincounts['idp'] = $utils->getAccessCountForServicePerIdentityProviders($conn, $days, $sp);
-    $vv_logincounts['sp'] = $utils->getLoginCountPerDayForSp($conn, $days, $sp);
+    $vv_logincounts['idp'] = $this->utils->getAccessCountForServicePerIdentityProviders($conn, $days, $sp);
+    $vv_logincounts['sp'] = $this->utils->getLoginCountPerDayForSp($conn, $days, $sp);
 
     $this->response->type('json');
     $this->response->statusCode(200);
@@ -161,9 +161,8 @@ class RciamStatsViewerServicesController extends StandardController
     $conn = $this->RciamStatsViewer->connect($this->request->params['named']['co']);
     $configData = $this->RciamStatsViewer->getConfiguration($this->request->params['named']['co']);
 
-    $utils = new RciamStatsViewerUtils($configData);
-    $vv_logincounts['sp'] = $utils->getAccessCountForIdentityProviderPerServiceProviders($conn, $days, $idp);
-    $vv_logincounts['idp'] = $utils->getLoginCountPerDayForIdp($conn, $days, $idp);
+    $vv_logincounts['sp'] = $this->utils->getAccessCountForIdentityProviderPerServiceProviders($conn, $days, $idp);
+    $vv_logincounts['idp'] = $this->utils->getLoginCountPerDayForIdp($conn, $days, $idp);
     $this->response->type('json');
     $this->response->statusCode(200);
     $this->response->body(json_encode($vv_logincounts));
