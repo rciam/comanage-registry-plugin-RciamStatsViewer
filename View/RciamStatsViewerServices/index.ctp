@@ -257,11 +257,7 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
     });
     google.charts.setOnLoadCallback(function() {
         drawLoginsChart(document.getElementById("loginsDashboard"))
-    });
-    google.charts.setOnLoadCallback(function() {
         drawIdpsChart(document.getElementById("summaryIdPChart"))
-    });
-    google.charts.setOnLoadCallback(function() {
         drawSpsChart(document.getElementById("summarySpChart"))
     });
 
