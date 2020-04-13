@@ -25,7 +25,6 @@ class RciamStatsViewerServicesController extends StandardController
   public function index()
   {
     //Get data if any for the configuration of RciamStatsViewer  
-    $configData = $this->RciamStatsViewer->getConfiguration($this->cur_co['Co']['id']);
     $conn = $this->RciamStatsViewer->connect($this->cur_co['Co']['id']);
 
     //$this->utils = new RciamStatsViewerUtils($configData);
@@ -48,7 +47,6 @@ class RciamStatsViewerServicesController extends StandardController
     $this->set('vv_logincount_per_sp', $vv_logincount_per_sp);
     $this->set('vv_logincount_per_idp', $vv_logincount_per_idp);
     $this->set('vv_logincount_per_day', $vv_logincount_per_day);
-    $this->set('rciam_stats_viewers', $configData);
     // $this->set('vv_conn',$conn);
   }
   public function getlogincountperidpperday()
@@ -61,7 +59,6 @@ class RciamStatsViewerServicesController extends StandardController
     $identifier = (isset($this->request->query['identifier']) ? $this->request->query['identifier'] : null);
     $type = (isset($this->request->query['type']) && $this->request->query['type'] != '' ? $this->request->query['type'] : null);
     $conn = $this->RciamStatsViewer->connect($this->request->params['named']['co']);
-    $configData = $this->RciamStatsViewer->getConfiguration($this->request->params['named']['co']);
     
     if ($type == null) {
       $vv_logincount_per_day_range = $this->utils->getLoginCountPerDay($conn, $days);
@@ -96,8 +93,7 @@ class RciamStatsViewerServicesController extends StandardController
     $this->autoRender = false; // We don't render a view in this example
     $this->layout = 'ajax'; //<-- No LAYOUT VERY IMPORTANT!!!!!
     $conn = $this->RciamStatsViewer->connect($this->request->params['named']['co']);
-    $configData = $this->RciamStatsViewer->getConfiguration($this->request->params['named']['co']);
-
+ 
     $vv_totalloginscount = array(
       $this->utils->getTotalLoginCounts($conn, 1, $sp),
       $this->utils->getTotalLoginCounts($conn, 7, $sp),
@@ -118,7 +114,6 @@ class RciamStatsViewerServicesController extends StandardController
     $this->autoRender = false; // We don't render a view in this example
     $this->layout = 'ajax'; //<-- No LAYOUT VERY IMPORTANT!!!!!
     $conn = $this->RciamStatsViewer->connect($this->request->params['named']['co']);
-    $configData = $this->RciamStatsViewer->getConfiguration($this->request->params['named']['co']);
 
     $vv_totalloginscount = array(
       $this->utils->getTotalLoginCounts($conn, 1, null, $idp),
@@ -141,7 +136,6 @@ class RciamStatsViewerServicesController extends StandardController
     $this->autoRender = false; // We don't render a view in this example
     $this->layout = 'ajax'; //<-- No LAYOUT VERY IMPORTANT!!!!!
     $conn = $this->RciamStatsViewer->connect($this->request->params['named']['co']);
-    $configData = $this->RciamStatsViewer->getConfiguration($this->request->params['named']['co']);
 
     $vv_logincounts['idp'] = $this->utils->getAccessCountForServicePerIdentityProviders($conn, $days, $sp);
     $vv_logincounts['sp'] = $this->utils->getLoginCountPerDayForSp($conn, $days, $sp);
@@ -159,7 +153,6 @@ class RciamStatsViewerServicesController extends StandardController
     $this->autoRender = false; // We don't render a view in this example
     $this->layout = 'ajax'; //<-- No LAYOUT VERY IMPORTANT!!!!!
     $conn = $this->RciamStatsViewer->connect($this->request->params['named']['co']);
-    $configData = $this->RciamStatsViewer->getConfiguration($this->request->params['named']['co']);
 
     $vv_logincounts['sp'] = $this->utils->getAccessCountForIdentityProviderPerServiceProviders($conn, $days, $idp);
     $vv_logincounts['idp'] = $this->utils->getLoginCountPerDayForIdp($conn, $days, $idp);
