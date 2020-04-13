@@ -1,0 +1,50 @@
+
+    div[id$="loginsDashboard"] {
+        padding-bottom: 35px;
+    }
+
+    div[id$="control_div"] {
+        height: 50px;
+    }
+
+    div[id$="control_div"] * {
+        font-size: 0.98em !important;
+    }
+
+    #idpsChartDetail,
+    #spsChartDetail {
+        padding-top: 60px;
+    }
+
+    #idpDatatable_wrapper,
+    #spDatatable_wrapper {
+        margin-top: 100px;
+    }
+
+    #idpDatatable,
+    #spDatatable {
+        padding-top: 15px;
+    }
+
+    #spSpecificData,
+    #idpSpecificData {
+        display: none;
+    }
+
+    .small-box * {
+        font-size: inherit;
+        line-height: initial;
+        font-weight: normal;
+    }
+
+    .small-box h3 {
+        color: #fff;
+    }
+
+    .inactive {
+        background-color: #b4b0b0 !important;
+    }
+
+    .overlay {
+        display: none;
+    }
