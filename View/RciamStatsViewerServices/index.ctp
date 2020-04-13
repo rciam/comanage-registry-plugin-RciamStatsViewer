@@ -278,16 +278,9 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
                 ?>
             ]);
         }
-        if (type == '' || type == null) {
-            dashboard = new google.visualization.Dashboard(document.getElementById(elementId));
-            cur_dashboard = dashboard;
-        } else if (type == 'idp') {
-            dashboardIdp = new google.visualization.Dashboard(document.getElementById(elementId));
-            cur_dashboard = dashboardIdp;
-        } else if (type == 'sp') {
-            dashboardSp = new google.visualization.Dashboard(document.getElementById(elementId));
-            cur_dashboard = dashboardSp;
-        }
+        
+        cur_dashboard = new google.visualization.Dashboard(document.getElementById(elementId));
+        
         chartRangeFilter = new google.visualization.ControlWrapper({
             controlType: 'ChartRangeFilter',
             containerId: type + 'control_div',
