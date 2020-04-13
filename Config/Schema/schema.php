@@ -37,5 +37,5 @@ class AppSchema extends CakeSchema
 /**
 // Console/cake schema create --file schema.php --path /srv/comanage/comanage-registry-current/local/Plugin/RciamStatsViewer/Config/Schema
 ALTER TABLE ONLY public.cm_rciam_stats_viewers ADD CONSTRAINT cm_rciam_stats_viewers_co_id_fkey FOREIGN KEY (co_id) REFERENCES public.cm_cos(id);
-GRANT SELECT ON TABLE public.cm_rciam_stats_viewers TO rciam_registry_user_proxy;
+GRANT SELECT ON TABLE public.cm_rciam_stats_viewers TO cmregistryuser_proxy;
 */
