@@ -82,25 +82,7 @@ class RciamStatsViewerServicesController extends StandardController
     $this->response->body(json_encode($vv_logincount_per_day));
     return $this->response;
   }
-  public function getdataperday()
-  {
-    $this->log(__METHOD__ . "::@", LOG_DEBUG);
-    $this->autoRender = false; // We don't render a view in this example
-    $this->request->onlyAllow('ajax'); // No direct access via browser URL
-    $this->layout = null;
-    $days = $this->request->query['days'];
-    $conn = $this->RciamStatsViewer->connect($this->request->params['named']['co']);
-    $configData = $this->RciamStatsViewer->getConfiguration($this->request->params['named']['co']);
-
-    $utils = new RciamStatsViewerUtils($configData);
-    $vv_logincount_per_day = $utils->getLoginCountPerDay($conn, $days);
-    $this->set('vv_totalloginscount_per_day', $vv_logincount_per_day);
-
-    $this->response->type('json');
-    $this->response->statusCode(201);
-    $this->response->body(json_encode($vv_logincount_per_day));
-    return $this->response;
-  }
+  
   public function getdataforsp()
   {
     $sp = $this->request->query['sp'];
@@ -212,7 +194,6 @@ class RciamStatsViewerServicesController extends StandardController
     // Determine what operations this user can perform
     $p['index'] = ($roles['cmadmin'] || $roles['coadmin']);
     $p['getdataforsp'] = ($roles['cmadmin'] || $roles['coadmin']);
-    $p['getdataperday'] = ($roles['cmadmin'] || $roles['coadmin']);
     $p['getchartforsp'] = ($roles['cmadmin'] || $roles['coadmin']);
     $p['getchartforidp'] = ($roles['cmadmin'] || $roles['coadmin']);
     $p['getlogincountperidpperday'] = ($roles['cmadmin'] || $roles['coadmin']);
