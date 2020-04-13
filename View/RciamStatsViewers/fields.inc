@@ -47,16 +47,16 @@
   
   print $this->Form->hidden('co_id', array('default' => $cur_co['Co']['id'])) . "\n";
 ?>
-<ul id="<?php print $this->action; ?>_rciam_stats_viewer" class="fields form-list">
-  <li id="fields-hostname" class="fieldGroup">
+<ul id="configuration-menu" id="<?php print $this->action; ?>_rciam_stats_viewer">
+  <li id="fields-database" class="fieldGroup">
     <a href="#tabs-database" class="fieldGroupName">
       <em class="material-icons">indeterminate_check_box</em>
       <?php 
         print 'Database Settings';//_txt('fd.name'); 
       ?>
     </a>
-    <ul id="tabs-database" class="fields data-list">
-      <li class="fields-data-container">
+    <ul id="tabs-database" class="fields data-list form-list">
+      <li>
         <div class="field-name">
           <div class="field-title">
             <?php print _txt('pl.rciamstatsviewer.hostname'); ?>
@@ -72,7 +72,7 @@
           ?>
         </div>
       </li>
-      <li class="fields-data-container">
+      <li>
         <div class="field-name">
           <?php print $this->Form->label('port',_txt('fd.server.port')); ?>
         </div>
@@ -84,7 +84,7 @@
           ?>
         </div>
       </li>
-      <li class="fields-data-container">
+      <li>
         <div class="field-name">
           <?php print ($e ? $this->Form->label('type', _txt('fd.type')) : _txt('fd.type')); ?><span class="required">*</span>
         </div>
@@ -109,7 +109,7 @@
           ?>
         </div>
       </li>
-      <li class="fields-data-container">
+      <li>
         <div class="field-name">
           <?php print $this->Form->label('username',_txt('fd.server.username')); ?>
           <span class="required">*</span>
@@ -122,7 +122,7 @@
           ?>
         </div>
       </li>
-      <li class="fields-data-container">
+      <li>
         <div class="field-name">
           <?php print $this->Form->label('password',_txt('fd.password')); ?>
           <span class="required">*</span>
@@ -135,7 +135,7 @@
           ?>
         </div>
       </li>
-      <li class="fields-data-container">
+      <li>
         <div class="field-name">
           <?php print $this->Form->label('databas',_txt('pl.rciamstatsviewer.database')); ?>
           <span class="required">*</span>
@@ -148,7 +148,7 @@
           ?>
         </div>
       </li>
-      <li class="fields-data-container">
+      <li>
         <div class="field-name">
           <?php print $this->Form->label('db_prefix',_txt('pl.rciamstatsviewer.db_prefix')); ?>
         </div>
@@ -160,7 +160,7 @@
           ?>
         </div>
       </li>
-      <li class="fields-data-container">
+      <li>
         <div class="field-name">
           <?php print $this->Form->label('persistent',_txt('pl.rciamstatsviewer.persistent')); ?>
           <span class="required">*</span>
@@ -186,7 +186,7 @@
           ?>
         </div>
       </li>
-      <li class="fields-data-container">
+      <li>
         <div class="field-name">
           <?php print $this->Form->label('encoding',_txt('pl.rciamstatsviewer.encoding')); ?>
           <span class="required">*</span>
@@ -212,7 +212,7 @@
           ?>
         </div>
       </li>
-      <li class="fields-data-container">
+      <li>
         <div class="field-name">
           <?php print $this->Form->label('statisticsTableName',_txt('pl.rciamstatsviewer.statisticsTableName')); ?>
           <span class="required">*</span>
@@ -225,7 +225,7 @@
           ?>
         </div>
       </li>
-      <li class="fields-data-container">
+      <li>
         <div class="field-name">
           <?php print $this->Form->label('identityProvidersMapTableName',_txt('pl.rciamstatsviewer.identityProvidersMapTableName')); ?>
           <span class="required">*</span>
@@ -238,7 +238,7 @@
           ?>
         </div>
       </li>
-      <li class="fields-data-container">
+      <li>
         <div class="field-name">
           <?php print $this->Form->label('serviceProvidersMapTableName',_txt('pl.rciamstatsviewer.databserviceProvidersMapTableNamease')); ?>
           <span class="required">*</span>
@@ -258,8 +258,8 @@
           <em class="material-icons">indeterminate_check_box</em>
           <?php print _txt('fd.name'); ?>
     </a>
-    <ul id="tabs-stats" class="fields data-list">
-      <li class="fields-data-container">
+    <ul id="tabs-stats" class="fields data-list form-list">
+      <li>
         <div class="field-name">
           <div class="field-title">
             <?php print _txt('pl.rciamstatsviewer.stats_type'); ?>
