@@ -49,7 +49,7 @@ class RciamStatsViewerServicesController extends StandardController
     $this->set('vv_logincount_per_day', $vv_logincount_per_day);
     // $this->set('vv_conn',$conn);
   }
-  public function getlogincountperidpperday()
+  public function getlogincountperday()
   {
     $this->log(__METHOD__ . "::@", LOG_DEBUG);
     $this->autoRender = false; // We don't render a view in this example
@@ -90,6 +90,7 @@ class RciamStatsViewerServicesController extends StandardController
   public function getdataforsp()
   {
     $sp = $this->request->query['sp'];
+    $days = (isset($this->request->query['days']) ? $this->request->query['days'] : 0);
     $this->autoRender = false; // We don't render a view in this example
     $this->layout = 'ajax'; //<-- No LAYOUT VERY IMPORTANT!!!!!
     $conn = $this->RciamStatsViewer->connect($this->request->params['named']['co']);
@@ -100,11 +101,13 @@ class RciamStatsViewerServicesController extends StandardController
       $this->utils->getTotalLoginCounts($conn, 30, $sp),
       $this->utils->getTotalLoginCounts($conn, 365, $sp)
     );
-    $this->set('vv_totalloginscount', $vv_totalloginscount);
+    $vv_logincounts['tiles'] = $vv_totalloginscount;
+    $vv_logincounts['idp'] = $this->utils->getAccessCountForServicePerIdentityProviders($conn, $days, $sp);
+    $vv_logincounts['sp'] = $this->utils->getLoginCountPerDayForSp($conn, $days, $sp);
 
     $this->response->type('json');
     $this->response->statusCode(201);
-    $this->response->body(json_encode($vv_totalloginscount));
+    $this->response->body(json_encode($vv_logincounts));
     return $this->response;
   }
 
@@ -121,48 +124,18 @@ class RciamStatsViewerServicesController extends StandardController
       $this->utils->getTotalLoginCounts($conn, 30, null, $idp),
       $this->utils->getTotalLoginCounts($conn, 365, null, $idp)
     );
-    $this->set('vv_totalloginscount', $vv_totalloginscount);
-
-    $this->response->type('json');
-    $this->response->statusCode(200);
-    $this->response->body(json_encode($vv_totalloginscount));
-    return $this->response;
-  }
-
-  public function getchartforsp()
-  {
-    $sp = $this->request->query['sp'];
-    $days = (isset($this->request->query['days']) ? $this->request->query['days'] : 0);
-    $this->autoRender = false; // We don't render a view in this example
-    $this->layout = 'ajax'; //<-- No LAYOUT VERY IMPORTANT!!!!!
-    $conn = $this->RciamStatsViewer->connect($this->request->params['named']['co']);
-
-    $vv_logincounts['idp'] = $this->utils->getAccessCountForServicePerIdentityProviders($conn, $days, $sp);
-    $vv_logincounts['sp'] = $this->utils->getLoginCountPerDayForSp($conn, $days, $sp);
-
-    $this->response->type('json');
-    $this->response->statusCode(200);
-    $this->response->body(json_encode($vv_logincounts));
-    return $this->response;
-  }
-
-  public function getchartforidp()
-  {
-    $idp = $this->request->query['idp'];
-    $days = (isset($this->request->query['days']) ? $this->request->query['days'] : 0);
-    $this->autoRender = false; // We don't render a view in this example
-    $this->layout = 'ajax'; //<-- No LAYOUT VERY IMPORTANT!!!!!
-    $conn = $this->RciamStatsViewer->connect($this->request->params['named']['co']);
 
     $vv_logincounts['sp'] = $this->utils->getAccessCountForIdentityProviderPerServiceProviders($conn, $days, $idp);
     $vv_logincounts['idp'] = $this->utils->getLoginCountPerDayForIdp($conn, $days, $idp);
+    
+    $vv_logincounts['tiles'] = $vv_totalloginscount;
+
     $this->response->type('json');
     $this->response->statusCode(200);
     $this->response->body(json_encode($vv_logincounts));
     return $this->response;
   }
-
-
+  
   public function beforeFilter()
   {
     // For ajax i accept only json format
@@ -186,9 +159,8 @@ class RciamStatsViewerServicesController extends StandardController
     // Determine what operations this user can perform
     $p['index'] = ($roles['cmadmin'] || $roles['coadmin']);
     $p['getdataforsp'] = ($roles['cmadmin'] || $roles['coadmin']);
-    $p['getchartforsp'] = ($roles['cmadmin'] || $roles['coadmin']);
-    $p['getchartforidp'] = ($roles['cmadmin'] || $roles['coadmin']);
-    $p['getlogincountperidpperday'] = ($roles['cmadmin'] || $roles['coadmin']);
+    $p['getdataforidp'] = ($roles['cmadmin'] || $roles['coadmin']);
+    $p['getlogincountperday'] = ($roles['cmadmin'] || $roles['coadmin']);
     $this->set('permissions', $p);
 
     return ($p[$this->action]);

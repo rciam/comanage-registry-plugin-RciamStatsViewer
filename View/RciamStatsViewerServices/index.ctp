@@ -41,63 +41,14 @@ echo $this->Html->css('/RciamStatsViewer/css/bootstrap.min');
 echo $this->Html->css('/RciamStatsViewer/css/AdminLTE.min');
 echo $this->Html->css('/RciamStatsViewer/css/ionicons.min');
 echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
+echo $this->Html->css('/RciamStatsViewer/css/style');
+echo $this->Html->css('//cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css');
+echo $this->Html->script('//cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js');
+echo $this->Html->script("https://www.gstatic.com/charts/loader.js");
 
 ?>
-<link rel="stylesheet" href="//cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css" />
-<script type="text/javascript" src="//cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
-<style>
-    div[id$="loginsDashboard"] {
-        padding-bottom: 35px;
-    }
+<script type="text/javascript">
 
-    div[id$="control_div"] {
-        height: 50px;
-    }
-
-    div[id$="control_div"] * {
-        font-size: 0.98em !important;
-    }
-
-    #idpsChartDetail,
-    #spsChartDetail {
-        padding-top: 60px;
-    }
-
-    #idpDatatable_wrapper,
-    #spDatatable_wrapper {
-        margin-top: 100px;
-    }
-
-    #idpDatatable,
-    #spDatatable {
-        padding-top: 15px;
-    }
-
-    #spSpecificData,
-    #idpSpecificData {
-        display: none;
-    }
-
-    .small-box * {
-        font-size: inherit;
-        line-height: initial;
-        font-weight: normal;
-    }
-
-    .small-box h3 {
-        color: #fff;
-    }
-
-    .inactive {
-        background-color: #b4b0b0 !important;
-    }
-
-    .overlay {
-        display: none;
-    }
-</style>
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-<script>
     var dashboard;
     var chartRangeFilter;
     $(function() {
@@ -116,7 +67,6 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
         $(document).on("click", ".backToTotal", function() {
             $(".overlay").show();
             idSpecData = $(this).parent().parent().attr("id");
-            console.log(idSpecData)
 
             // $( "#"+idSpecData ).toggle("slide", {direction: "right"}, 500);
             $("#" + idSpecData).hide();
@@ -144,7 +94,6 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
                 identifier = $(this).attr("identifier");
                 spChart = type + "SpecificChart";
                 idpChart = type + "SpecificChart";
-                console.log(linerangeChartId)
             }
             $(".overlay").show();
             // Set the other tiles to inactive
@@ -163,7 +112,7 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
             var url_str = '<?php echo $this->Html->url(array(
                                 'plugin' => Inflector::singularize(Inflector::tableize($this->plugin)),
                                 'controller' => 'rciam_stats_viewer_services',
-                                'action' => 'getlogincountperidpperday',
+                                'action' => 'getlogincountperday',
                                 'co'  => $cur_co['Co']['id']
                             )); ?>';
             $.ajax({
@@ -173,18 +122,15 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
                     days: days,
                     identifier: identifier,
                     type: type
-                    //name_startsWith: request.term
                 },
                 success: function(data) {
-                    console.log(data);
-                    //data = $.parseJSON(data);
+                    
                     fValues = [];
                     fValues.push(['Date', 'Count'])
                     data['range'].forEach(function(item) {
                         var temp = [];
                         temp.push(new Date(item[0]["year"], item[0]["month"] - 1, item[0]["day"]));
                         temp.push(parseInt(item[0]["count"]));
-                        // console.log(item[0]["year"]);   
                         fValues.push(temp);
                     })
 
@@ -192,7 +138,6 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
 
                     drawLoginsChart(document.getElementById(linerangeChartId), dataRange, type)
                     if (type == '' || type == 'sp') {
-                        console.log(idpChart);
                         fValues = [];
                         dataValues = "";
                         fValues.push(['sourceIdp', 'sourceIdPEntityId', 'Count'])
@@ -200,13 +145,9 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
                             var temp = [];
                             temp.push(item[0]["idpname"]);
                             temp.push(item[0]["sourceidp"])
-                            //temp.push(item[0]["count"]);
                             temp.push(parseInt(item[0]["count"]));
-                            // console.log(item[0]["year"]);   
-
                             fValues.push(temp);
                         })
-                        console.log(fValues);
                         var dataIdp = new google.visualization.arrayToDataTable(fValues);
                         drawIdpsChart(document.getElementById(idpChart), dataIdp);
                     }
@@ -221,7 +162,7 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
                             temp.push(parseInt(item[0]["count"]));
                             fValues.push(temp);
                         })
-                        //console.log(fValues);
+                        
                         var dataSp = new google.visualization.arrayToDataTable(fValues);
                         drawSpsChart(document.getElementById(spChart), dataSp);
                     }
@@ -239,9 +180,7 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
                     drawSpsChart(document.getElementById('spsChartDetail'));
             }
             if ($(this).attr("data-draw") == "drawIdpsChart") {
-                //$("#tabs").tabs( "refresh" );
                 drawIdpsChart(document.getElementById('idpsChartDetail'));
-
                 $(this).attr("data-draw", "")
 
             } else if ($(this).attr("data-draw") == "drawSpsChart") {
@@ -250,8 +189,7 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
             }
         })
     });
-</script>
-<script type="text/javascript">
+
     google.charts.load('current', {
         'packages': ['corechart', 'controls', 'table']
     });
@@ -285,7 +223,9 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
                 ]);
             }
         }
-        dataTable.sort({column: 0});
+        dataTable.sort({
+            column: 0
+        });
         return dataTable;
     }
     // Line Chart - Range
@@ -301,8 +241,8 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
                 ?>
             ]);
         }
-        if (data.getNumberOfRows()>0)
-            data=setZerosIfNoDate(data);
+        if (data.getNumberOfRows() > 0)
+            data = setZerosIfNoDate(data);
         cur_dashboard = new google.visualization.Dashboard(document.getElementById(elementId));
 
         chartRangeFilter = new google.visualization.ControlWrapper({
@@ -329,7 +269,6 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
         });
 
         cur_dashboard.bind(chartRangeFilter, chart);
-        
         cur_dashboard.draw(data);
     }
 
@@ -372,8 +311,10 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
 
         function selectHandler() {
             $(".overlay").show();
-            $('html,body').animate({ scrollTop: 150 }, 'slow');
-        
+            $('html,body').animate({
+                scrollTop: 150
+            }, 'slow');
+
             var selection = chart.getSelection();
             if (selection.length) {
                 var identifier = data.getValue(selection[0].row, 1);
@@ -403,11 +344,10 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
                             active: 1
                         }); // first tab selected
 
-                        $("#idpSpecificData .bg-aqua h3").text(data[0] != null ? data[0] : 0);
-                        $("#idpSpecificData .bg-green h3").text(data[1] != null ? data[1] : 0);
-                        $("#idpSpecificData .bg-yellow h3").text(data[2] != null ? data[2] : 0);
-                        $("#idpSpecificData .bg-red h3").text(data[3] != null ? data[3] : 0);
-
+                        $("#idpSpecificData .bg-aqua h3").text(data['tiles'][0] != null ? data['tiles'][0] : 0);
+                        $("#idpSpecificData .bg-green h3").text(data['tiles'][1] != null ? data['tiles'][1] : 0);
+                        $("#idpSpecificData .bg-yellow h3").text(data['tiles'][2] != null ? data['tiles'][2] : 0);
+                        $("#idpSpecificData .bg-red h3").text(data['tiles'][3] != null ? data['tiles'][3] : 0);
                         $("#idpSpecificData h1").html("<a href='#' onclick='return false;' style='font-size:2.5rem' class='backToTotal'>Identity Providers</a> > " + legend);
                         // Hide to left / show from left
                         //$("#totalIdpsInfo").toggle("slide", {direction: "left"}, 500);
@@ -416,64 +356,43 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
                         //$("#idpSpecificData").toggle("slide", {direction: "right"}, 500);
                         $("#idpSpecificData").show();
 
-                        var url_str = '<?php echo $this->Html->url(array(
-                                            'plugin' => Inflector::singularize(Inflector::tableize($this->plugin)),
-                                            'controller' => 'rciam_stats_viewer_services',
-                                            'action' => 'getchartforidp',
-                                            'co'  => $cur_co['Co']['id']
-                                        )); ?>';
-                        $.ajax({
+                        fValues = [];
+                        dataValues = "";
+                        fValues.push(['service', 'serviceIdentifier', 'Count'])
+                        data['sp'].forEach(function(item) {
+                            var temp = [];
+                            temp.push(item[0]["spname"]);
+                            temp.push(item[0]["service"])
+                            temp.push(parseInt(item[0]["count"]));
+                            dataValues += "[" + new Date(item[0]["year"], item[0]["month"] - 1, item[0]["day"]), parseInt(item[0]["count"]) + "],";
+                            fValues.push(temp);
+                        })
 
-                            url: url_str,
-                            data: {
-                                idp: identifier,
-                                //name_startsWith: request.term
-                            },
-                            success: function(data) {
-                                console.log(data);
-                                //data = $.parseJSON(data);
-                                fValues = [];
-                                dataValues = "";
-                                fValues.push(['service', 'serviceIdentifier', 'Count'])
-                                data['sp'].forEach(function(item) {
-                                    var temp = [];
-                                    temp.push(item[0]["spname"]);
-                                    temp.push(item[0]["service"])
-                                    temp.push(parseInt(item[0]["count"]));
-                                    dataValues += "[" + new Date(item[0]["year"], item[0]["month"] - 1, item[0]["day"]), parseInt(item[0]["count"]) + "],";
-                                    fValues.push(temp);
-                                })
-                                console.log(fValues);
-                                var dataSp = new google.visualization.arrayToDataTable(fValues);
+                        var dataSp = new google.visualization.arrayToDataTable(fValues);
 
-                                drawSpsChart(document.getElementById("idpSpecificChart"), dataSp);
+                        drawSpsChart(document.getElementById("idpSpecificChart"), dataSp);
 
-                                ////Draw Line - Range Chart
-                                fValues = [];
+                        ////Draw Line - Range Chart
+                        fValues = [];
+                        fValues.push(['Date', 'Count'])
 
-                                fValues.push(['Date', 'Count'])
+                        data['idp'].forEach(function(item) {
+                            var temp = [];
+                            temp.push(new Date(item[0]["year"], item[0]["month"] - 1, item[0]["day"]));
+                            temp.push(parseInt(item[0]["count"]));
+                            fValues.push(temp);
+                        })
+                        var dataIdp = new google.visualization.arrayToDataTable(fValues);
+                        drawLoginsChart(document.getElementById("idpsloginsDashboard"), dataIdp, 'idp')
 
-                                data['idp'].forEach(function(item) {
-                                    var temp = [];
-                                    temp.push(new Date(item[0]["year"], item[0]["month"] - 1, item[0]["day"]));
-
-                                    temp.push(parseInt(item[0]["count"]));
-
-                                    fValues.push(temp);
-                                })
-                                var dataIdp = new google.visualization.arrayToDataTable(fValues);
-                                drawLoginsChart(document.getElementById("idpsloginsDashboard"), dataIdp, 'idp')
-
-                                $(".overlay").hide();
-                            }
-                        });
+                        $(".overlay").hide();
                     }
                 });
             }
         }
     }
 
-    //Sp Chart 
+    // Sp Chart 
     function drawSpsChart(elementId, data = null) {
         if (data == null) {
             var data = google.visualization.arrayToDataTable([
@@ -512,9 +431,11 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
         google.visualization.events.addListener(chart, 'select', selectHandler);
 
         function selectHandler() {
-            
+
             $(".overlay").show();
-            $('html,body').animate({ scrollTop: 150 }, 'slow');
+            $('html,body').animate({
+                scrollTop: 150
+            }, 'slow');
             var selection = chart.getSelection();
             if (selection.length) {
                 var identifier = data.getValue(selection[0].row, 1);
@@ -544,11 +465,10 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
                             active: 2
                         }); // first tab selected
                         // initialize tiles
-                        $("#spSpecificData .bg-aqua h3").text(data[0] != null ? data[0] : 0);
-                        $("#spSpecificData .bg-green h3").text(data[1] != null ? data[1] : 0);
-                        $("#spSpecificData .bg-yellow h3").text(data[2] != null ? data[2] : 0);
-                        $("#spSpecificData .bg-red h3").text(data[3] != null ? data[3] : 0);
-
+                        $("#spSpecificData .bg-aqua h3").text(data['tiles'][0] != null ? data['tiles'][0] : 0);
+                        $("#spSpecificData .bg-green h3").text(data['tiles'][1] != null ? data['tiles'][1] : 0);
+                        $("#spSpecificData .bg-yellow h3").text(data['tiles'][2] != null ? data['tiles'][2] : 0);
+                        $("#spSpecificData .bg-red h3").text(data['tiles'][3] != null ? data['tiles'][3] : 0);
                         $("#spSpecificData h1").html("<a href='#' onclick='return false;' style='font-size:2.5rem' class='backToTotal'>Service Providers</a> > " + legend);
                         // Hide to left / show from left
                         //$("#totalSpsInfo").toggle("slide", {direction: "left"}, 500);
@@ -558,69 +478,51 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
                         //$("#spSpecificData").toggle("slide", {direction: "right"}, 500);
                         $("#spSpecificData").show();
 
-                        var url_str = '<?php echo $this->Html->url(array(
-                                            'plugin' => Inflector::singularize(Inflector::tableize($this->plugin)),
-                                            'controller' => 'rciam_stats_viewer_services',
-                                            'action' => 'getchartforsp',
-                                            'co'  => $cur_co['Co']['id']
-                                        )); ?>';
-                        $.ajax({
+                        fValues = [];
+                        dataValues = "";
+                        fValues.push(['sourceIdp', 'sourceIdPEntityId', 'Count'])
+                        data['idp'].forEach(function(item) {
+                            var temp = [];
+                            temp.push(item[0]["idpname"]);
+                            temp.push(item[0]["sourceidp"])
+                            temp.push(parseInt(item[0]["count"]));
+                            fValues.push(temp);
+                        })
 
-                            url: url_str,
-                            data: {
-                                sp: identifier
-                            },
-                            success: function(data) {
-                                //console.log(data);
-                                fValues = [];
-                                dataValues = "";
-                                fValues.push(['sourceIdp', 'sourceIdPEntityId', 'Count'])
-                                data['idp'].forEach(function(item) {
-                                    var temp = [];
-                                    temp.push(item[0]["idpname"]);
-                                    temp.push(item[0]["sourceidp"])
-                                    temp.push(parseInt(item[0]["count"]));
+                        var dataSp = new google.visualization.arrayToDataTable(fValues);
+                        drawIdpsChart(document.getElementById("spSpecificChart"), dataSp);
 
-                                    dataValues += "[" + new Date(item[0]["year"], item[0]["month"] - 1, item[0]["day"]), parseInt(item[0]["count"]) + "],";
-                                    fValues.push(temp);
-                                })
-                                //console.log(fValues);
-                                var dataSp = new google.visualization.arrayToDataTable(fValues);
-                                drawIdpsChart(document.getElementById("spSpecificChart"), dataSp);
+                        ////Draw Line - Range Chart
+                        fValues = [];
+                        fValues.push(['Date', 'Count'])
 
+                        data['sp'].forEach(function(item) {
+                            var temp = [];
+                            temp.push(new Date(item[0]["year"], item[0]["month"] - 1, item[0]["day"]));
+                            temp.push(parseInt(item[0]["count"]));
+                            fValues.push(temp);
+                        })
 
-                                ////Draw Line - Range Chart
-                                fValues = [];
+                        var dataSp = new google.visualization.arrayToDataTable(fValues);
+                        drawLoginsChart(document.getElementById("spsloginsDashboard"), dataSp, 'sp')
 
-                                fValues.push(['Date', 'Count'])
-
-                                data['sp'].forEach(function(item) {
-                                    var temp = [];
-                                    temp.push(new Date(item[0]["year"], item[0]["month"] - 1, item[0]["day"]));
-
-                                    temp.push(parseInt(item[0]["count"]));
-
-                                    fValues.push(temp);
-                                })
-                                console.log(fValues);
-                                var dataSp = new google.visualization.arrayToDataTable(fValues);
-                                drawLoginsChart(document.getElementById("spsloginsDashboard"), dataSp, 'sp')
-
-                                $(".overlay").hide();
-                            }
-                        });
+                        $(".overlay").hide();
                     }
                 });
-
-
-                //var ul = $("#tabs").find( "ul" );
-                // $( "<li><a href='#newtab'>New Tab</a></li>" ).appendTo( ul );
-                //$( "<div id='newtab'><p>New Content</p></div>" ).appendTo( tabs );
-                //$("#tabs").tabs( "refresh" );
             }
+
+
+
+            //var ul = $("#tabs").find( "ul" );
+            // $( "<li><a href='#newtab'>New Tab</a></li>" ).appendTo( ul );
+            //$( "<div id='newtab'><p>New Content</p></div>" ).appendTo( tabs );
+            //$("#tabs").tabs( "refresh" );
+
         }
     }
+
 </script>
+
 <div class="box">
     <div class="box-body">
         <div id="tabs">
@@ -630,7 +532,6 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
                 <li><a data-draw="drawSpsChart" href='#spProvidersTab'>Service Providers Details</a></li>
             </ul>
             <div id="dashboardTab">
-
                 <h1>Summary</h1>
                 <div class="row">
                     <div class="col-lg-3 col-xs-6">
@@ -701,7 +602,6 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
                     </div>
                     <div id="summarySpChart"></div>
                 </div>
-
             </div>
 
             <div id="idpProvidersTab">
@@ -713,7 +613,6 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
                             <div class="small-box bg-aqua">
                                 <div class="inner">
                                     <h3></h3>
-
                                     <p>Todays Logins</p>
                                 </div>
                                 <a href="#" onclick="return false" data-days="1" data-type="idp" class="more-info small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
@@ -736,10 +635,8 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
                             <div class="small-box bg-yellow">
                                 <div class="inner">
                                     <h3></h3>
-
                                     <p>Last 30 days Logins</p>
                                 </div>
-
                                 <a href="#" onclick="return false" data-days="30" data-type="idp" class="more-info small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
                             </div>
                         </div>
@@ -751,7 +648,6 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
                                     <h3></h3>
                                     <p>Last year logins</p>
                                 </div>
-
                                 <a href="#" onclick="return false" data-days="365" data-type="idp" class="more-info small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
                             </div>
                         </div>
@@ -821,7 +717,6 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
                             <div class="small-box bg-aqua">
                                 <div class="inner">
                                     <h3></h3>
-
                                     <p>Todays Logins</p>
                                 </div>
                                 <a href="#" onclick="return false" data-days="1" data-type="sp" class="more-info small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
@@ -832,7 +727,6 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
                             <!-- small box -->
                             <div class="small-box bg-green">
                                 <div class="inner">
-                                    <!--<h3>53<sup style="font-size: 20px">%</sup></h3>-->
                                     <h3></h3>
                                     <p>Last 7 days Logins</p>
                                 </div>
@@ -845,7 +739,6 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
                             <div class="small-box bg-yellow">
                                 <div class="inner">
                                     <h3></h3>
-
                                     <p>Last 30 days Logins</p>
                                 </div>
                                 <a href="#" onclick="return false" data-days="30" data-type="sp" class="more-info small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
@@ -897,7 +790,6 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
                         </div>
                         <div id="spsChartDetail"></div>
                     </div>
-
                     <!-- Create Datatable -->
                     <table id="spDatatable" class="stripe row-border hover">
                         <thead>
