@@ -261,6 +261,33 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
         drawSpsChart(document.getElementById("summarySpChart"))
     });
 
+    function setZerosIfNoDate(dataTable) {
+        var datePattern = 'd.M.yy';
+        var formatDate = new google.visualization.DateFormat({
+            pattern: datePattern
+        });
+        var startDate = dataTable.getColumnRange(0).min;
+        var endDate = dataTable.getColumnRange(0).max;
+        var oneDay = (1000 * 60 * 60 * 24);
+        for (var i = startDate.getTime(); i < endDate.getTime(); i = i + oneDay) {
+            var coffeeData = dataTable.getFilteredRows([{
+                column: 0,
+                test: function(value, row, column, table) {
+                    var coffeeDate = formatDate.formatValue(table.getValue(row, column));
+                    var testDate = formatDate.formatValue(new Date(i));
+                    return (coffeeDate === testDate);
+                }
+            }]);
+            if (coffeeData.length === 0) {
+                dataTable.addRow([
+                    new Date(i),
+                    0
+                ]);
+            }
+        }
+        dataTable.sort({column: 0});
+        return dataTable;
+    }
     // Line Chart - Range
     function drawLoginsChart(elementId, data = null, type = '') {
         console.log("range" + elementId)
@@ -274,9 +301,10 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
                 ?>
             ]);
         }
-        
+        if (data.getNumberOfRows()>0)
+            data=setZerosIfNoDate(data);
         cur_dashboard = new google.visualization.Dashboard(document.getElementById(elementId));
-        
+
         chartRangeFilter = new google.visualization.ControlWrapper({
             controlType: 'ChartRangeFilter',
             containerId: type + 'control_div',
@@ -301,7 +329,7 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
         });
 
         cur_dashboard.bind(chartRangeFilter, chart);
-        console.log(data);
+        
         cur_dashboard.draw(data);
     }
 
@@ -344,6 +372,8 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
 
         function selectHandler() {
             $(".overlay").show();
+            $('html,body').animate({ scrollTop: 150 }, 'slow');
+        
             var selection = chart.getSelection();
             if (selection.length) {
                 var identifier = data.getValue(selection[0].row, 1);
@@ -352,6 +382,7 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
                 //initialize tiles
                 $("#idpSpecificData .more-info").each(function() {
                     $(this).attr("identifier", identifier);
+                    $(this).parent().removeClass("inactive");
                 })
 
                 var url_str = '<?php echo $this->Html->url(array(
@@ -481,7 +512,9 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
         google.visualization.events.addListener(chart, 'select', selectHandler);
 
         function selectHandler() {
+            
             $(".overlay").show();
+            $('html,body').animate({ scrollTop: 150 }, 'slow');
             var selection = chart.getSelection();
             if (selection.length) {
                 var identifier = data.getValue(selection[0].row, 1);
@@ -489,6 +522,7 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
                 //initialize tiles
                 $("#spSpecificData .more-info").each(function() {
                     $(this).attr("identifier", identifier);
+                    $(this).parent().removeClass("inactive");
                 })
                 //window.location.href = 'spDetail.php?identifier=' + identifier;
                 var url_str = '<?php echo $this->Html->url(array(
@@ -705,7 +739,7 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
 
                                     <p>Last 30 days Logins</p>
                                 </div>
-                                
+
                                 <a href="#" onclick="return false" data-days="30" data-type="idp" class="more-info small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
                             </div>
                         </div>
@@ -717,7 +751,7 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
                                     <h3></h3>
                                     <p>Last year logins</p>
                                 </div>
-                                
+
                                 <a href="#" onclick="return false" data-days="365" data-type="idp" class="more-info small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
                             </div>
                         </div>
@@ -814,7 +848,7 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
 
                                     <p>Last 30 days Logins</p>
                                 </div>
-                            <a href="#" onclick="return false" data-days="30" data-type="sp" class="more-info small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+                                <a href="#" onclick="return false" data-days="30" data-type="sp" class="more-info small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
                             </div>
                         </div>
                         <!-- ./col -->
@@ -825,7 +859,7 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
                                     <h3></h3>
                                     <p>Last year logins</p>
                                 </div>
-                            <a href="#" onclick="return false" data-days="365" data-type="sp" class="more-info small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+                                <a href="#" onclick="return false" data-days="365" data-type="sp" class="more-info small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
                             </div>
                         </div>
                     </div>
