@@ -347,6 +347,8 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
             var selection = chart.getSelection();
             if (selection.length) {
                 var identifier = data.getValue(selection[0].row, 1);
+                var legend = data.getValue(selection[0].row, 0);
+                //console.log(legend);
                 //initialize tiles
                 $("#idpSpecificData .more-info").each(function() {
                     $(this).attr("identifier", identifier);
@@ -375,7 +377,7 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
                         $("#idpSpecificData .bg-yellow h3").text(data[2] != null ? data[2] : 0);
                         $("#idpSpecificData .bg-red h3").text(data[3] != null ? data[3] : 0);
 
-                        $("#idpSpecificData h1").html("<a href='#' onclick='return false;' style='font-size:2.5rem' class='backToTotal'>Identity Providers</a> > " + identifier);
+                        $("#idpSpecificData h1").html("<a href='#' onclick='return false;' style='font-size:2.5rem' class='backToTotal'>Identity Providers</a> > " + legend);
                         // Hide to left / show from left
                         //$("#totalIdpsInfo").toggle("slide", {direction: "left"}, 500);
                         $("#totalIdpsInfo").hide();
@@ -483,6 +485,7 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
             var selection = chart.getSelection();
             if (selection.length) {
                 var identifier = data.getValue(selection[0].row, 1);
+                var legend = data.getValue(selection[0].row, 0);
                 //initialize tiles
                 $("#spSpecificData .more-info").each(function() {
                     $(this).attr("identifier", identifier);
@@ -512,7 +515,7 @@ echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
                         $("#spSpecificData .bg-yellow h3").text(data[2] != null ? data[2] : 0);
                         $("#spSpecificData .bg-red h3").text(data[3] != null ? data[3] : 0);
 
-                        $("#spSpecificData h1").html("<a href='#' onclick='return false;' style='font-size:2.5rem' class='backToTotal'>Service Providers</a> > " + identifier);
+                        $("#spSpecificData h1").html("<a href='#' onclick='return false;' style='font-size:2.5rem' class='backToTotal'>Service Providers</a> > " + legend);
                         // Hide to left / show from left
                         //$("#totalSpsInfo").toggle("slide", {direction: "left"}, 500);
                         $("#totalSpsInfo").hide();
