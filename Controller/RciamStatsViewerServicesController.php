@@ -119,7 +119,7 @@ class RciamStatsViewerServicesController extends StandardController
     $vv_logincounts['sp'] = $this->utils->getLoginCountPerDayForSp($conn, $days, $sp);
 
     $this->response->type('json');
-    $this->response->statusCode(201);
+    $this->response->statusCode(200);
     $this->response->body(json_encode($vv_logincounts));
     return $this->response;
   }

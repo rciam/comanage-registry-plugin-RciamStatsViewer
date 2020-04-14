@@ -847,7 +847,7 @@ print $this->Html->script("https://www.gstatic.com/charts/loader.js");
                         <div class="col-lg-12">
                             <div class="box">
                                 <div class="box-header with-border">
-                                    <h3 class="box-title">Access to Service Providers from this Identity Provider</h3>
+                                    <h3 class="box-title">Service Providers that have been accessed by this Identity Provider</h3>
                                 </div>
                                 <div id="idpSpecificChart"></div>
                             </div>
