@@ -48,7 +48,7 @@ print $this->Html->script("https://www.gstatic.com/charts/loader.js");
 print $this->Html->script('/RciamStatsViewer/js/functions.js')
 ?>
 <script type="text/javascript">
-    //Default Values
+    //Global Variables
     var defaultdataIdp, defaultdataSp;
     var dashboard;
     var chartRangeFilter;
@@ -66,7 +66,6 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
                         )); ?>';
 
     $(function() {
-
 
         //Initialize Tabs
         var tabs = $("#tabs").tabs();
@@ -139,60 +138,7 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
                                 'action' => 'getlogincountperday',
                                 'co'  => $cur_co['Co']['id']
                             )); ?>';
-            $.ajax({
-
-                url: url_str,
-                data: {
-                    days: days,
-                    identifier: identifier,
-                    type: type
-                },
-                success: function(data) {
-
-                    fValues = [];
-                    fValues.push(['Date', 'Count'])
-                    data['range'].forEach(function(item) {
-                        var temp = [];
-                        temp.push(new Date(item[0]["year"], item[0]["month"] - 1, item[0]["day"]));
-                        temp.push(parseInt(item[0]["count"]));
-                        fValues.push(temp);
-                    })
-
-                    var dataRange = new google.visualization.arrayToDataTable(fValues);
-
-                    drawLoginsChart(document.getElementById(linerangeChartId), dataRange, type)
-                    if (type == '' || type == 'sp') {
-                        fValues = [];
-                        dataValues = "";
-                        fValues.push(['sourceIdp', 'sourceIdPEntityId', 'Count'])
-                        data['idps'].forEach(function(item) {
-                            var temp = [];
-                            temp.push(item[0]["idpname"]);
-                            temp.push(item[0]["sourceidp"])
-                            temp.push(parseInt(item[0]["count"]));
-                            fValues.push(temp);
-                        })
-                        var dataIdp = new google.visualization.arrayToDataTable(fValues);
-                        drawIdpsChart(document.getElementById(idpChart), dataIdp, url_str_idp);
-                    }
-                    if (type == '' || type == 'idp') {
-                        fValues = [];
-                        dataValues = "";
-                        fValues.push(['service', 'serviceIdentifier', 'Count'])
-                        data['sps'].forEach(function(item) {
-                            var temp = [];
-                            temp.push(item[0]["spname"]);
-                            temp.push(item[0]["service"])
-                            temp.push(parseInt(item[0]["count"]));
-                            fValues.push(temp);
-                        })
-
-                        var dataSp = new google.visualization.arrayToDataTable(fValues);
-                        drawSpsChart(document.getElementById(spChart), dataSp, url_str_sp);
-                    }
-                    $(".overlay").hide()
-                }
-            });
+            getLoginCountPerDay(url_str, days, identifier, type, linerangeChartId, idpChart, spChart);
 
         })
 
@@ -241,60 +187,8 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
                                 'action' => 'getlogincountperday',
                                 'co'  => $cur_co['Co']['id']
                             )); ?>';
-            $.ajax({
 
-                url: url_str,
-                data: {
-                    days: days,
-                    identifier: identifier,
-                    type: type
-                },
-                success: function(data) {
-
-                    fValues = [];
-                    fValues.push(['Date', 'Count'])
-                    data['range'].forEach(function(item) {
-                        var temp = [];
-                        temp.push(new Date(item[0]["year"], item[0]["month"] - 1, item[0]["day"]));
-                        temp.push(parseInt(item[0]["count"]));
-                        fValues.push(temp);
-                    })
-
-                    var dataRange = new google.visualization.arrayToDataTable(fValues);
-
-                    drawLoginsChart(document.getElementById(linerangeChartId), dataRange, type)
-                    if (type == '' || type == 'sp') {
-                        fValues = [];
-                        dataValues = "";
-                        fValues.push(['sourceIdp', 'sourceIdPEntityId', 'Count'])
-                        data['idps'].forEach(function(item) {
-                            var temp = [];
-                            temp.push(item[0]["idpname"]);
-                            temp.push(item[0]["sourceidp"])
-                            temp.push(parseInt(item[0]["count"]));
-                            fValues.push(temp);
-                        })
-                        var dataIdp = new google.visualization.arrayToDataTable(fValues);
-                        drawIdpsChart(document.getElementById(idpChart), dataIdp, url_str_idp);
-                    }
-                    if (type == '' || type == 'idp') {
-                        fValues = [];
-                        dataValues = "";
-                        fValues.push(['service', 'serviceIdentifier', 'Count'])
-                        data['sps'].forEach(function(item) {
-                            var temp = [];
-                            temp.push(item[0]["spname"]);
-                            temp.push(item[0]["service"])
-                            temp.push(parseInt(item[0]["count"]));
-                            fValues.push(temp);
-                        })
-
-                        var dataSp = new google.visualization.arrayToDataTable(fValues);
-                        drawSpsChart(document.getElementById(spChart), dataSp, url_str_sp);
-                    }
-                    $(".overlay").hide()
-                }
-            });
+            getLoginCountPerDay(url_str, days, identifier, type, linerangeChartId, idpChart, spChart);
         })
 
         // draw IdP/ Sp  Charts when click at the tab or backToTotal for the first time 
@@ -330,7 +224,7 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
             ?>
         ]);
         drawLoginsChart(document.getElementById("loginsDashboard"), data)
-        
+
         defaultdataIdp = google.visualization.arrayToDataTable([
             ['sourceIdp', 'sourceIdPEntityId', 'Count'],
             <?php
