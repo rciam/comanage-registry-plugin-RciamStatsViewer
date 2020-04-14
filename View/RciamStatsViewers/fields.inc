@@ -52,7 +52,7 @@
     <a href="#tabs-database" class="fieldGroupName">
       <em class="material-icons">indeterminate_check_box</em>
       <?php 
-        print 'Database Settings';//_txt('fd.name'); 
+        print _txt('pl.rciamstatsviewer.db_settings');
       ?>
     </a>
     <ul id="tabs-database" class="fields data-list form-list">
@@ -212,6 +212,14 @@
           ?>
         </div>
       </li>
+    </ul>
+  </li>
+  <li id="fields-stats" class="fieldGroup">
+    <a href="#tabs-stats" class="fieldGroupName">
+          <em class="material-icons">indeterminate_check_box</em>
+          <?php print _txt('pl.rciamstatsviewer.pl_config'); ?>
+    </a>
+    <ul id="tabs-stats" class="fields data-list form-list">
       <li>
         <div class="field-name">
           <?php print $this->Form->label('statisticsTableName',_txt('pl.rciamstatsviewer.statisticsTableName')); ?>
@@ -251,14 +259,6 @@
           ?>
         </div>
       </li>
-    </ul>
-  </li>
-  <li id="fields-stats" class="fieldGroup">
-    <a href="#tabs-stats" class="fieldGroupName">
-          <em class="material-icons">indeterminate_check_box</em>
-          <?php print _txt('fd.name'); ?>
-    </a>
-    <ul id="tabs-stats" class="fields data-list form-list">
       <li>
         <div class="field-name">
           <div class="field-title">
