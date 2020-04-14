@@ -42,11 +42,11 @@ class RciamStatsViewerServicesController extends StandardController
       $vv_logincount_per_idp = ($this->utils->getLoginCountPerIdp($conn, 0)) ?: array();
       $vv_logincount_per_sp = ($this->utils->getLoginCountPerSp($conn, 0)) ?: array();
 
-    // Return the existing data if any
-    $this->set('vv_totalloginscount', $vv_totalloginscount);
-    $this->set('vv_logincount_per_sp', $vv_logincount_per_sp);
-    $this->set('vv_logincount_per_idp', $vv_logincount_per_idp);
-    $this->set('vv_logincount_per_day', $vv_logincount_per_day);
+      // Return the existing data if any
+      $this->set('vv_totalloginscount', $vv_totalloginscount);
+      $this->set('vv_logincount_per_sp', $vv_logincount_per_sp);
+      $this->set('vv_logincount_per_idp', $vv_logincount_per_idp);
+      $this->set('vv_logincount_per_day', $vv_logincount_per_day);
       // $this->set('vv_conn',$conn);
     } catch (MissingConnectionException $e) {
       $this->log( __METHOD__ . ':: Database Connection failed. Error Message::' . $e->getMessage(), LOG_DEBUG);
