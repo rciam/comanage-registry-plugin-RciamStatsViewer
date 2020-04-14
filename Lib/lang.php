@@ -43,7 +43,9 @@ $cm_rciam_stats_viewer_texts['en_US'] = array(
   'pl.rciamstatsviewer.stats_type'      => 'Type of Statistics',
   'pl.rciamstatsviewer.stats_type.desc' => 'Select the type of statistics you want',
   'pl.rciamstatsviewer.database'        => 'Database',
+  'pl.rciamstatsviewer.db_settings'     => 'Database Configuration',
   'pl.rciamstatsviewer.db_prefix'       => 'DB Prefix',
+  'pl.rciamstatsviewer.pl_config'       => 'Statistics Configuration',
 
   //Database
   'rs.rciam_stats_viewer.error' => 'Save failed'

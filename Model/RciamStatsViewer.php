@@ -154,8 +154,11 @@ class RciamStatsViewer extends AppModel
 
     /**
      * Establish a connection (via Cake's ConnectionManager) to the specified SQL server.
+     * @param $coId
+     * @return DataSource|null
+     * @throws InvalidArgumentException   Plugins Configuration is not valid
+     * @throws MissingConnectionException The database connection failed
      */
-
     public function connect($coId)
     {
         // Get our connection information
@@ -169,14 +172,10 @@ class RciamStatsViewer extends AppModel
             throw new InvalidArgumentException(_txt('er.notfound', array(_txt('ct.rciam_stats_viewers.1'), $coId)));
         }
 
-        $dbmap = array(
-            RciamStatsViewerDBDriverTypeEnum::Mysql     => 'Mysql',
-            RciamStatsViewerDBDriverTypeEnum::Postgres  => 'Postgres'
-        );
 
         Configure::write('Security.useOpenSsl', true);
         $dbconfig = array(
-            'datasource' => 'Database/' . $dbmap[$rciamstatsviewer['RciamStatsViewer']['type']],
+            'datasource' => 'Database/' . RciamStatsViewerDBDriverTypeEnum::type[$rciamstatsviewer['RciamStatsViewer']['type']],
             'persistent' => $rciamstatsviewer['RciamStatsViewer']['persistent'],
             'host'       => $rciamstatsviewer['RciamStatsViewer']['hostname'],
             'login'      => $rciamstatsviewer['RciamStatsViewer']['username'],
@@ -187,13 +186,16 @@ class RciamStatsViewer extends AppModel
         );
 
         // Port Value
-        if (!isset($rciamstatsviewer['RciamStatsViewer']['port']) || $rciamstatsviewer['RciamStatsViewer']['port'] == "") {
-            if ($dbconfig['datasource'] == "Mysql")
-                $dbconfig['port'] = "3306";
-            else if ($dbconfig['datasource'] == "Postgres")
-                $dbconfig['port'] = "5432";
+        if (!isset($rciamstatsviewer['RciamStatsViewer']['port']) || $rciamstatsviewer['RciamStatsViewer']['port'] === '') {
+            if ($dbconfig['datasource'] === 'Database/Mysql') {
+              $dbconfig['port'] = '3306';
+            }
+            else if ($dbconfig['datasource'] === 'Database/Postgres') {
+              $dbconfig['port'] = '5432';
+            }
         }
 
+        // Database connection per CO
         $datasource = ConnectionManager::create('connection_' . $coId, $dbconfig);
 
         return $datasource;
