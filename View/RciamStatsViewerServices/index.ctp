@@ -52,13 +52,13 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
     var defaultdataIdp, defaultdataSp;
     var dashboard;
     var chartRangeFilter;
-    var url_str_idp = '<?php echo $this->Html->url(array(
+    var url_str_idp = '<?php print $this->Html->url(array(
                             'plugin' => Inflector::singularize(Inflector::tableize($this->plugin)),
                             'controller' => 'rciam_stats_viewer_services',
                             'action' => 'getdataforidp',
                             'co'  => $cur_co['Co']['id']
                         )); ?>';
-    var url_str_sp = '<?php echo $this->Html->url(array(
+    var url_str_sp = '<?php print $this->Html->url(array(
                             'plugin' => Inflector::singularize(Inflector::tableize($this->plugin)),
                             'controller' => 'rciam_stats_viewer_services',
                             'action' => 'getdataforsp',
@@ -132,7 +132,7 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
 
             fValues = new Array();
 
-            var url_str = '<?php echo $this->Html->url(array(
+            var url_str = '<?php print $this->Html->url(array(
                                 'plugin' => Inflector::singularize(Inflector::tableize($this->plugin)),
                                 'controller' => 'rciam_stats_viewer_services',
                                 'action' => 'getlogincountperday',
@@ -181,7 +181,7 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
 
             fValues = new Array();
 
-            var url_str = '<?php echo $this->Html->url(array(
+            var url_str = '<?php print $this->Html->url(array(
                                 'plugin' => Inflector::singularize(Inflector::tableize($this->plugin)),
                                 'controller' => 'rciam_stats_viewer_services',
                                 'action' => 'getlogincountperday',
@@ -219,7 +219,7 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
             ['Date', 'Count'],
             <?php
             foreach ($vv_logincount_per_day as $record) {
-                echo "[new Date(" . $record[0]["year"] . "," . ($record[0]["month"] - 1) . ", " . $record[0]["day"] . "), {v:" . $record[0]["count"] . "}],";
+                print "[new Date(" . $record[0]["year"] . "," . ($record[0]["month"] - 1) . ", " . $record[0]["day"] . "), {v:" . $record[0]["count"] . "}],";
             }
             ?>
         ]);
@@ -229,7 +229,7 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
             ['sourceIdp', 'sourceIdPEntityId', 'Count'],
             <?php
             foreach ($vv_logincount_per_idp as $record) {
-                echo "['" . str_replace("'", "\'", $record[0]["idpname"]) . "', '" . $record[0]["sourceidp"] . "', " . $record[0]["count"] . "],";
+                print "['" . str_replace("'", "\'", $record[0]["idpname"]) . "', '" . $record[0]["sourceidp"] . "', " . $record[0]["count"] . "],";
             }
             ?>
         ]);
@@ -240,7 +240,7 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
             ['service', 'serviceIdentifier', 'Count'],
             <?php
             foreach ($vv_logincount_per_sp as $record) {
-                echo "['" . str_replace("'", "\'", $record[0]["spname"]) . "', '" . $record[0]["service"] . "', " .  $record[0]["count"] . "],";
+                print "['" . str_replace("'", "\'", $record[0]["spname"]) . "', '" . $record[0]["service"] . "', " .  $record[0]["count"] . "],";
             }
             ?>
         ]);
@@ -342,6 +342,7 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
                                 </div>
                                 <div id="idpSpecificChart"></div>
                             </div>
+                            <div id="idpSpecificDataTableContainer"></div>   
                         </div>
                     </div>
                     <!-- ./col -->
@@ -367,10 +368,10 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
                         <tbody>
                             <?php
                             foreach ($vv_logincount_per_idp as $record) {
-                                echo "<tr>";
-                                echo "<td>" . str_replace("'", "\'", $record[0]["idpname"]) . "</td>";
-                                echo "<td>" . $record[0]["count"] . "</td>";
-                                echo "</tr>";
+                                print "<tr>";
+                                print "<td>" . str_replace("'", "\'", $record[0]["idpname"]) . "</td>";
+                                print "<td>" . $record[0]["count"] . "</td>";
+                                print "</tr>";
                             }
                             ?>
                         </tbody>
@@ -418,6 +419,7 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
                                 </div>
                                 <div id="spSpecificChart"></div>
                             </div>
+                            <div id="spSpecificDataTableContainer"></div>
                         </div>
                     </div>
                     <!-- ./col -->
@@ -442,10 +444,10 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
                         <tbody>
                             <?php
                             foreach ($vv_logincount_per_sp as $record) {
-                                echo "<tr>";
-                                echo "<td>" . str_replace("'", "\'", $record[0]["spname"]) . "</td>";
-                                echo "<td>" . $record[0]["count"] . "</td>";
-                                echo "</tr>";
+                                print "<tr>";
+                                print "<td>" . str_replace("'", "\'", $record[0]["spname"]) . "</td>";
+                                print "<td>" . $record[0]["count"] . "</td>";
+                                print "</tr>";
                             }
                             ?>
                         </tbody>

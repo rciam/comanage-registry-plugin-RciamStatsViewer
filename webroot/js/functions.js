@@ -127,6 +127,7 @@ function drawIdpsChart(elementId, data, url_str) {
     google.visualization.events.addListener(chart, 'select', selectHandler);
 
     function selectHandler() {
+
         $(".overlay").show();
         $('html,body').animate({
             scrollTop: 150
@@ -151,7 +152,7 @@ function drawIdpsChart(elementId, data, url_str) {
 
 
             $.ajax({
-                url: url_str,
+                url: url_str_idp,
                 data: {
                     idp: identifier,
                 },
@@ -206,7 +207,8 @@ function drawIdpsChart(elementId, data, url_str) {
                     })
                     var dataIdp = new google.visualization.arrayToDataTable(fValues);
                     drawLoginsChart(document.getElementById("idpsloginsDashboard"), dataIdp, 'idp')
-
+                    
+                    createDataTable($("#idpSpecificDataTableContainer"), data['sp'], "sp")
                     $(".overlay").hide();
                 }
             });
@@ -267,7 +269,7 @@ function drawSpsChart(elementId, data, url_str) {
 
             $.ajax({
 
-                url: url_str,
+                url: url_str_sp,
                 data: {
                     sp: identifier,
                 },
@@ -322,7 +324,8 @@ function drawSpsChart(elementId, data, url_str) {
 
                     var dataSp = new google.visualization.arrayToDataTable(fValues);
                     drawLoginsChart(document.getElementById("spsloginsDashboard"), dataSp, 'sp')
-
+                    
+                    createDataTable($("#spSpecificDataTableContainer"), data['idp'], "idp")
                     $(".overlay").hide();
                 }
             });
@@ -335,7 +338,7 @@ function drawSpsChart(elementId, data, url_str) {
     }
 }
 
-function getLoginCountPerDay(url_str, days, identifier, type, linerangeChartId, idpChart, spChart){
+function getLoginCountPerDay(url_str, days, identifier, type, linerangeChartId, idpChart, spChart) {
     $.ajax({
 
         url: url_str,
@@ -344,11 +347,11 @@ function getLoginCountPerDay(url_str, days, identifier, type, linerangeChartId, 
             identifier: identifier,
             type: type
         },
-        success: function(data) {
+        success: function (data) {
 
             fValues = [];
             fValues.push(['Date', 'Count'])
-            data['range'].forEach(function(item) {
+            data['range'].forEach(function (item) {
                 var temp = [];
                 temp.push(new Date(item[0]["year"], item[0]["month"] - 1, item[0]["day"]));
                 temp.push(parseInt(item[0]["count"]));
@@ -362,7 +365,7 @@ function getLoginCountPerDay(url_str, days, identifier, type, linerangeChartId, 
                 fValues = [];
                 dataValues = "";
                 fValues.push(['sourceIdp', 'sourceIdPEntityId', 'Count'])
-                data['idps'].forEach(function(item) {
+                data['idps'].forEach(function (item) {
                     var temp = [];
                     temp.push(item[0]["idpname"]);
                     temp.push(item[0]["sourceidp"])
@@ -371,12 +374,14 @@ function getLoginCountPerDay(url_str, days, identifier, type, linerangeChartId, 
                 })
                 var dataIdp = new google.visualization.arrayToDataTable(fValues);
                 drawIdpsChart(document.getElementById(idpChart), dataIdp, url_str_idp);
+                if (type == 'sp')
+                    createDataTable($("#spSpecificDataTableContainer"), data['idps'], "idp")
             }
             if (type == '' || type == 'idp') {
                 fValues = [];
                 dataValues = "";
                 fValues.push(['service', 'serviceIdentifier', 'Count'])
-                data['sps'].forEach(function(item) {
+                data['sps'].forEach(function (item) {
                     var temp = [];
                     temp.push(item[0]["spname"]);
                     temp.push(item[0]["service"])
@@ -386,8 +391,48 @@ function getLoginCountPerDay(url_str, days, identifier, type, linerangeChartId, 
 
                 var dataSp = new google.visualization.arrayToDataTable(fValues);
                 drawSpsChart(document.getElementById(spChart), dataSp, url_str_sp);
+                if (type == 'idp')
+                    createDataTable($("#idpSpecificDataTableContainer"), data['sps'], "sp")
             }
+
             $(".overlay").hide();
         }
     })
+}
+
+function createDataTable(elementId, data, type) {
+    console.log("DATATABLE CREATING")
+    if (type == "idp")
+        {
+            column1='idpname'
+            column2='count'
+            th='Identity Providers'
+            console.log(data)
+        }
+    else 
+        {
+            column1='spname'
+            column2='count'
+            th='Service Providers'
+        }
+    dataAppend = '';
+    data.forEach(function (item) {
+        dataAppend += '<tr><td>' + item[0][column1] + '</td><td>' + item[0][column2] + '</td></tr>';
+    })
+    //elementId.html("");
+    elementId.html('<table id="'+ type +'SpecificDatatable" class="stripe row-border hover">' +
+        '<thead>' +
+        '<tr>' +
+        '<th>' + th + '</th>' +
+        '<th>Number of Logins</th>' +
+        '</tr>' +
+        '</thead>' +
+        '<tbody>' +
+        dataAppend +
+        '</tbody>' +
+        '</table>');
+    $("#"+ type +"SpecificDatatable").DataTable({
+        "order": [1, 'desc']
+    });
+
 }
