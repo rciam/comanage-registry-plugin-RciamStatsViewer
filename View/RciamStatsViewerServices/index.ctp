@@ -48,7 +48,6 @@ echo $this->Html->script("https://www.gstatic.com/charts/loader.js");
 
 ?>
 <script type="text/javascript">
-
     var dashboard;
     var chartRangeFilter;
     $(function() {
@@ -81,8 +80,7 @@ echo $this->Html->script("https://www.gstatic.com/charts/loader.js");
             $(".overlay").hide();
         })
 
-        // Get Data For Specific Days 
-        $(document).on("click", ".more-info", function() {
+        $(document).on("click", ".back-to-overall", function() {
             var type = '';
             var linerangeChartId = "loginsDashboard";
             var identifier = null;
@@ -95,17 +93,18 @@ echo $this->Html->script("https://www.gstatic.com/charts/loader.js");
                 spChart = type + "SpecificChart";
                 idpChart = type + "SpecificChart";
             }
-            $(".overlay").show();
-            // Set the other tiles to inactive
-            var active = $(this).closest(".small-box");
             var row = $(this).closest(".row");
-            active.removeClass("inactive");
-            console.log(active);
+            $(".overlay").show();
+
+            $(this).html('More info <i class="fa fa-arrow-circle-right"></i>')
+            $(this).addClass("more-info");
+            $(this).removeClass("back-to-overall")
+
             row.find(".small-box").each(function() {
-                if ($(this)[0] != active[0])
-                    $(this).addClass("inactive");
+                $(this).removeClass("inactive");
+                $(this).addClass("active");
             })
-            var days = $(this).attr("data-days");
+            var days = 0;
 
             fValues = new Array();
 
@@ -124,7 +123,7 @@ echo $this->Html->script("https://www.gstatic.com/charts/loader.js");
                     type: type
                 },
                 success: function(data) {
-                    
+
                     fValues = [];
                     fValues.push(['Date', 'Count'])
                     data['range'].forEach(function(item) {
@@ -162,7 +161,109 @@ echo $this->Html->script("https://www.gstatic.com/charts/loader.js");
                             temp.push(parseInt(item[0]["count"]));
                             fValues.push(temp);
                         })
-                        
+
+                        var dataSp = new google.visualization.arrayToDataTable(fValues);
+                        drawSpsChart(document.getElementById(spChart), dataSp);
+                    }
+                    $(".overlay").hide()
+                }
+            });
+
+        })
+
+        // Get Data For Specific Days 
+        $(document).on("click", ".more-info", function() {
+            var type = '';
+            var linerangeChartId = "loginsDashboard";
+            var identifier = null;
+            var spChart = "summarySpChart";
+            var idpChart = "summaryIdPChart";
+            if ($(this).attr("data-type") != undefined) {
+                type = $(this).attr("data-type");
+                linerangeChartId = type + "loginsDashboard";
+                identifier = $(this).attr("identifier");
+                spChart = type + "SpecificChart";
+                idpChart = type + "SpecificChart";
+            }
+            $(".overlay").show();
+            // Set the other tiles to inactive
+            var active = $(this).closest(".small-box");
+            var row = $(this).closest(".row");
+            active.removeClass("inactive");
+
+            $(this).html('<i class="fa fa-arrow-circle-left"></i> Click again to reset')
+            $(this).removeClass("more-info");
+            $(this).addClass("back-to-overall")
+
+            row.find(".small-box").each(function() {
+                if ($(this)[0] != active[0]) {
+                    $(this).addClass("inactive");
+                    $(this).find(".back-to-overall").each(function() {
+                        $(this).html('More info <i class="fa fa-arrow-circle-right"></i>')
+                        $(this).addClass("more-info");
+                        $(this).removeClass("back-to-overall")
+                    })
+
+                }
+            })
+            var days = $(this).attr("data-days");
+
+            fValues = new Array();
+
+            var url_str = '<?php echo $this->Html->url(array(
+                                'plugin' => Inflector::singularize(Inflector::tableize($this->plugin)),
+                                'controller' => 'rciam_stats_viewer_services',
+                                'action' => 'getlogincountperday',
+                                'co'  => $cur_co['Co']['id']
+                            )); ?>';
+            $.ajax({
+
+                url: url_str,
+                data: {
+                    days: days,
+                    identifier: identifier,
+                    type: type
+                },
+                success: function(data) {
+
+                    fValues = [];
+                    fValues.push(['Date', 'Count'])
+                    data['range'].forEach(function(item) {
+                        var temp = [];
+                        temp.push(new Date(item[0]["year"], item[0]["month"] - 1, item[0]["day"]));
+                        temp.push(parseInt(item[0]["count"]));
+                        fValues.push(temp);
+                    })
+
+                    var dataRange = new google.visualization.arrayToDataTable(fValues);
+
+                    drawLoginsChart(document.getElementById(linerangeChartId), dataRange, type)
+                    if (type == '' || type == 'sp') {
+                        fValues = [];
+                        dataValues = "";
+                        fValues.push(['sourceIdp', 'sourceIdPEntityId', 'Count'])
+                        data['idps'].forEach(function(item) {
+                            var temp = [];
+                            temp.push(item[0]["idpname"]);
+                            temp.push(item[0]["sourceidp"])
+                            temp.push(parseInt(item[0]["count"]));
+                            fValues.push(temp);
+                        })
+                        var dataIdp = new google.visualization.arrayToDataTable(fValues);
+                        drawIdpsChart(document.getElementById(idpChart), dataIdp);
+                    }
+                    if (type == '' || type == 'idp') {
+                        fValues = [];
+                        dataValues = "";
+                        fValues.push(['service', 'serviceIdentifier', 'Count'])
+                        data['sps'].forEach(function(item) {
+                            var temp = [];
+                            temp.push(item[0]["spname"]);
+                            temp.push(item[0]["service"])
+                            temp.push(parseInt(item[0]["count"]));
+                            fValues.push(temp);
+                        })
+
                         var dataSp = new google.visualization.arrayToDataTable(fValues);
                         drawSpsChart(document.getElementById(spChart), dataSp);
                     }
@@ -188,6 +289,7 @@ echo $this->Html->script("https://www.gstatic.com/charts/loader.js");
                 $(this).attr("data-draw", "")
             }
         })
+
     });
 
     google.charts.load('current', {
@@ -228,6 +330,20 @@ echo $this->Html->script("https://www.gstatic.com/charts/loader.js");
         });
         return dataTable;
     }
+
+    // Hide more-info link for 0 logins
+    function setHiddenElements(element, value) {
+        console.log(element)
+        console.log(value);
+        if (value == null) {
+            element.find(".more-info").addClass("hidden")
+            element.find(".no-data").removeClass("hidden")
+        } else {
+            element.find(".more-info").removeClass("hidden")
+            element.find(".no-data").addClass("hidden")
+        }
+    }
+
     // Line Chart - Range
     function drawLoginsChart(elementId, data = null, type = '') {
         console.log("range" + elementId)
@@ -271,6 +387,7 @@ echo $this->Html->script("https://www.gstatic.com/charts/loader.js");
         cur_dashboard.bind(chartRangeFilter, chart);
         cur_dashboard.draw(data);
     }
+
 
     // IdP Chart
     function drawIdpsChart(elementId, data = null) {
@@ -319,11 +436,17 @@ echo $this->Html->script("https://www.gstatic.com/charts/loader.js");
             if (selection.length) {
                 var identifier = data.getValue(selection[0].row, 1);
                 var legend = data.getValue(selection[0].row, 0);
-                //console.log(legend);
                 //initialize tiles
                 $("#idpSpecificData .more-info").each(function() {
                     $(this).attr("identifier", identifier);
                     $(this).parent().removeClass("inactive");
+
+                })
+
+                $("#idpSpecificData").find(".back-to-overall").each(function() {
+                    $(this).html('More info <i class="fa fa-arrow-circle-right"></i>')
+                    $(this).addClass("more-info");
+                    $(this).removeClass("back-to-overall")
                 })
 
                 var url_str = '<?php echo $this->Html->url(array(
@@ -345,9 +468,13 @@ echo $this->Html->script("https://www.gstatic.com/charts/loader.js");
                         }); // first tab selected
 
                         $("#idpSpecificData .bg-aqua h3").text(data['tiles'][0] != null ? data['tiles'][0] : 0);
+                        setHiddenElements($("#idpSpecificData .bg-aqua"), data['tiles'][0])
                         $("#idpSpecificData .bg-green h3").text(data['tiles'][1] != null ? data['tiles'][1] : 0);
+                        setHiddenElements($("#idpSpecificData .bg-green"), data['tiles'][1])
                         $("#idpSpecificData .bg-yellow h3").text(data['tiles'][2] != null ? data['tiles'][2] : 0);
+                        setHiddenElements($("#idpSpecificData .bg-yellow"), data['tiles'][2])
                         $("#idpSpecificData .bg-red h3").text(data['tiles'][3] != null ? data['tiles'][3] : 0);
+                        setHiddenElements($("#idpSpecificData .bg-red"), data['tiles'][3])
                         $("#idpSpecificData h1").html("<a href='#' onclick='return false;' style='font-size:2.5rem' class='backToTotal'>Identity Providers</a> > " + legend);
                         // Hide to left / show from left
                         //$("#totalIdpsInfo").toggle("slide", {direction: "left"}, 500);
@@ -445,7 +572,12 @@ echo $this->Html->script("https://www.gstatic.com/charts/loader.js");
                     $(this).attr("identifier", identifier);
                     $(this).parent().removeClass("inactive");
                 })
-                //window.location.href = 'spDetail.php?identifier=' + identifier;
+                $("#spSpecificData").find(".back-to-overall").each(function() {
+                    $(this).html('More info <i class="fa fa-arrow-circle-right"></i>')
+                    $(this).addClass("more-info");
+                    $(this).removeClass("back-to-overall")
+                })
+
                 var url_str = '<?php echo $this->Html->url(array(
                                     'plugin' => Inflector::singularize(Inflector::tableize($this->plugin)),
                                     'controller' => 'rciam_stats_viewer_services',
@@ -466,9 +598,13 @@ echo $this->Html->script("https://www.gstatic.com/charts/loader.js");
                         }); // first tab selected
                         // initialize tiles
                         $("#spSpecificData .bg-aqua h3").text(data['tiles'][0] != null ? data['tiles'][0] : 0);
+                        setHiddenElements($("#spSpecificData .bg-aqua"), data['tiles'][0])
                         $("#spSpecificData .bg-green h3").text(data['tiles'][1] != null ? data['tiles'][1] : 0);
+                        setHiddenElements($("#spSpecificData .bg-green"), data['tiles'][1])
                         $("#spSpecificData .bg-yellow h3").text(data['tiles'][2] != null ? data['tiles'][2] : 0);
+                        setHiddenElements($("#spSpecificData .bg-yellow"), data['tiles'][2])
                         $("#spSpecificData .bg-red h3").text(data['tiles'][3] != null ? data['tiles'][3] : 0);
+                        setHiddenElements($("#spSpecificData .bg-red"), data['tiles'][3])
                         $("#spSpecificData h1").html("<a href='#' onclick='return false;' style='font-size:2.5rem' class='backToTotal'>Service Providers</a> > " + legend);
                         // Hide to left / show from left
                         //$("#totalSpsInfo").toggle("slide", {direction: "left"}, 500);
@@ -520,7 +656,6 @@ echo $this->Html->script("https://www.gstatic.com/charts/loader.js");
 
         }
     }
-
 </script>
 
 <div class="box">
@@ -541,7 +676,17 @@ echo $this->Html->script("https://www.gstatic.com/charts/loader.js");
                                 <h3><?php echo ($vv_totalloginscount[0] != null ? $vv_totalloginscount[0] : 0); ?></h3>
                                 <p>Todays Logins</p>
                             </div>
-                            <a href="#" onlick="return false" data-days="1" class="more-info small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+                            <?php
+                            if ($vv_totalloginscount[0] == null) {
+                                $nodata = "";
+                                $more_info = "hidden";
+                            } else {
+                                $nodata = "hidden";
+                                $more_info = "";
+                            }
+                            ?>
+                            <div class="small-box-footer <?php echo $nodata; ?>">No data</div>
+                            <a href="#" onlick="return false" data-days="1" class="more-info small-box-footer <?php echo $more_info; ?>">More info <i class="fa fa-arrow-circle-right"></i></a>
                         </div>
                     </div>
                     <!-- ./col -->
@@ -553,7 +698,17 @@ echo $this->Html->script("https://www.gstatic.com/charts/loader.js");
                                 <h3><?php echo ($vv_totalloginscount[1] != null ? $vv_totalloginscount[1] : 0); ?></h3>
                                 <p>Last 7 days Logins</p>
                             </div>
-                            <a href="#" onclick="return false" data-days="7" class="more-info small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+                            <?php
+                            if ($vv_totalloginscount[1] == null) {
+                                $nodata = "";
+                                $more_info = "hidden";
+                            } else {
+                                $nodata = "hidden";
+                                $more_info = "";
+                            }
+                            ?>
+                            <div class="small-box-footer <?php echo $nodata; ?>">No data</div>
+                            <a href="#" onclick="return false" data-days="7" class="more-info small-box-footer <?php echo $more_info; ?>">More info <i class="fa fa-arrow-circle-right"></i></a>
                         </div>
                     </div>
                     <!-- ./col -->
@@ -562,10 +717,19 @@ echo $this->Html->script("https://www.gstatic.com/charts/loader.js");
                         <div class="small-box bg-yellow">
                             <div class="inner">
                                 <h3><?php echo ($vv_totalloginscount[2] != null ? $vv_totalloginscount[2] : 0) ?></h3>
-
                                 <p>Last 30 days Logins</p>
                             </div>
-                            <a href="#" onclick="return false" data-days="30" class="more-info small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+                            <?php
+                            if ($vv_totalloginscount[2] == null) {
+                                $nodata = "";
+                                $more_info = "hidden";
+                            } else {
+                                $nodata = "hidden";
+                                $more_info = "";
+                            }
+                            ?>
+                            <div class="small-box-footer <?php echo $nodata; ?>">No data</div>
+                            <a href="#" onclick="return false" data-days="30" class="more-info small-box-footer <?php echo $more_info; ?>">More info <i class="fa fa-arrow-circle-right"></i></a>
                         </div>
                     </div>
                     <!-- ./col -->
@@ -576,7 +740,17 @@ echo $this->Html->script("https://www.gstatic.com/charts/loader.js");
                                 <h3><?php echo ($vv_totalloginscount[3] != null ? $vv_totalloginscount[3] : 0) ?></h3>
                                 <p>Last year logins</p>
                             </div>
-                            <a href="#" onclick="return false" data-days="365" class="more-info small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+                            <?php
+                            if ($vv_totalloginscount[3] == null) {
+                                $nodata = "";
+                                $more_info = "hidden";
+                            } else {
+                                $nodata = "hidden";
+                                $more_info = "";
+                            }
+                            ?>
+                            <div class="small-box-footer <?php echo $nodata; ?>">No data</div>
+                            <a href="#" onclick="return false" data-days="365" class="more-info small-box-footer <?php echo $more_info; ?>">More info <i class="fa fa-arrow-circle-right"></i></a>
                         </div>
                     </div>
                     <!-- ./col -->
@@ -615,6 +789,7 @@ echo $this->Html->script("https://www.gstatic.com/charts/loader.js");
                                     <h3></h3>
                                     <p>Todays Logins</p>
                                 </div>
+                                <div class="small-box-footer no-data">No data</div>
                                 <a href="#" onclick="return false" data-days="1" data-type="idp" class="more-info small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
                             </div>
                         </div>
@@ -626,6 +801,7 @@ echo $this->Html->script("https://www.gstatic.com/charts/loader.js");
                                     <h3></h3>
                                     <p>Last 7 days Logins</p>
                                 </div>
+                                <div class="small-box-footer no-data">No data</div>
                                 <a href="#" onclick="return false" data-days="7" data-type="idp" class="more-info small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
                             </div>
                         </div>
@@ -637,6 +813,7 @@ echo $this->Html->script("https://www.gstatic.com/charts/loader.js");
                                     <h3></h3>
                                     <p>Last 30 days Logins</p>
                                 </div>
+                                <div class="small-box-footer no-data">No data</div>
                                 <a href="#" onclick="return false" data-days="30" data-type="idp" class="more-info small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
                             </div>
                         </div>
@@ -648,6 +825,7 @@ echo $this->Html->script("https://www.gstatic.com/charts/loader.js");
                                     <h3></h3>
                                     <p>Last year logins</p>
                                 </div>
+                                <div class="small-box-footer no-data">No data</div>
                                 <a href="#" onclick="return false" data-days="365" data-type="idp" class="more-info small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
                             </div>
                         </div>
@@ -719,6 +897,7 @@ echo $this->Html->script("https://www.gstatic.com/charts/loader.js");
                                     <h3></h3>
                                     <p>Todays Logins</p>
                                 </div>
+                                <div class="small-box-footer no-data">No data</div>
                                 <a href="#" onclick="return false" data-days="1" data-type="sp" class="more-info small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
                             </div>
                         </div>
@@ -730,6 +909,7 @@ echo $this->Html->script("https://www.gstatic.com/charts/loader.js");
                                     <h3></h3>
                                     <p>Last 7 days Logins</p>
                                 </div>
+                                <div class="small-box-footer no-data">No data</div>
                                 <a href="#" onclick="return false" data-days="7" data-type="sp" class="more-info small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
                             </div>
                         </div>
@@ -741,6 +921,7 @@ echo $this->Html->script("https://www.gstatic.com/charts/loader.js");
                                     <h3></h3>
                                     <p>Last 30 days Logins</p>
                                 </div>
+                                <div class="small-box-footer no-data">No data</div>
                                 <a href="#" onclick="return false" data-days="30" data-type="sp" class="more-info small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
                             </div>
                         </div>
@@ -752,6 +933,7 @@ echo $this->Html->script("https://www.gstatic.com/charts/loader.js");
                                     <h3></h3>
                                     <p>Last year logins</p>
                                 </div>
+                                <div class="small-box-footer no-data">No data</div>
                                 <a href="#" onclick="return false" data-days="365" data-type="sp" class="more-info small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
                             </div>
                         </div>
@@ -811,7 +993,6 @@ echo $this->Html->script("https://www.gstatic.com/charts/loader.js");
                     </table>
                 </div>
             </div>
-
         </div>
     </div>
     <div class="overlay">

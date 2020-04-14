@@ -95,7 +95,7 @@ class RciamStatsViewerUtils
                     if ($sp == null)
                         $sql = "SELECT sourceidp, COALESCE(name,sourceIdp) AS idpname, SUM(count) AS count FROM $tableName LEFT OUTER JOIN $identityProvidersMapTableName ON sourceidp = entityId GROUP BY sourceidp, name HAVING sourceidp != '' ORDER BY count DESC";
                     else
-                        $sql = "SELECT sourceidp, COALESCE(name,sourceIdp) AS idpname, SUM(count) AS count FROM $tableName LEFT OUTER JOIN $identityProvidersMapTableName ON sourceidp = entityId WHERE service'".$sp."' GROUP BY sourceidp, name HAVING sourceidp != '' ORDER BY count DESC";
+                        $sql = "SELECT sourceidp, COALESCE(name,sourceIdp) AS idpname, SUM(count) AS count FROM $tableName LEFT OUTER JOIN $identityProvidersMapTableName ON sourceidp = entityId WHERE service = '".$sp."' GROUP BY sourceidp, name HAVING sourceidp != '' ORDER BY count DESC";
             } else {// TODO 
                 $sql = "SELECT sourceidp, IFNULL(name,sourceIdp) AS idpname, SUM(count) AS count FROM $tableName LEFT OUTER JOIN $identityProvidersMapTableName ON sourceidp = entityId GROUP BY sourceidp HAVING sourceidp != '' ORDER BY count DESC";
             }
@@ -129,7 +129,7 @@ class RciamStatsViewerUtils
                 if ($idp == null)
                     $sql = "SELECT service, COALESCE(name,service) AS spname, SUM(count) AS count FROM $table_name LEFT OUTER JOIN $serviceProvidersMapTableName ON service = identifier GROUP BY service, name HAVING service != ''  ORDER BY count DESC";
                 else
-                    $sql = "SELECT service, COALESCE(name,service) AS spname, SUM(count) AS count FROM $table_name LEFT OUTER JOIN $serviceProvidersMapTableName ON service = identifier WHERE sourceidp = $idp GROUP BY service, name HAVING service != ''  ORDER BY count DESC";
+                    $sql = "SELECT service, COALESCE(name,service) AS spname, SUM(count) AS count FROM $table_name LEFT OUTER JOIN $serviceProvidersMapTableName ON service = identifier WHERE sourceidp = '".$idp."' GROUP BY service, name HAVING service != ''  ORDER BY count DESC";
             } else {
                 $sql = "SELECT service, IFNULL(name,service) AS spname, SUM(count) AS count FROM $table_name LEFT OUTER JOIN " . $serviceProvidersMapTableName . " ON service = identifier GROUP BY service HAVING service != ''  ORDER BY count DESC";
             }
