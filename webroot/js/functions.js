@@ -207,7 +207,7 @@ function drawIdpsChart(elementId, data, url_str) {
                     })
                     var dataIdp = new google.visualization.arrayToDataTable(fValues);
                     drawLoginsChart(document.getElementById("idpsloginsDashboard"), dataIdp, 'idp')
-                    
+
                     createDataTable($("#idpSpecificDataTableContainer"), data['sp'], "sp")
                     $(".overlay").hide();
                 }
@@ -324,7 +324,7 @@ function drawSpsChart(elementId, data, url_str) {
 
                     var dataSp = new google.visualization.arrayToDataTable(fValues);
                     drawLoginsChart(document.getElementById("spsloginsDashboard"), dataSp, 'sp')
-                    
+
                     createDataTable($("#spSpecificDataTableContainer"), data['idp'], "idp")
                     $(".overlay").hide();
                 }
@@ -402,25 +402,23 @@ function getLoginCountPerDay(url_str, days, identifier, type, linerangeChartId, 
 
 function createDataTable(elementId, data, type) {
     console.log("DATATABLE CREATING")
-    if (type == "idp")
-        {
-            column1='idpname'
-            column2='count'
-            th='Identity Providers'
-            console.log(data)
-        }
-    else 
-        {
-            column1='spname'
-            column2='count'
-            th='Service Providers'
-        }
+    if (type == "idp") {
+        column1 = 'idpname'
+        column2 = 'count'
+        th = 'Identity Providers'
+        console.log(data)
+    }
+    else {
+        column1 = 'spname'
+        column2 = 'count'
+        th = 'Service Providers'
+    }
     dataAppend = '';
     data.forEach(function (item) {
         dataAppend += '<tr><td>' + item[0][column1] + '</td><td>' + item[0][column2] + '</td></tr>';
     })
     //elementId.html("");
-    elementId.html('<table id="'+ type +'SpecificDatatable" class="stripe row-border hover">' +
+    elementId.html('<table id="' + type + 'SpecificDatatable" class="stripe row-border hover">' +
         '<thead>' +
         '<tr>' +
         '<th>' + th + '</th>' +
@@ -431,7 +429,7 @@ function createDataTable(elementId, data, type) {
         dataAppend +
         '</tbody>' +
         '</table>');
-    $("#"+ type +"SpecificDatatable").DataTable({
+    $("#" + type + "SpecificDatatable").DataTable({
         "order": [1, 'desc']
     });
 
