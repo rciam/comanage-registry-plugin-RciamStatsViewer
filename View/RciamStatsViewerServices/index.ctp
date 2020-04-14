@@ -45,15 +45,40 @@ print $this->Html->css('/RciamStatsViewer/css/style');
 print $this->Html->css('//cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css');
 print $this->Html->script('//cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js');
 print $this->Html->script("https://www.gstatic.com/charts/loader.js");
-
+print $this->Html->script('/RciamStatsViewer/js/functions.js')
 ?>
 <script type="text/javascript">
+    //Default Values
+    var defaultdataIdp, defaultdataSp;
     var dashboard;
     var chartRangeFilter;
+    var url_str_idp = '<?php echo $this->Html->url(array(
+                            'plugin' => Inflector::singularize(Inflector::tableize($this->plugin)),
+                            'controller' => 'rciam_stats_viewer_services',
+                            'action' => 'getdataforidp',
+                            'co'  => $cur_co['Co']['id']
+                        )); ?>';
+    var url_str_sp = '<?php echo $this->Html->url(array(
+                            'plugin' => Inflector::singularize(Inflector::tableize($this->plugin)),
+                            'controller' => 'rciam_stats_viewer_services',
+                            'action' => 'getdataforsp',
+                            'co'  => $cur_co['Co']['id']
+                        )); ?>';
+
     $(function() {
+
+
         //Initialize Tabs
         var tabs = $("#tabs").tabs();
 
+        //Initialize Tiles
+        var tabsIds = ["dashboardTab", "idpSpecificData", "spSpecificData"];
+        tabsIds.forEach(function(item) {
+            createTile($("#" + item + " .row .col-lg-3").eq(0), "bg-aqua", <?php print($vv_totalloginscount[0] ?: 0); ?>, "Todays Logins", 1, item)
+            createTile($("#" + item + " .row .col-lg-3").eq(1), "bg-green", <?php print($vv_totalloginscount[1] ?: 0); ?>, "Last 7 days Logins", 7, item)
+            createTile($("#" + item + " .row .col-lg-3").eq(2), "bg-yellow", <?php print($vv_totalloginscount[2] ?: 0); ?>, "Last 30 days Logins", 30, item)
+            createTile($("#" + item + " .row .col-lg-3").eq(3), "bg-red", <?php print($vv_totalloginscount[3] ?: 0); ?>, "Last Year Logins", 365, item)
+        });
         //Initialize Datables
         $("#idpDatatable").DataTable({
             "order": [1, 'desc']
@@ -148,7 +173,7 @@ print $this->Html->script("https://www.gstatic.com/charts/loader.js");
                             fValues.push(temp);
                         })
                         var dataIdp = new google.visualization.arrayToDataTable(fValues);
-                        drawIdpsChart(document.getElementById(idpChart), dataIdp);
+                        drawIdpsChart(document.getElementById(idpChart), dataIdp, url_str_idp);
                     }
                     if (type == '' || type == 'idp') {
                         fValues = [];
@@ -163,7 +188,7 @@ print $this->Html->script("https://www.gstatic.com/charts/loader.js");
                         })
 
                         var dataSp = new google.visualization.arrayToDataTable(fValues);
-                        drawSpsChart(document.getElementById(spChart), dataSp);
+                        drawSpsChart(document.getElementById(spChart), dataSp, url_str_sp);
                     }
                     $(".overlay").hide()
                 }
@@ -250,7 +275,7 @@ print $this->Html->script("https://www.gstatic.com/charts/loader.js");
                             fValues.push(temp);
                         })
                         var dataIdp = new google.visualization.arrayToDataTable(fValues);
-                        drawIdpsChart(document.getElementById(idpChart), dataIdp);
+                        drawIdpsChart(document.getElementById(idpChart), dataIdp, url_str_idp);
                     }
                     if (type == '' || type == 'idp') {
                         fValues = [];
@@ -265,7 +290,7 @@ print $this->Html->script("https://www.gstatic.com/charts/loader.js");
                         })
 
                         var dataSp = new google.visualization.arrayToDataTable(fValues);
-                        drawSpsChart(document.getElementById(spChart), dataSp);
+                        drawSpsChart(document.getElementById(spChart), dataSp, url_str_sp);
                     }
                     $(".overlay").hide()
                 }
@@ -276,16 +301,16 @@ print $this->Html->script("https://www.gstatic.com/charts/loader.js");
         $(document).on("click", ".tabset_tabs li a, .backToTotal", function() {
             if ($(this).hasClass("backToTotal")) {
                 if ($(this).parent().parent().attr("id") == "idpSpecificData")
-                    drawIdpsChart(document.getElementById('idpsChartDetail'));
+                    drawIdpsChart(document.getElementById('idpsChartDetail'), defaultdataIdp, url_str_idp);
                 else
-                    drawSpsChart(document.getElementById('spsChartDetail'));
+                    drawSpsChart(document.getElementById('spsChartDetail'), defaultdataSp, url_str_sp);
             }
             if ($(this).attr("data-draw") == "drawIdpsChart") {
-                drawIdpsChart(document.getElementById('idpsChartDetail'));
+                drawIdpsChart(document.getElementById('idpsChartDetail'), defaultdataIdp, url_str_idp);
                 $(this).attr("data-draw", "")
 
             } else if ($(this).attr("data-draw") == "drawSpsChart") {
-                drawSpsChart(document.getElementById('spsChartDetail'));
+                drawSpsChart(document.getElementById('spsChartDetail'), defaultdataSp, url_str_sp);
                 $(this).attr("data-draw", "")
             }
         })
@@ -296,366 +321,38 @@ print $this->Html->script("https://www.gstatic.com/charts/loader.js");
         'packages': ['corechart', 'controls', 'table']
     });
     google.charts.setOnLoadCallback(function() {
-        drawLoginsChart(document.getElementById("loginsDashboard"))
-        drawIdpsChart(document.getElementById("summaryIdPChart"))
-        drawSpsChart(document.getElementById("summarySpChart"))
+        var data = google.visualization.arrayToDataTable([
+            ['Date', 'Count'],
+            <?php
+            foreach ($vv_logincount_per_day as $record) {
+                echo "[new Date(" . $record[0]["year"] . "," . ($record[0]["month"] - 1) . ", " . $record[0]["day"] . "), {v:" . $record[0]["count"] . "}],";
+            }
+            ?>
+        ]);
+        drawLoginsChart(document.getElementById("loginsDashboard"), data)
+        
+        defaultdataIdp = google.visualization.arrayToDataTable([
+            ['sourceIdp', 'sourceIdPEntityId', 'Count'],
+            <?php
+            foreach ($vv_logincount_per_idp as $record) {
+                echo "['" . str_replace("'", "\'", $record[0]["idpname"]) . "', '" . $record[0]["sourceidp"] . "', " . $record[0]["count"] . "],";
+            }
+            ?>
+        ]);
+        drawIdpsChart(document.getElementById("summaryIdPChart"), defaultdataIdp, url_str_idp)
+
+
+        defaultdataSp = google.visualization.arrayToDataTable([
+            ['service', 'serviceIdentifier', 'Count'],
+            <?php
+            foreach ($vv_logincount_per_sp as $record) {
+                echo "['" . str_replace("'", "\'", $record[0]["spname"]) . "', '" . $record[0]["service"] . "', " .  $record[0]["count"] . "],";
+            }
+            ?>
+        ]);
+
+        drawSpsChart(document.getElementById("summarySpChart"), defaultdataSp, url_str_sp)
     });
-
-    function setZerosIfNoDate(dataTable) {
-        var datePattern = 'd.M.yy';
-        var formatDate = new google.visualization.DateFormat({
-            pattern: datePattern
-        });
-        var startDate = dataTable.getColumnRange(0).min;
-        var endDate = dataTable.getColumnRange(0).max;
-        var oneDay = (1000 * 60 * 60 * 24);
-        for (var i = startDate.getTime(); i < endDate.getTime(); i = i + oneDay) {
-            var coffeeData = dataTable.getFilteredRows([{
-                column: 0,
-                test: function(value, row, column, table) {
-                    var coffeeDate = formatDate.formatValue(table.getValue(row, column));
-                    var testDate = formatDate.formatValue(new Date(i));
-                    return (coffeeDate === testDate);
-                }
-            }]);
-            if (coffeeData.length === 0) {
-                dataTable.addRow([
-                    new Date(i),
-                    0
-                ]);
-            }
-        }
-        dataTable.sort({
-            column: 0
-        });
-        return dataTable;
-    }
-
-    // Hide more-info link for 0 logins
-    function setHiddenElements(element, value) {
-        console.log(element)
-        console.log(value);
-        if (value == null) {
-            element.find(".more-info").addClass("hidden")
-            element.find(".no-data").removeClass("hidden")
-        } else {
-            element.find(".more-info").removeClass("hidden")
-            element.find(".no-data").addClass("hidden")
-        }
-    }
-
-    // Line Chart - Range
-    function drawLoginsChart(elementId, data = null, type = '') {
-        console.log("range" + elementId)
-        if (data == null) {
-            var data = google.visualization.arrayToDataTable([
-                ['Date', 'Count'],
-                <?php
-                foreach ($vv_logincount_per_day as $record) {
-                    echo "[new Date(" . $record[0]["year"] . "," . ($record[0]["month"] - 1) . ", " . $record[0]["day"] . "), {v:" . $record[0]["count"] . "}],";
-                }
-                ?>
-            ]);
-        }
-        if (data.getNumberOfRows() > 0)
-            data = setZerosIfNoDate(data);
-        cur_dashboard = new google.visualization.Dashboard(document.getElementById(elementId));
-
-        chartRangeFilter = new google.visualization.ControlWrapper({
-            controlType: 'ChartRangeFilter',
-            containerId: type + 'control_div',
-            options: {
-                filterColumnLabel: 'Date',
-                'ui': {
-                    'chartType': 'LineChart',
-                    'chartOptions': {
-                        'chartArea': {
-                            'width': '95%'
-                        },
-                    },
-                }
-            }
-        });
-        var chart = new google.visualization.ChartWrapper({
-            'chartType': 'LineChart',
-            'containerId': type + 'line_div',
-            'options': {
-                'legend': 'none'
-            }
-        });
-
-        cur_dashboard.bind(chartRangeFilter, chart);
-        cur_dashboard.draw(data);
-    }
-
-
-    // IdP Chart
-    function drawIdpsChart(elementId, data = null) {
-        if (data == null) {
-            var data = google.visualization.arrayToDataTable([
-                ['sourceIdp', 'sourceIdPEntityId', 'Count'],
-                <?php
-                foreach ($vv_logincount_per_idp as $record) {
-                    echo "['" . str_replace("'", "\'", $record[0]["idpname"]) . "', '" . $record[0]["sourceidp"] . "', " . $record[0]["count"] . "],";
-                }
-                ?>
-            ]);
-        }
-
-        data.sort([{
-            column: 2,
-            desc: true
-        }]);
-        var view = new google.visualization.DataView(data);
-        view.setColumns([0, 2]);
-
-        var options = {
-            pieSliceText: 'value',
-            width: '100%',
-            height: '350',
-            chartArea: {
-                left: "3%",
-                top: "3%",
-                height: "94%",
-                width: "94%"
-            }
-        };
-
-        var chart = new google.visualization.PieChart(elementId);
-        chart.draw(view, options);
-
-        google.visualization.events.addListener(chart, 'select', selectHandler);
-
-        function selectHandler() {
-            $(".overlay").show();
-            $('html,body').animate({
-                scrollTop: 150
-            }, 'slow');
-
-            var selection = chart.getSelection();
-            if (selection.length) {
-                var identifier = data.getValue(selection[0].row, 1);
-                var legend = data.getValue(selection[0].row, 0);
-                //initialize tiles
-                $("#idpSpecificData .more-info").each(function() {
-                    $(this).attr("identifier", identifier);
-                    $(this).parent().removeClass("inactive");
-
-                })
-
-                $("#idpSpecificData").find(".back-to-overall").each(function() {
-                    $(this).html('More info <i class="fa fa-arrow-circle-right"></i>')
-                    $(this).addClass("more-info");
-                    $(this).removeClass("back-to-overall")
-                })
-
-                var url_str = '<?php echo $this->Html->url(array(
-                                    'plugin' => Inflector::singularize(Inflector::tableize($this->plugin)),
-                                    'controller' => 'rciam_stats_viewer_services',
-                                    'action' => 'getdataforidp',
-                                    'co'  => $cur_co['Co']['id']
-                                )); ?>';
-                $.ajax({
-                    url: url_str,
-                    data: {
-                        idp: identifier,
-                    },
-                    success: function(data) {
-                        var ref_this = $("ul.tabset_tabs li.ui-state-active");
-                        console.log(ref_this.attr("aria-controls"));
-                        $('#tabs').tabs({
-                            active: 1
-                        }); // first tab selected
-
-                        $("#idpSpecificData .bg-aqua h3").text(data['tiles'][0] != null ? data['tiles'][0] : 0);
-                        setHiddenElements($("#idpSpecificData .bg-aqua"), data['tiles'][0])
-                        $("#idpSpecificData .bg-green h3").text(data['tiles'][1] != null ? data['tiles'][1] : 0);
-                        setHiddenElements($("#idpSpecificData .bg-green"), data['tiles'][1])
-                        $("#idpSpecificData .bg-yellow h3").text(data['tiles'][2] != null ? data['tiles'][2] : 0);
-                        setHiddenElements($("#idpSpecificData .bg-yellow"), data['tiles'][2])
-                        $("#idpSpecificData .bg-red h3").text(data['tiles'][3] != null ? data['tiles'][3] : 0);
-                        setHiddenElements($("#idpSpecificData .bg-red"), data['tiles'][3])
-                        $("#idpSpecificData h1").html("<a href='#' onclick='return false;' style='font-size:2.5rem' class='backToTotal'>Identity Providers</a> > " + legend);
-                        // Hide to left / show from left
-                        //$("#totalIdpsInfo").toggle("slide", {direction: "left"}, 500);
-                        $("#totalIdpsInfo").hide();
-                        // Show from right / hide to right
-                        //$("#idpSpecificData").toggle("slide", {direction: "right"}, 500);
-                        $("#idpSpecificData").show();
-
-                        fValues = [];
-                        dataValues = "";
-                        fValues.push(['service', 'serviceIdentifier', 'Count'])
-                        data['sp'].forEach(function(item) {
-                            var temp = [];
-                            temp.push(item[0]["spname"]);
-                            temp.push(item[0]["service"])
-                            temp.push(parseInt(item[0]["count"]));
-                            dataValues += "[" + new Date(item[0]["year"], item[0]["month"] - 1, item[0]["day"]), parseInt(item[0]["count"]) + "],";
-                            fValues.push(temp);
-                        })
-
-                        var dataSp = new google.visualization.arrayToDataTable(fValues);
-
-                        drawSpsChart(document.getElementById("idpSpecificChart"), dataSp);
-
-                        ////Draw Line - Range Chart
-                        fValues = [];
-                        fValues.push(['Date', 'Count'])
-
-                        data['idp'].forEach(function(item) {
-                            var temp = [];
-                            temp.push(new Date(item[0]["year"], item[0]["month"] - 1, item[0]["day"]));
-                            temp.push(parseInt(item[0]["count"]));
-                            fValues.push(temp);
-                        })
-                        var dataIdp = new google.visualization.arrayToDataTable(fValues);
-                        drawLoginsChart(document.getElementById("idpsloginsDashboard"), dataIdp, 'idp')
-
-                        $(".overlay").hide();
-                    }
-                });
-            }
-        }
-    }
-
-    // Sp Chart 
-    function drawSpsChart(elementId, data = null) {
-        if (data == null) {
-            var data = google.visualization.arrayToDataTable([
-                ['service', 'serviceIdentifier', 'Count'],
-                <?php
-                foreach ($vv_logincount_per_sp as $record) {
-                    echo "['" . str_replace("'", "\'", $record[0]["spname"]) . "', '" . $record[0]["service"] . "', " .  $record[0]["count"] . "],";
-                }
-                ?>
-            ]);
-        }
-        data.sort([{
-            column: 2,
-            desc: true
-        }]);
-
-        var view = new google.visualization.DataView(data);
-        view.setColumns([0, 2]);
-
-        var options = {
-            pieSliceText: 'value',
-            width: '100%',
-            height: '350',
-            chartArea: {
-                left: "3%",
-                top: "3%",
-                height: "94%",
-                width: "94%"
-            }
-        };
-
-        var chart = new google.visualization.PieChart(elementId);
-
-        chart.draw(view, options);
-
-        google.visualization.events.addListener(chart, 'select', selectHandler);
-
-        function selectHandler() {
-
-            $(".overlay").show();
-            $('html,body').animate({
-                scrollTop: 150
-            }, 'slow');
-            var selection = chart.getSelection();
-            if (selection.length) {
-                var identifier = data.getValue(selection[0].row, 1);
-                var legend = data.getValue(selection[0].row, 0);
-                //initialize tiles
-                $("#spSpecificData .more-info").each(function() {
-                    $(this).attr("identifier", identifier);
-                    $(this).parent().removeClass("inactive");
-                })
-                $("#spSpecificData").find(".back-to-overall").each(function() {
-                    $(this).html('More info <i class="fa fa-arrow-circle-right"></i>')
-                    $(this).addClass("more-info");
-                    $(this).removeClass("back-to-overall")
-                })
-
-                var url_str = '<?php echo $this->Html->url(array(
-                                    'plugin' => Inflector::singularize(Inflector::tableize($this->plugin)),
-                                    'controller' => 'rciam_stats_viewer_services',
-                                    'action' => 'getdataforsp',
-                                    'co'  => $cur_co['Co']['id']
-                                )); ?>';
-                $.ajax({
-
-                    url: url_str,
-                    data: {
-                        sp: identifier,
-                    },
-                    success: function(data) {
-
-                        var ref_this = $("ul.tabset_tabs li.ui-state-active");
-                        $('#tabs').tabs({
-                            active: 2
-                        }); // first tab selected
-                        // initialize tiles
-                        $("#spSpecificData .bg-aqua h3").text(data['tiles'][0] != null ? data['tiles'][0] : 0);
-                        setHiddenElements($("#spSpecificData .bg-aqua"), data['tiles'][0])
-                        $("#spSpecificData .bg-green h3").text(data['tiles'][1] != null ? data['tiles'][1] : 0);
-                        setHiddenElements($("#spSpecificData .bg-green"), data['tiles'][1])
-                        $("#spSpecificData .bg-yellow h3").text(data['tiles'][2] != null ? data['tiles'][2] : 0);
-                        setHiddenElements($("#spSpecificData .bg-yellow"), data['tiles'][2])
-                        $("#spSpecificData .bg-red h3").text(data['tiles'][3] != null ? data['tiles'][3] : 0);
-                        setHiddenElements($("#spSpecificData .bg-red"), data['tiles'][3])
-                        $("#spSpecificData h1").html("<a href='#' onclick='return false;' style='font-size:2.5rem' class='backToTotal'>Service Providers</a> > " + legend);
-                        // Hide to left / show from left
-                        //$("#totalSpsInfo").toggle("slide", {direction: "left"}, 500);
-                        $("#totalSpsInfo").hide();
-
-                        // Show from right / hide to right
-                        //$("#spSpecificData").toggle("slide", {direction: "right"}, 500);
-                        $("#spSpecificData").show();
-
-                        fValues = [];
-                        dataValues = "";
-                        fValues.push(['sourceIdp', 'sourceIdPEntityId', 'Count'])
-                        data['idp'].forEach(function(item) {
-                            var temp = [];
-                            temp.push(item[0]["idpname"]);
-                            temp.push(item[0]["sourceidp"])
-                            temp.push(parseInt(item[0]["count"]));
-                            fValues.push(temp);
-                        })
-
-                        var dataSp = new google.visualization.arrayToDataTable(fValues);
-                        drawIdpsChart(document.getElementById("spSpecificChart"), dataSp);
-
-                        ////Draw Line - Range Chart
-                        fValues = [];
-                        fValues.push(['Date', 'Count'])
-
-                        data['sp'].forEach(function(item) {
-                            var temp = [];
-                            temp.push(new Date(item[0]["year"], item[0]["month"] - 1, item[0]["day"]));
-                            temp.push(parseInt(item[0]["count"]));
-                            fValues.push(temp);
-                        })
-
-                        var dataSp = new google.visualization.arrayToDataTable(fValues);
-                        drawLoginsChart(document.getElementById("spsloginsDashboard"), dataSp, 'sp')
-
-                        $(".overlay").hide();
-                    }
-                });
-            }
-
-
-
-            //var ul = $("#tabs").find( "ul" );
-            // $( "<li><a href='#newtab'>New Tab</a></li>" ).appendTo( ul );
-            //$( "<div id='newtab'><p>New Content</p></div>" ).appendTo( tabs );
-            //$("#tabs").tabs( "refresh" );
-
-        }
-    }
 </script>
 
 <div class="box">
@@ -671,87 +368,18 @@ print $this->Html->script("https://www.gstatic.com/charts/loader.js");
                 <div class="row">
                     <div class="col-lg-3 col-xs-6">
                         <!-- small box -->
-                        <div class="small-box bg-aqua">
-                            <div class="inner">
-                                <h3><?php echo ($vv_totalloginscount[0] != null ? $vv_totalloginscount[0] : 0); ?></h3>
-                                <p>Todays Logins</p>
-                            </div>
-                            <?php
-                            if ($vv_totalloginscount[0] == null) {
-                                $nodata = "";
-                                $more_info = "hidden";
-                            } else {
-                                $nodata = "hidden";
-                                $more_info = "";
-                            }
-                            ?>
-                            <div class="small-box-footer <?php echo $nodata; ?>">No data</div>
-                            <a href="#" onlick="return false" data-days="1" class="more-info small-box-footer <?php echo $more_info; ?>">More info <i class="fa fa-arrow-circle-right"></i></a>
-                        </div>
                     </div>
                     <!-- ./col -->
                     <div class="col-lg-3 col-xs-6">
                         <!-- small box -->
-                        <div class="small-box bg-green">
-                            <div class="inner">
-                                <!--<h3>53<sup style="font-size: 20px">%</sup></h3>-->
-                                <h3><?php echo ($vv_totalloginscount[1] != null ? $vv_totalloginscount[1] : 0); ?></h3>
-                                <p>Last 7 days Logins</p>
-                            </div>
-                            <?php
-                            if ($vv_totalloginscount[1] == null) {
-                                $nodata = "";
-                                $more_info = "hidden";
-                            } else {
-                                $nodata = "hidden";
-                                $more_info = "";
-                            }
-                            ?>
-                            <div class="small-box-footer <?php echo $nodata; ?>">No data</div>
-                            <a href="#" onclick="return false" data-days="7" class="more-info small-box-footer <?php echo $more_info; ?>">More info <i class="fa fa-arrow-circle-right"></i></a>
-                        </div>
                     </div>
                     <!-- ./col -->
                     <div class="col-lg-3 col-xs-6">
                         <!-- small box -->
-                        <div class="small-box bg-yellow">
-                            <div class="inner">
-                                <h3><?php echo ($vv_totalloginscount[2] != null ? $vv_totalloginscount[2] : 0) ?></h3>
-                                <p>Last 30 days Logins</p>
-                            </div>
-                            <?php
-                            if ($vv_totalloginscount[2] == null) {
-                                $nodata = "";
-                                $more_info = "hidden";
-                            } else {
-                                $nodata = "hidden";
-                                $more_info = "";
-                            }
-                            ?>
-                            <div class="small-box-footer <?php echo $nodata; ?>">No data</div>
-                            <a href="#" onclick="return false" data-days="30" class="more-info small-box-footer <?php echo $more_info; ?>">More info <i class="fa fa-arrow-circle-right"></i></a>
-                        </div>
                     </div>
                     <!-- ./col -->
                     <div class="col-lg-3 col-xs-6">
                         <!-- small box -->
-                        <div class="small-box bg-red">
-                            <div class="inner">
-                                <h3><?php echo ($vv_totalloginscount[3] != null ? $vv_totalloginscount[3] : 0) ?></h3>
-                                <p>Last year logins</p>
-                            </div>
-                            <?php
-                            if ($vv_totalloginscount[3] == null) {
-                                $nodata = "";
-                                $more_info = "hidden";
-                            } else {
-                                $nodata = "hidden";
-                                $more_info = "";
-                            }
-                            ?>
-                            <div class="small-box-footer <?php echo $nodata; ?>">No data</div>
-                            <a href="#" onclick="return false" data-days="365" class="more-info small-box-footer <?php echo $more_info; ?>">More info <i class="fa fa-arrow-circle-right"></i></a>
-                        </div>
                     </div>
                     <!-- ./col -->
                 </div>
@@ -784,51 +412,20 @@ print $this->Html->script("https://www.gstatic.com/charts/loader.js");
                     <div class="row">
                         <div class="col-lg-3 col-xs-6">
                             <!-- small box -->
-                            <div class="small-box bg-aqua">
-                                <div class="inner">
-                                    <h3></h3>
-                                    <p>Todays Logins</p>
-                                </div>
-                                <div class="small-box-footer no-data">No data</div>
-                                <a href="#" onclick="return false" data-days="1" data-type="idp" class="more-info small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
-                            </div>
                         </div>
                         <!-- ./col -->
                         <div class="col-lg-3 col-xs-6">
                             <!-- small box -->
-                            <div class="small-box bg-green">
-                                <div class="inner">
-                                    <h3></h3>
-                                    <p>Last 7 days Logins</p>
-                                </div>
-                                <div class="small-box-footer no-data">No data</div>
-                                <a href="#" onclick="return false" data-days="7" data-type="idp" class="more-info small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
-                            </div>
                         </div>
                         <!-- ./col -->
                         <div class="col-lg-3 col-xs-6">
                             <!-- small box -->
-                            <div class="small-box bg-yellow">
-                                <div class="inner">
-                                    <h3></h3>
-                                    <p>Last 30 days Logins</p>
-                                </div>
-                                <div class="small-box-footer no-data">No data</div>
-                                <a href="#" onclick="return false" data-days="30" data-type="idp" class="more-info small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
-                            </div>
                         </div>
                         <!-- ./col -->
                         <div class="col-lg-3 col-xs-6">
                             <!-- small box -->
-                            <div class="small-box bg-red">
-                                <div class="inner">
-                                    <h3></h3>
-                                    <p>Last year logins</p>
-                                </div>
-                                <div class="small-box-footer no-data">No data</div>
-                                <a href="#" onclick="return false" data-days="365" data-type="idp" class="more-info small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
-                            </div>
                         </div>
+                        <!-- ./col -->
                     </div>
                     <div class="row">
                         <div class="col-lg-12">
@@ -892,50 +489,18 @@ print $this->Html->script("https://www.gstatic.com/charts/loader.js");
                     <div class="row">
                         <div class="col-lg-3 col-xs-6">
                             <!-- small box -->
-                            <div class="small-box bg-aqua">
-                                <div class="inner">
-                                    <h3></h3>
-                                    <p>Todays Logins</p>
-                                </div>
-                                <div class="small-box-footer no-data">No data</div>
-                                <a href="#" onclick="return false" data-days="1" data-type="sp" class="more-info small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
-                            </div>
                         </div>
                         <!-- ./col -->
                         <div class="col-lg-3 col-xs-6">
                             <!-- small box -->
-                            <div class="small-box bg-green">
-                                <div class="inner">
-                                    <h3></h3>
-                                    <p>Last 7 days Logins</p>
-                                </div>
-                                <div class="small-box-footer no-data">No data</div>
-                                <a href="#" onclick="return false" data-days="7" data-type="sp" class="more-info small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
-                            </div>
                         </div>
                         <!-- ./col -->
                         <div class="col-lg-3 col-xs-6">
                             <!-- small box -->
-                            <div class="small-box bg-yellow">
-                                <div class="inner">
-                                    <h3></h3>
-                                    <p>Last 30 days Logins</p>
-                                </div>
-                                <div class="small-box-footer no-data">No data</div>
-                                <a href="#" onclick="return false" data-days="30" data-type="sp" class="more-info small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
-                            </div>
                         </div>
                         <!-- ./col -->
                         <div class="col-lg-3 col-xs-6">
                             <!-- small box -->
-                            <div class="small-box bg-red">
-                                <div class="inner">
-                                    <h3></h3>
-                                    <p>Last year logins</p>
-                                </div>
-                                <div class="small-box-footer no-data">No data</div>
-                                <a href="#" onclick="return false" data-days="365" data-type="sp" class="more-info small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
-                            </div>
                         </div>
                     </div>
                     <div class="row">
