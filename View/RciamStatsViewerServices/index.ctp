@@ -37,14 +37,14 @@ $params = array();
 $params['title'] = _txt('ct.rciam_stats_viewer_services.pl');
 
 // For tiles
-echo $this->Html->css('/RciamStatsViewer/css/bootstrap.min');
-echo $this->Html->css('/RciamStatsViewer/css/AdminLTE.min');
-echo $this->Html->css('/RciamStatsViewer/css/ionicons.min');
-echo $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
-echo $this->Html->css('/RciamStatsViewer/css/style');
-echo $this->Html->css('//cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css');
-echo $this->Html->script('//cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js');
-echo $this->Html->script("https://www.gstatic.com/charts/loader.js");
+print $this->Html->css('/RciamStatsViewer/css/bootstrap.min');
+print $this->Html->css('/RciamStatsViewer/css/AdminLTE.min');
+print $this->Html->css('/RciamStatsViewer/css/ionicons.min');
+print $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
+print $this->Html->css('/RciamStatsViewer/css/style');
+print $this->Html->css('//cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css');
+print $this->Html->script('//cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js');
+print $this->Html->script("https://www.gstatic.com/charts/loader.js");
 
 ?>
 <script type="text/javascript">

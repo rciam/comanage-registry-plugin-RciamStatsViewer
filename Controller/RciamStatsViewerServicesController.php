@@ -1,17 +1,17 @@
 <?php
-App::uses("StandardController", "Controller");
-require('/srv/comanage/comanage-registry-Fix_regex_PCRE_group_error/local/Plugin/RciamStatsViewer/Lib/utils.php');
+App::uses('StandardController', 'Controller');
+
 class RciamStatsViewerServicesController extends StandardController
 {
   // Class name, used by Cake
-  public $name = "RciamStatsViewerServices";
+  public $name = 'RciamStatsViewerServices';
 
   public $requires_co = true;
 
   public $uses = array(
-    "RciamStatsViewer.RciamStatsViewer",
-    "Co",
-    "RciamStatsViewer.RciamStatsViewerUtils"
+    'RciamStatsViewer.RciamStatsViewer',
+    'Co',
+    'RciamStatsViewer.RciamStatsViewerUtils'
   );
   private $utils;
 
@@ -24,10 +24,13 @@ class RciamStatsViewerServicesController extends StandardController
 
   public function index()
   {
-    //Get data if any for the configuration of RciamStatsViewer  
+    try {
+      // Try to connect to the database
     $conn = $this->RciamStatsViewer->connect($this->cur_co['Co']['id']);
 
-    $vv_logincount_per_day = $this->utils->getLoginCountPerDay($conn, 0);
+      // Fetch the data
+      $vv_logincount_per_day = ($this->utils->getLoginCountPerDay($conn, 0)) ?: array();
+      $vv_totalloginscount_today = ($this->utils->getTotalLoginCounts($conn, 1)) ?: array();
 
     $vv_totalloginscount = array(
       $this->utils->getTotalLoginCounts($conn, 1),
@@ -36,21 +39,31 @@ class RciamStatsViewerServicesController extends StandardController
       $this->utils->getTotalLoginCounts($conn, 365)
     );
 
-    $vv_logincount_per_idp = $this->utils->getLoginCountPerIdp($conn, 0);
-    $vv_logincount_per_sp = $this->utils->getLoginCountPerSp($conn, 0);
+      $vv_logincount_per_idp = ($this->utils->getLoginCountPerIdp($conn, 0)) ?: array();
+      $vv_logincount_per_sp = ($this->utils->getLoginCountPerSp($conn, 0)) ?: array();
 
     // Return the existing data if any
     $this->set('vv_totalloginscount', $vv_totalloginscount);
     $this->set('vv_logincount_per_sp', $vv_logincount_per_sp);
     $this->set('vv_logincount_per_idp', $vv_logincount_per_idp);
     $this->set('vv_logincount_per_day', $vv_logincount_per_day);
-    
+      // $this->set('vv_conn',$conn);
+    } catch (MissingConnectionException $e) {
+      $this->log( __METHOD__ . ':: Database Connection failed. Error Message::' . $e->getMessage(), LOG_DEBUG);
+      $this->Flash->set(_txt('er.db.connect', array($e->getMessage())), array('key' => 'error'));
+
+      // Initialize frontend placeholders
+      $this->set('vv_totalloginscount', array());
+      $this->set('vv_logincount_per_sp', array());
+      $this->set('vv_logincount_per_idp', array());
+      $this->set('vv_logincount_per_day', array());
+    }
   }
 
   //For Index Page and IdP/Sp Details
   public function getlogincountperday()
   {
-    $this->log(__METHOD__ . "::@", LOG_DEBUG);
+    $this->log(__METHOD__ . '::@', LOG_DEBUG);
     $this->autoRender = false; // We don't render a view in this example
     $this->request->onlyAllow('ajax'); // No direct access via browser URL
     $this->layout = null;
@@ -59,21 +72,21 @@ class RciamStatsViewerServicesController extends StandardController
     $type = (isset($this->request->query['type']) && $this->request->query['type'] != '' ? $this->request->query['type'] : null);
     $conn = $this->RciamStatsViewer->connect($this->request->params['named']['co']);
     
-    if ($type == null) {
+    if ($type === null) {
       $vv_logincount_per_day_range = $this->utils->getLoginCountPerDay($conn, $days);
       $vv_logincount_idp_per_day = $this->utils->getLoginCountPerIdp($conn, $days);
       $vv_logincount_sp_per_day = $this->utils->getLoginCountPerSp($conn, $days);
       $vv_logincount_per_day['range'] = $vv_logincount_per_day_range;
       $vv_logincount_per_day['idps'] = $vv_logincount_idp_per_day;
       $vv_logincount_per_day['sps'] = $vv_logincount_sp_per_day;
-    } else if ($type == "idp") {
+    } else if ($type === "idp") {
       $vv_logincount_per_day_range = $this->utils->getLoginCountPerDayForIdp($conn, $days, $identifier);
       $vv_logincount_per_day['sps'] = $this->utils->getLoginCountPerSp($conn, $days, $identifier);
       $vv_logincount_per_day['range'] = $vv_logincount_per_day_range;
 
       // $vv_logincount_idp_per_day = $this->utils->getLoginCountPerDayForIdp($conn, $days, $identifier);    
     }
-    else if ($type == "sp") {
+    else if ($type === "sp") {
       $vv_logincount_per_day_range = $this->utils->getLoginCountPerDayForSp($conn, $days, $identifier);
       $vv_logincount_per_day['idps'] = $this->utils->getLoginCountPerIdp($conn, $days, $identifier);
       $vv_logincount_per_day['range'] = $vv_logincount_per_day_range;
