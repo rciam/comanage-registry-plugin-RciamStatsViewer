@@ -85,9 +85,9 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
         $("#spDatatable").DataTable({
             "order": [1, 'desc']
         });
-        
-        createDataTable($("#idpDatatableContainer"), <?php print json_encode($vv_logincount_per_idp);?>, "idp" , "idpDatatable")
-        createDataTable($("#spDatatableContainer"), <?php print json_encode($vv_logincount_per_sp);?>, "sp" , "spDatatable")
+
+        createDataTable($("#idpDatatableContainer"), <?php print json_encode($vv_logincount_per_idp); ?>, "idp", "idpDatatable")
+        createDataTable($("#spDatatableContainer"), <?php print json_encode($vv_logincount_per_sp); ?>, "sp", "spDatatable")
 
         // Going Back to General Idp/ Sp Details
         $(document).on("click", ".backToTotal", function() {
@@ -107,6 +107,7 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
             $(".overlay").hide();
         })
 
+        // when clear filter is clicked
         $(document).on("click", ".back-to-overall", function() {
             var type = '';
             var linerangeChartId = "loginsDashboard";
@@ -160,7 +161,7 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
                 idpChart = type + "SpecificChart";
             }
             $(".overlay").show();
-            // Set the other tiles to inactive
+
             var active = $(this).closest(".small-box");
             var row = $(this).closest(".row");
             active.removeClass("inactive");
@@ -169,6 +170,7 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
             $(this).removeClass("more-info");
             $(this).addClass("back-to-overall")
 
+            // Set the other tiles to inactive
             row.find(".small-box").each(function() {
                 if ($(this)[0] != active[0]) {
                     $(this).addClass("inactive");
@@ -192,6 +194,13 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
                             )); ?>';
 
             getLoginCountPerDay(url_str, days, identifier, type, linerangeChartId, idpChart, spChart);
+        })
+
+        $(document).on("click", ".datatable-link", function() {
+            identifier = $(this).attr("data-identifier")
+            type = $(this).attr("data-type")
+            legend = $(this).text();
+            goToSpecificProvider(identifier, legend, type);
         })
 
         // draw IdP/ Sp  Charts when click at the tab or backToTotal for the first time 
@@ -344,7 +353,7 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
                                 </div>
                                 <div id="idpSpecificChart"></div>
                             </div>
-                            <div id="idpSpecificDataTableContainer"></div>   
+                            <div id="idpSpecificDataTableContainer"></div>
                         </div>
                     </div>
                     <!-- ./col -->

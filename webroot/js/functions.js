@@ -1,6 +1,6 @@
 function createTile(row, bgClass, value, text, days, type = null) {
     data_type = "";
-    if (value == 0) {
+    if (value == 0 || value == null) {
         nodata = "";
         more_info = "hidden";
     } else {
@@ -17,7 +17,7 @@ function createTile(row, bgClass, value, text, days, type = null) {
         '<h3>' + (value != 0 ? value : 0) + '</h3>' +
         '<p>' + text + '</p>' +
         '</div>' +
-        '<div class="small-box-footer ' + nodata + '">No data</div>' +
+        '<div class="small-box-footer no-data ' + nodata + '">No data</div>' +
         '<a href="#" onclick="return false" ' + data_type + ' data-days="' + days + '" class="more-info small-box-footer ' + more_info + '">More info <i class="fa fa-arrow-circle-right"></i></a>' +
         '</div>');
 }
@@ -56,7 +56,7 @@ function setZerosIfNoDate(dataTable) {
 function setHiddenElements(element, value) {
     console.log(element)
     console.log(value);
-    if (value == null) {
+    if (value == null || value == 0) {
         element.find(".more-info").addClass("hidden")
         element.find(".no-data").removeClass("hidden")
     } else {
@@ -118,7 +118,9 @@ function drawIdpsChart(elementId, data, url_str) {
             top: "3%",
             height: "94%",
             width: "94%"
-        }
+        },
+        sliceVisibilityThreshold: .005,
+        tooltip: { isHtml: true }
     };
 
     var chart = new google.visualization.PieChart(elementId);
@@ -127,91 +129,13 @@ function drawIdpsChart(elementId, data, url_str) {
     google.visualization.events.addListener(chart, 'select', selectHandler);
 
     function selectHandler() {
-
-        $(".overlay").show();
-        $('html,body').animate({
-            scrollTop: 150
-        }, 'slow');
-
         var selection = chart.getSelection();
         if (selection.length) {
+
             var identifier = data.getValue(selection[0].row, 1);
             var legend = data.getValue(selection[0].row, 0);
-            //initialize tiles
-            $("#idpSpecificData .more-info").each(function () {
-                $(this).attr("identifier", identifier);
-                $(this).parent().removeClass("inactive");
-
-            })
-
-            $("#idpSpecificData").find(".back-to-overall").each(function () {
-                $(this).html('More info <i class="fa fa-arrow-circle-right"></i>')
-                $(this).addClass("more-info");
-                $(this).removeClass("back-to-overall")
-            })
-
-
-            $.ajax({
-                url: url_str_idp,
-                data: {
-                    idp: identifier,
-                },
-                success: function (data) {
-                    var ref_this = $("ul.tabset_tabs li.ui-state-active");
-                    console.log(ref_this.attr("aria-controls"));
-                    $('#tabs').tabs({
-                        active: 1
-                    }); // first tab selected
-
-                    $("#idpSpecificData .bg-aqua h3").text(data['tiles'][0] != null ? data['tiles'][0] : 0);
-                    setHiddenElements($("#idpSpecificData .bg-aqua"), data['tiles'][0])
-                    $("#idpSpecificData .bg-green h3").text(data['tiles'][1] != null ? data['tiles'][1] : 0);
-                    setHiddenElements($("#idpSpecificData .bg-green"), data['tiles'][1])
-                    $("#idpSpecificData .bg-yellow h3").text(data['tiles'][2] != null ? data['tiles'][2] : 0);
-                    setHiddenElements($("#idpSpecificData .bg-yellow"), data['tiles'][2])
-                    $("#idpSpecificData .bg-red h3").text(data['tiles'][3] != null ? data['tiles'][3] : 0);
-                    setHiddenElements($("#idpSpecificData .bg-red"), data['tiles'][3])
-                    $("#idpSpecificData h1").html("<a href='#' onclick='return false;' style='font-size:2.5rem' class='backToTotal'>Identity Providers</a> > " + legend);
-                    // Hide to left / show from left
-                    //$("#totalIdpsInfo").toggle("slide", {direction: "left"}, 500);
-                    $("#totalIdpsInfo").hide();
-                    // Show from right / hide to right
-                    //$("#idpSpecificData").toggle("slide", {direction: "right"}, 500);
-                    $("#idpSpecificData").show();
-
-                    fValues = [];
-                    dataValues = "";
-                    fValues.push(['service', 'serviceIdentifier', 'Count'])
-                    data['sp'].forEach(function (item) {
-                        var temp = [];
-                        temp.push(item[0]["spname"]);
-                        temp.push(item[0]["service"])
-                        temp.push(parseInt(item[0]["count"]));
-                        dataValues += "[" + new Date(item[0]["year"], item[0]["month"] - 1, item[0]["day"]), parseInt(item[0]["count"]) + "],";
-                        fValues.push(temp);
-                    })
-
-                    var dataSp = new google.visualization.arrayToDataTable(fValues);
-
-                    drawSpsChart(document.getElementById("idpSpecificChart"), dataSp);
-
-                    ////Draw Line - Range Chart
-                    fValues = [];
-                    fValues.push(['Date', 'Count'])
-
-                    data['idp'].forEach(function (item) {
-                        var temp = [];
-                        temp.push(new Date(item[0]["year"], item[0]["month"] - 1, item[0]["day"]));
-                        temp.push(parseInt(item[0]["count"]));
-                        fValues.push(temp);
-                    })
-                    var dataIdp = new google.visualization.arrayToDataTable(fValues);
-                    drawLoginsChart(document.getElementById("idpsloginsDashboard"), dataIdp, 'idp')
-
-                    createDataTable($("#idpSpecificDataTableContainer"), data['sp'], "sp")
-                    $(".overlay").hide();
-                }
-            });
+            type = "idp";
+            goToSpecificProvider(identifier, legend, type);
         }
     }
 }
@@ -236,7 +160,9 @@ function drawSpsChart(elementId, data, url_str) {
             top: "3%",
             height: "94%",
             width: "94%"
-        }
+        },
+        sliceVisibilityThreshold: .005,
+        tooltip: { isHtml: true }
     };
 
     var chart = new google.visualization.PieChart(elementId);
@@ -246,89 +172,13 @@ function drawSpsChart(elementId, data, url_str) {
     google.visualization.events.addListener(chart, 'select', selectHandler);
 
     function selectHandler() {
-
-        $(".overlay").show();
-        $('html,body').animate({
-            scrollTop: 150
-        }, 'slow');
         var selection = chart.getSelection();
         if (selection.length) {
+
             var identifier = data.getValue(selection[0].row, 1);
             var legend = data.getValue(selection[0].row, 0);
-            //initialize tiles
-            $("#spSpecificData .more-info").each(function () {
-                $(this).attr("identifier", identifier);
-                $(this).parent().removeClass("inactive");
-            })
-            $("#spSpecificData").find(".back-to-overall").each(function () {
-                $(this).html('More info <i class="fa fa-arrow-circle-right"></i>')
-                $(this).addClass("more-info");
-                $(this).removeClass("back-to-overall")
-            })
-
-
-            $.ajax({
-
-                url: url_str_sp,
-                data: {
-                    sp: identifier,
-                },
-                success: function (data) {
-
-                    var ref_this = $("ul.tabset_tabs li.ui-state-active");
-                    $('#tabs').tabs({
-                        active: 2
-                    }); // first tab selected
-                    // initialize tiles
-                    $("#spSpecificData .bg-aqua h3").text(data['tiles'][0] != null ? data['tiles'][0] : 0);
-                    setHiddenElements($("#spSpecificData .bg-aqua"), data['tiles'][0])
-                    $("#spSpecificData .bg-green h3").text(data['tiles'][1] != null ? data['tiles'][1] : 0);
-                    setHiddenElements($("#spSpecificData .bg-green"), data['tiles'][1])
-                    $("#spSpecificData .bg-yellow h3").text(data['tiles'][2] != null ? data['tiles'][2] : 0);
-                    setHiddenElements($("#spSpecificData .bg-yellow"), data['tiles'][2])
-                    $("#spSpecificData .bg-red h3").text(data['tiles'][3] != null ? data['tiles'][3] : 0);
-                    setHiddenElements($("#spSpecificData .bg-red"), data['tiles'][3])
-                    $("#spSpecificData h1").html("<a href='#' onclick='return false;' style='font-size:2.5rem' class='backToTotal'>Service Providers</a> > " + legend);
-                    // Hide to left / show from left
-                    //$("#totalSpsInfo").toggle("slide", {direction: "left"}, 500);
-                    $("#totalSpsInfo").hide();
-
-                    // Show from right / hide to right
-                    //$("#spSpecificData").toggle("slide", {direction: "right"}, 500);
-                    $("#spSpecificData").show();
-
-                    fValues = [];
-                    dataValues = "";
-                    fValues.push(['sourceIdp', 'sourceIdPEntityId', 'Count'])
-                    data['idp'].forEach(function (item) {
-                        var temp = [];
-                        temp.push(item[0]["idpname"]);
-                        temp.push(item[0]["sourceidp"])
-                        temp.push(parseInt(item[0]["count"]));
-                        fValues.push(temp);
-                    })
-
-                    var dataSp = new google.visualization.arrayToDataTable(fValues);
-                    drawIdpsChart(document.getElementById("spSpecificChart"), dataSp);
-
-                    ////Draw Line - Range Chart
-                    fValues = [];
-                    fValues.push(['Date', 'Count'])
-
-                    data['sp'].forEach(function (item) {
-                        var temp = [];
-                        temp.push(new Date(item[0]["year"], item[0]["month"] - 1, item[0]["day"]));
-                        temp.push(parseInt(item[0]["count"]));
-                        fValues.push(temp);
-                    })
-
-                    var dataSp = new google.visualization.arrayToDataTable(fValues);
-                    drawLoginsChart(document.getElementById("spsloginsDashboard"), dataSp, 'sp')
-
-                    createDataTable($("#spSpecificDataTableContainer"), data['idp'], "idp")
-                    $(".overlay").hide();
-                }
-            });
+            type = "sp";
+            goToSpecificProvider(identifier, legend, type);
         }
         //var ul = $("#tabs").find( "ul" );
         // $( "<li><a href='#newtab'>New Tab</a></li>" ).appendTo( ul );
@@ -400,23 +250,132 @@ function getLoginCountPerDay(url_str, days, identifier, type, linerangeChartId, 
     })
 }
 
+function goToSpecificProvider(identifier, legend, type) {
+
+    $(".overlay").show();
+    $('html,body').animate({
+        scrollTop: 150
+    }, 'slow');
+
+
+    //initialize tiles
+    $("#" + type + "SpecificData .more-info").each(function () {
+        $(this).attr("identifier", identifier);
+        $(this).parent().removeClass("inactive");
+
+    })
+
+    $("#" + type + "SpecificData").find(".back-to-overall").each(function () {
+        $(this).html('More info <i class="fa fa-arrow-circle-right"></i>')
+        $(this).addClass("more-info");
+        $(this).removeClass("back-to-overall")
+    })
+
+    if (type == "idp") {
+        url_str = url_str_idp
+        obj = { idp: identifier };
+        tab_active = 1;
+
+    }
+    else {
+        url_str = url_str_sp
+        obj = { sp: identifier };
+        tab_active = 2;
+    }
+    $.ajax({
+        url: url_str,
+        data: obj,
+        success: function (data) {
+            var ref_this = $("ul.tabset_tabs li.ui-state-active");
+            console.log(ref_this.attr("aria-controls"));
+            $('#tabs').tabs({
+                active: tab_active
+            }); // first tab selected
+
+            $("#" + type + "SpecificData .bg-aqua h3").text(data['tiles'][0] != null ? data['tiles'][0] : 0);
+            setHiddenElements($("#" + type + "SpecificData .bg-aqua"), data['tiles'][0])
+            $("#" + type + "SpecificData .bg-green h3").text(data['tiles'][1] != null ? data['tiles'][1] : 0);
+            setHiddenElements($("#" + type + "SpecificData .bg-green"), data['tiles'][1])
+            $("#" + type + "SpecificData .bg-yellow h3").text(data['tiles'][2] != null ? data['tiles'][2] : 0);
+            setHiddenElements($("#" + type + "SpecificData .bg-yellow"), data['tiles'][2])
+            $("#" + type + "SpecificData .bg-red h3").text(data['tiles'][3] != null ? data['tiles'][3] : 0);
+            setHiddenElements($("#" + type + "SpecificData .bg-red"), data['tiles'][3])
+            $("#" + type + "SpecificData h1").html("<a href='#' onclick='return false;' style='font-size:2.5rem' class='backToTotal'>Identity Providers</a> > " + legend);
+            // Hide to left / show from left
+            //$("#totalIdpsInfo").toggle("slide", {direction: "left"}, 500);
+            $("#total" + type.charAt(0).toUpperCase() + type.slice(1) + "sInfo").hide();
+            // Show from right / hide to right
+            //$("#idpSpecificData").toggle("slide", {direction: "right"}, 500);
+            $("#" + type + "SpecificData").show();
+
+            fValues = [];
+            dataValues = "";
+            if (type == 'idp') {
+                columnNames = ['service', 'serviceIdentifier', 'Count'];
+                dataCol = 'sp';
+                columns = ['spname', 'service', 'count'];
+            }
+            else {
+                columnNames = ['sourceIdp', 'sourceIdPEntityId', 'Count'];
+                dataCol = 'idp';
+                columns = ['idpname', 'sourceidp', 'count']
+            }
+            fValues.push(columnNames)
+            data[dataCol].forEach(function (item) {
+                var temp = [];
+                temp.push(item[0][columns[0]]);
+                temp.push(item[0][columns[1]])
+                temp.push(parseInt(item[0][columns[2]]));
+                dataValues += "[" + new Date(item[0]["year"], item[0]["month"] - 1, item[0]["day"]), parseInt(item[0]["count"]) + "],";
+                fValues.push(temp);
+            })
+
+
+            var dataTable = new google.visualization.arrayToDataTable(fValues);
+            if (type == "idp")
+                drawSpsChart(document.getElementById(type + "SpecificChart"), dataTable);
+            else
+                drawIdpsChart(document.getElementById(type + "SpecificChart"), dataTable);
+            ////Draw Line - Range Chart
+            fValues = [];
+            fValues.push(['Date', 'Count'])
+
+            data[type].forEach(function (item) {
+                var temp = [];
+                temp.push(new Date(item[0]["year"], item[0]["month"] - 1, item[0]["day"]));
+                temp.push(parseInt(item[0]["count"]));
+                fValues.push(temp);
+            })
+            var dataTable = new google.visualization.arrayToDataTable(fValues);
+            drawLoginsChart(document.getElementById(type + "sloginsDashboard"), dataTable, type)
+
+            createDataTable($("#" + type + "SpecificDataTableContainer"), data[dataCol], dataCol)
+            $(".overlay").hide();
+        }
+    });
+}
+
+
+
 function createDataTable(element, data, type, idDataTable = null) {
-    
+
     if (type == "idp") {
         column1 = 'idpname'
         column2 = 'count'
-        th = 'Identity Providers'   
+        data_param = 'sourceidp'
+        th = 'Identity Providers'
     }
     else {
         column1 = 'spname'
         column2 = 'count'
+        data_param = 'service'
         th = 'Service Providers'
     }
     dataAppend = '';
     data.forEach(function (item) {
-        dataAppend += '<tr><td>' + item[0][column1] + '</td><td>' + item[0][column2] + '</td></tr>';
+        dataAppend += '<tr><td><a class="datatable-link" href="#" onclick="return false;" data-type="' + type + '" data-identifier="' + item[0][data_param] + '">' + item[0][column1] + '</a></td><td>' + item[0][column2] + '</td></tr>';
     })
-    //elementId.html("");
+
     id = (idDataTable != null ? idDataTable : type + 'SpecificDatatable');
     element.html('<table id="' + id + '" class="stripe row-border hover">' +
         '<thead>' +
@@ -429,7 +388,7 @@ function createDataTable(element, data, type, idDataTable = null) {
         dataAppend +
         '</tbody>' +
         '</table>');
-    $("#" + id ).DataTable({
+    $("#" + id).DataTable({
         "order": [1, 'desc']
     });
 
