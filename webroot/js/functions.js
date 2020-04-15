@@ -400,13 +400,12 @@ function getLoginCountPerDay(url_str, days, identifier, type, linerangeChartId, 
     })
 }
 
-function createDataTable(elementId, data, type) {
-    console.log("DATATABLE CREATING")
+function createDataTable(element, data, type, idDataTable = null) {
+    
     if (type == "idp") {
         column1 = 'idpname'
         column2 = 'count'
-        th = 'Identity Providers'
-        console.log(data)
+        th = 'Identity Providers'   
     }
     else {
         column1 = 'spname'
@@ -418,7 +417,8 @@ function createDataTable(elementId, data, type) {
         dataAppend += '<tr><td>' + item[0][column1] + '</td><td>' + item[0][column2] + '</td></tr>';
     })
     //elementId.html("");
-    elementId.html('<table id="' + type + 'SpecificDatatable" class="stripe row-border hover">' +
+    id = (idDataTable != null ? idDataTable : type + 'SpecificDatatable');
+    element.html('<table id="' + id + '" class="stripe row-border hover">' +
         '<thead>' +
         '<tr>' +
         '<th>' + th + '</th>' +
@@ -429,7 +429,7 @@ function createDataTable(elementId, data, type) {
         dataAppend +
         '</tbody>' +
         '</table>');
-    $("#" + type + "SpecificDatatable").DataTable({
+    $("#" + id ).DataTable({
         "order": [1, 'desc']
     });
 

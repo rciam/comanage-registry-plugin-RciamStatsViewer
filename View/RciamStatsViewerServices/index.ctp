@@ -78,13 +78,16 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
             createTile($("#" + item + " .row .col-lg-3").eq(2), "bg-yellow", <?php print($vv_totalloginscount[2] ?: 0); ?>, "Last 30 days Logins", 30, item)
             createTile($("#" + item + " .row .col-lg-3").eq(3), "bg-red", <?php print($vv_totalloginscount[3] ?: 0); ?>, "Last Year Logins", 365, item)
         });
-        //Initialize Datables
+        //Initialize Datatables
         $("#idpDatatable").DataTable({
             "order": [1, 'desc']
         });
         $("#spDatatable").DataTable({
             "order": [1, 'desc']
         });
+        
+        createDataTable($("#idpDatatableContainer"), <?php print json_encode($vv_logincount_per_idp);?>, "idp" , "idpDatatable")
+        createDataTable($("#spDatatableContainer"), <?php print json_encode($vv_logincount_per_sp);?>, "sp" , "spDatatable")
 
         // Going Back to General Idp/ Sp Details
         $(document).on("click", ".backToTotal", function() {
@@ -162,7 +165,7 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
             var row = $(this).closest(".row");
             active.removeClass("inactive");
 
-            $(this).html('<i class="fa fa-arrow-circle-left"></i> Click again to reset')
+            $(this).html('<i class="fa fa-arrow-circle-left"></i> Clear Filter')
             $(this).removeClass("more-info");
             $(this).addClass("back-to-overall")
 
@@ -235,7 +238,6 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
         ]);
         drawIdpsChart(document.getElementById("summaryIdPChart"), defaultdataIdp, url_str_idp)
 
-
         defaultdataSp = google.visualization.arrayToDataTable([
             ['service', 'serviceIdentifier', 'Count'],
             <?php
@@ -253,12 +255,12 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
     <div class="box-body">
         <div id="tabs">
             <ul class="tabset_tabs" width="100px">
-                <li><a href='#dashboardTab'>Summary</a></li>
-                <li><a data-draw="drawIdpsChart" href='#idpProvidersTab'>Identity Providers Details</a></li>
-                <li><a data-draw="drawSpsChart" href='#spProvidersTab'>Service Providers Details</a></li>
+                <li><a href='#dashboardTab'><?php print _txt('pl.rciamstatsviewer.summary'); ?></a></li>
+                <li><a data-draw="drawIdpsChart" href='#idpProvidersTab'><?php print _txt('pl.rciamstatsviewer.idp_details.pl'); ?></a></li>
+                <li><a data-draw="drawSpsChart" href='#spProvidersTab'><?php print _txt('pl.rciamstatsviewer.sp_details.pl'); ?></a></li>
             </ul>
             <div id="dashboardTab">
-                <h1>Summary</h1>
+                <h1><?php print _txt('pl.rciamstatsviewer.summary'); ?></h1>
                 <div class="row">
                     <div class="col-lg-3 col-xs-6">
                         <!-- small box -->
@@ -348,7 +350,7 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
                     <!-- ./col -->
                 </div>
                 <div id="totalIdpsInfo">
-                    <h1>Identity Providers</h1>
+                    <h1><?php print _txt('pl.rciamstatsviewer.idp.pl'); ?></h1>
                     <div class="box">
                         <div class="box-header with-border">
                             <h3 class="box-title">Number of logins per Identity Provider</h3>
@@ -356,26 +358,8 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
                         </div>
                         <div id="idpsChartDetail"></div>
                     </div>
-
+                    <div id="idpDatatableContainer"></div>
                     <!-- Create Datatable -->
-                    <table id="idpDatatable" class="stripe row-border hover">
-                        <thead>
-                            <tr>
-                                <th>Identity Providers</th>
-                                <th>Number of Logins</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php
-                            foreach ($vv_logincount_per_idp as $record) {
-                                print "<tr>";
-                                print "<td>" . str_replace("'", "\'", $record[0]["idpname"]) . "</td>";
-                                print "<td>" . $record[0]["count"] . "</td>";
-                                print "</tr>";
-                            }
-                            ?>
-                        </tbody>
-                    </table>
                 </div>
             </div>
             <div id="spProvidersTab">
@@ -425,7 +409,7 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
                     <!-- ./col -->
                 </div>
                 <div id="totalSpsInfo">
-                    <h1>Service Providers</h1>
+                    <h1><?php print _txt('pl.rciamstatsviewer.sp.pl'); ?></h1>
                     <div class="box">
                         <div class="box-header with-border">
                             <h3 class="box-title">Number of logins per Service Provider</h3>
@@ -434,24 +418,7 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
                         <div id="spsChartDetail"></div>
                     </div>
                     <!-- Create Datatable -->
-                    <table id="spDatatable" class="stripe row-border hover">
-                        <thead>
-                            <tr>
-                                <th>Service Providers</th>
-                                <th>Number of Logins</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php
-                            foreach ($vv_logincount_per_sp as $record) {
-                                print "<tr>";
-                                print "<td>" . str_replace("'", "\'", $record[0]["spname"]) . "</td>";
-                                print "<td>" . $record[0]["count"] . "</td>";
-                                print "</tr>";
-                            }
-                            ?>
-                        </tbody>
-                    </table>
+                    <div id="spDatatableContainer"></div>
                 </div>
             </div>
         </div>
