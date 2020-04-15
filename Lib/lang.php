@@ -46,6 +46,12 @@ $cm_rciam_stats_viewer_texts['en_US'] = array(
   'pl.rciamstatsviewer.db_settings'     => 'Database Configuration',
   'pl.rciamstatsviewer.db_prefix'       => 'DB Prefix',
   'pl.rciamstatsviewer.pl_config'       => 'Statistics Configuration',
+  'pl.rciamstatsviewer.summary'         => 'Summary',
+  'pl.rciamstatsviewer.idp.pl'         => 'Identity Providers',
+  'pl.rciamstatsviewer.sp.pl'          => 'Service Providers',
+  'pl.rciamstatsviewer.idp_details.pl' => 'Identity Providers Details',
+  'pl.rciamstatsviewer.sp_details.pl'  => 'Service Providers Details',
+
 
   //Database
   'rs.rciam_stats_viewer.error' => 'Save failed'

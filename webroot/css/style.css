@@ -17,7 +17,9 @@
     }
 
     #idpDatatable_wrapper,
-    #spDatatable_wrapper {
+    #spDatatable_wrapper, 
+    #idpSpecificDataTableContainer, 
+    #spSpecificDataTableContainer {
         margin-top: 100px;
     }
 
