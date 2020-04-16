@@ -71,7 +71,7 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
         var tabs = $("#tabs").tabs();
 
         //Initialize Tiles
-        var tabsIds = ["dashboardTab", "idpSpecificData", "spSpecificData"];
+        var tabsIds = ["dashboardTab", "totalIdpsInfo", "idpSpecificData", "totalSpsInfo", "spSpecificData"];
         tabsIds.forEach(function(item) {
             createTile($("#" + item + " .row .col-lg-3").eq(0), "bg-aqua", <?php print($vv_totalloginscount[0] ?: 0); ?>, "Todays Logins", 1, item)
             createTile($("#" + item + " .row .col-lg-3").eq(1), "bg-green", <?php print($vv_totalloginscount[1] ?: 0); ?>, "Last 7 days Logins", 7, item)
@@ -114,7 +114,19 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
             var identifier = null;
             var spChart = "summarySpChart";
             var idpChart = "summaryIdPChart";
-            if ($(this).attr("data-type") != undefined) {
+            if ($(this).attr("data-type") == "totalIdps") {
+                
+                linerangeChartId = null;
+                var spChart = null;
+                var idpChart = "idpsChartDetail";
+            }
+            else if ($(this).attr("data-type") == "totalSps") {
+                
+                linerangeChartId = null;
+                var spChart = "spsChartDetail";
+                var idpChart = null;
+            }
+            else if ($(this).attr("data-type") != undefined) {
                 type = $(this).attr("data-type");
                 linerangeChartId = type + "loginsDashboard";
                 identifier = $(this).attr("identifier");
@@ -153,13 +165,26 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
             var identifier = null;
             var spChart = "summarySpChart";
             var idpChart = "summaryIdPChart";
-            if ($(this).attr("data-type") != undefined) {
+            if ($(this).attr("data-type") == "totalIdps") {
+                
+                linerangeChartId = null;
+                var spChart = null;
+                var idpChart = "idpsChartDetail";
+            }
+            else if ($(this).attr("data-type") == "totalSps") {
+                
+                linerangeChartId = null;
+                var spChart = "spsChartDetail";
+                var idpChart = null;
+            }
+            else if ($(this).attr("data-type") != undefined) {
                 type = $(this).attr("data-type");
                 linerangeChartId = type + "loginsDashboard";
                 identifier = $(this).attr("identifier");
                 spChart = type + "SpecificChart";
                 idpChart = type + "SpecificChart";
             }
+            
             $(".overlay").show();
 
             var active = $(this).closest(".small-box");
@@ -360,6 +385,24 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
                 </div>
                 <div id="totalIdpsInfo">
                     <h1><?php print _txt('pl.rciamstatsviewer.idp.pl'); ?></h1>
+                    <div class="row">
+                        <div class="col-lg-3 col-xs-6">
+                            <!-- small box -->
+                        </div>
+                        <!-- ./col -->
+                        <div class="col-lg-3 col-xs-6">
+                            <!-- small box -->
+                        </div>
+                        <!-- ./col -->
+                        <div class="col-lg-3 col-xs-6">
+                            <!-- small box -->
+                        </div>
+                        <!-- ./col -->
+                        <div class="col-lg-3 col-xs-6">
+                            <!-- small box -->
+                        </div>
+                        <!-- ./col -->
+                    </div>
                     <div class="box">
                         <div class="box-header with-border">
                             <h3 class="box-title">Number of logins per Identity Provider</h3>
@@ -419,6 +462,23 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
                 </div>
                 <div id="totalSpsInfo">
                     <h1><?php print _txt('pl.rciamstatsviewer.sp.pl'); ?></h1>
+                    <div class="row">
+                        <div class="col-lg-3 col-xs-6">
+                            <!-- small box -->
+                        </div>
+                        <!-- ./col -->
+                        <div class="col-lg-3 col-xs-6">
+                            <!-- small box -->
+                        </div>
+                        <!-- ./col -->
+                        <div class="col-lg-3 col-xs-6">
+                            <!-- small box -->
+                        </div>
+                        <!-- ./col -->
+                        <div class="col-lg-3 col-xs-6">
+                            <!-- small box -->
+                        </div>
+                    </div>
                     <div class="box">
                         <div class="box-header with-border">
                             <h3 class="box-title">Number of logins per Service Provider</h3>

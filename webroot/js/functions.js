@@ -7,10 +7,16 @@ function createTile(row, bgClass, value, text, days, type = null) {
         nodata = "hidden";
         more_info = "";
     }
+    
     if (type == "idpSpecificData")
         data_type = 'data-type="idp"';
     else if (type == "spSpecificData")
         data_type = 'data-type="sp"';
+    else if (type == 'totalIdpsInfo')
+        data_type = 'data-type="totalIdps"';
+    else if (type == 'totalSpsInfo')
+        data_type = 'data-type="totalSps"';
+
 
     row.append('<div class="small-box ' + bgClass + '">' +
         '<div class="inner">' +
@@ -189,6 +195,7 @@ function drawSpsChart(elementId, data, url_str) {
 }
 
 function getLoginCountPerDay(url_str, days, identifier, type, linerangeChartId, idpChart, spChart) {
+    
     $.ajax({
 
         url: url_str,
@@ -198,7 +205,8 @@ function getLoginCountPerDay(url_str, days, identifier, type, linerangeChartId, 
             type: type
         },
         success: function (data) {
-
+            console.log(data)
+            if(linerangeChartId != null) {
             fValues = [];
             fValues.push(['Date', 'Count'])
             data['range'].forEach(function (item) {
@@ -211,7 +219,8 @@ function getLoginCountPerDay(url_str, days, identifier, type, linerangeChartId, 
             var dataRange = new google.visualization.arrayToDataTable(fValues);
 
             drawLoginsChart(document.getElementById(linerangeChartId), dataRange, type)
-            if (type == '' || type == 'sp') {
+            }
+            if ((type == '' || type == 'sp') && idpChart != null) {
                 fValues = [];
                 dataValues = "";
                 fValues.push(['sourceIdp', 'sourceIdPEntityId', 'Count'])
@@ -226,8 +235,10 @@ function getLoginCountPerDay(url_str, days, identifier, type, linerangeChartId, 
                 drawIdpsChart(document.getElementById(idpChart), dataIdp, url_str_idp);
                 if (type == 'sp')
                     createDataTable($("#spSpecificDataTableContainer"), data['idps'], "idp")
+                else if (type == '' && spChart==null) //for Identity Providers Details Tab
+                    createDataTable($("#idpDatatableContainer"), data['idps'], "idp")
             }
-            if (type == '' || type == 'idp') {
+            if ((type == '' || type == 'idp') &&  spChart != null) {
                 fValues = [];
                 dataValues = "";
                 fValues.push(['service', 'serviceIdentifier', 'Count'])
@@ -243,9 +254,17 @@ function getLoginCountPerDay(url_str, days, identifier, type, linerangeChartId, 
                 drawSpsChart(document.getElementById(spChart), dataSp, url_str_sp);
                 if (type == 'idp')
                     createDataTable($("#idpSpecificDataTableContainer"), data['sps'], "sp")
+                else if (type == '' && idpChart==null) //for Service Providers Details Tab
+                    createDataTable($("#spDatatableContainer"), data['sps'], "sp")    
             }
 
             $(".overlay").hide();
+        },
+        error: function (x, status, error) {
+            if (x.status == 403) {
+                alert("Sorry, your session has expired. Please login again to continue");
+                location.reload();
+            }
         }
     })
 }
@@ -351,6 +370,12 @@ function goToSpecificProvider(identifier, legend, type) {
 
             createDataTable($("#" + type + "SpecificDataTableContainer"), data[dataCol], dataCol)
             $(".overlay").hide();
+        },
+        error: function (x, status, error) {
+            if (x.status == 403) {
+                alert("Sorry, your session has expired. Please login again to continue");
+                location.reload();
+            }
         }
     });
 }
@@ -389,7 +414,9 @@ function createDataTable(element, data, type, idDataTable = null) {
         '</tbody>' +
         '</table>');
     $("#" + id).DataTable({
-        "order": [1, 'desc']
+        "order": [1, 'desc'],
     });
 
 }
+ 
+ 
