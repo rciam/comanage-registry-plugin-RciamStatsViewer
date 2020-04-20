@@ -7,7 +7,7 @@ function createTile(row, bgClass, value, text, days, type = null) {
         nodata = "hidden";
         more_info = "";
     }
-    
+
     if (type == "idpSpecificData")
         data_type = 'data-type="idp"';
     else if (type == "spSpecificData")
@@ -195,7 +195,7 @@ function drawSpsChart(elementId, data, url_str) {
 }
 
 function getLoginCountPerDay(url_str, days, identifier, type, linerangeChartId, idpChart, spChart) {
-    
+
     $.ajax({
 
         url: url_str,
@@ -206,19 +206,19 @@ function getLoginCountPerDay(url_str, days, identifier, type, linerangeChartId, 
         },
         success: function (data) {
             console.log(data)
-            if(linerangeChartId != null) {
-            fValues = [];
-            fValues.push(['Date', 'Count'])
-            data['range'].forEach(function (item) {
-                var temp = [];
-                temp.push(new Date(item[0]["year"], item[0]["month"] - 1, item[0]["day"]));
-                temp.push(parseInt(item[0]["count"]));
-                fValues.push(temp);
-            })
+            if (linerangeChartId != null) {
+                fValues = [];
+                fValues.push(['Date', 'Count'])
+                data['range'].forEach(function (item) {
+                    var temp = [];
+                    temp.push(new Date(item[0]["year"], item[0]["month"] - 1, item[0]["day"]));
+                    temp.push(parseInt(item[0]["count"]));
+                    fValues.push(temp);
+                })
 
-            var dataRange = new google.visualization.arrayToDataTable(fValues);
+                var dataRange = new google.visualization.arrayToDataTable(fValues);
 
-            drawLoginsChart(document.getElementById(linerangeChartId), dataRange, type)
+                drawLoginsChart(document.getElementById(linerangeChartId), dataRange, type)
             }
             if ((type == '' || type == 'sp') && idpChart != null) {
                 fValues = [];
@@ -235,10 +235,10 @@ function getLoginCountPerDay(url_str, days, identifier, type, linerangeChartId, 
                 drawIdpsChart(document.getElementById(idpChart), dataIdp, url_str_idp);
                 if (type == 'sp')
                     createDataTable($("#spSpecificDataTableContainer"), data['idps'], "idp")
-                else if (type == '' && spChart==null) //for Identity Providers Details Tab
-                    createDataTable($("#idpDatatableContainer"), data['idps'], "idp")
+                else if (type == '' && spChart == null) //for Identity Providers Details Tab
+                    createDataTable($("#idpDatatableContainer"), data['idps'], "idp", "idpDatatable")
             }
-            if ((type == '' || type == 'idp') &&  spChart != null) {
+            if ((type == '' || type == 'idp') && spChart != null) {
                 fValues = [];
                 dataValues = "";
                 fValues.push(['service', 'serviceIdentifier', 'Count'])
@@ -254,24 +254,24 @@ function getLoginCountPerDay(url_str, days, identifier, type, linerangeChartId, 
                 drawSpsChart(document.getElementById(spChart), dataSp, url_str_sp);
                 if (type == 'idp')
                     createDataTable($("#idpSpecificDataTableContainer"), data['sps'], "sp")
-                else if (type == '' && idpChart==null) //for Service Providers Details Tab
-                    createDataTable($("#spDatatableContainer"), data['sps'], "sp")    
+                else if (type == '' && idpChart == null) //for Service Providers Details Tab
+                    createDataTable($("#spDatatableContainer"), data['sps'], "sp", "spDatatable")
             }
 
             $(".overlay").hide();
         },
         error: function (x, status, error) {
             if (x.status == 403) {
-                alert("Sorry, your session has expired. Please login again to continue");
-                location.reload();
+                //alert("Sorry, your session has expired. Please login again to continue");
+                generateSessionExpiredNotification("Sorry, your session has expired. Please login again to continue","error");
+                //location.reload();
             }
         }
     })
 }
 
 function goToSpecificProvider(identifier, legend, type) {
-
-    $(".overlay").show();
+     $(".overlay").show();
     $('html,body').animate({
         scrollTop: 150
     }, 'slow');
@@ -294,12 +294,14 @@ function goToSpecificProvider(identifier, legend, type) {
         url_str = url_str_idp
         obj = { idp: identifier };
         tab_active = 1;
+        root_title = 'Identity Providers';
 
     }
     else {
         url_str = url_str_sp
         obj = { sp: identifier };
         tab_active = 2;
+        root_title = 'Service Providers';
     }
     $.ajax({
         url: url_str,
@@ -319,7 +321,7 @@ function goToSpecificProvider(identifier, legend, type) {
             setHiddenElements($("#" + type + "SpecificData .bg-yellow"), data['tiles'][2])
             $("#" + type + "SpecificData .bg-red h3").text(data['tiles'][3] != null ? data['tiles'][3] : 0);
             setHiddenElements($("#" + type + "SpecificData .bg-red"), data['tiles'][3])
-            $("#" + type + "SpecificData h1").html("<a href='#' onclick='return false;' style='font-size:2.5rem' class='backToTotal'>Identity Providers</a> > " + legend);
+            $("#" + type + "SpecificData h1").html("<a href='#' onclick='return false;' style='font-size:2.5rem' class='backToTotal'>" + root_title + "</a> > " + legend);
             // Hide to left / show from left
             //$("#totalIdpsInfo").toggle("slide", {direction: "left"}, 500);
             $("#total" + type.charAt(0).toUpperCase() + type.slice(1) + "sInfo").hide();
@@ -373,8 +375,9 @@ function goToSpecificProvider(identifier, legend, type) {
         },
         error: function (x, status, error) {
             if (x.status == 403) {
-                alert("Sorry, your session has expired. Please login again to continue");
-                location.reload();
+                //alert("Sorry, your session has expired. Please login again to continue");
+                generateSessionExpiredNotification("Sorry, your session has expired. Please login again to continue","error");
+               
             }
         }
     });
@@ -383,7 +386,9 @@ function goToSpecificProvider(identifier, legend, type) {
 
 
 function createDataTable(element, data, type, idDataTable = null) {
-
+    console.log("Creating Datatable...")
+    console.log(type)
+    console.log(idDataTable)
     if (type == "idp") {
         column1 = 'idpname'
         column2 = 'count'
@@ -418,5 +423,25 @@ function createDataTable(element, data, type, idDataTable = null) {
     });
 
 }
- 
- 
+
+
+    // Generate flash notifications for messages
+    function generateSessionExpiredNotification(text, type) {
+        var n = noty({
+            text: text,
+            type: type,
+            dismissQueue: true,
+            layout: 'topCenter',
+            theme: 'comanage',
+            buttons: [
+                {
+                    addClass: 'general-button red', text: 'Ok', onClick: function($noty)
+                    {
+                          
+                       $noty.close();
+                       location.reload();
+                    }
+                },
+                ]
+        });
+    }
