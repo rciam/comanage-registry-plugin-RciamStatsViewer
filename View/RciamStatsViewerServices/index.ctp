@@ -115,18 +115,16 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
             var spChart = "summarySpChart";
             var idpChart = "summaryIdPChart";
             if ($(this).attr("data-type") == "totalIdps") {
-                
+
                 linerangeChartId = null;
                 var spChart = null;
                 var idpChart = "idpsChartDetail";
-            }
-            else if ($(this).attr("data-type") == "totalSps") {
-                
+            } else if ($(this).attr("data-type") == "totalSps") {
+
                 linerangeChartId = null;
                 var spChart = "spsChartDetail";
                 var idpChart = null;
-            }
-            else if ($(this).attr("data-type") != undefined) {
+            } else if ($(this).attr("data-type") != undefined) {
                 type = $(this).attr("data-type");
                 linerangeChartId = type + "loginsDashboard";
                 identifier = $(this).attr("identifier");
@@ -166,25 +164,23 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
             var spChart = "summarySpChart";
             var idpChart = "summaryIdPChart";
             if ($(this).attr("data-type") == "totalIdps") {
-                
+
                 linerangeChartId = null;
                 var spChart = null;
                 var idpChart = "idpsChartDetail";
-            }
-            else if ($(this).attr("data-type") == "totalSps") {
-                
+            } else if ($(this).attr("data-type") == "totalSps") {
+
                 linerangeChartId = null;
                 var spChart = "spsChartDetail";
                 var idpChart = null;
-            }
-            else if ($(this).attr("data-type") != undefined) {
+            } else if ($(this).attr("data-type") != undefined) {
                 type = $(this).attr("data-type");
                 linerangeChartId = type + "loginsDashboard";
                 identifier = $(this).attr("identifier");
                 spChart = type + "SpecificChart";
                 idpChart = type + "SpecificChart";
             }
-            
+
             $(".overlay").show();
 
             var active = $(this).closest(".small-box");
