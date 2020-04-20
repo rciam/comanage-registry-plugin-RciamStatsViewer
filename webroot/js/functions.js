@@ -105,8 +105,8 @@ function drawLoginsChart(elementId, data, type = '') {
     cur_dashboard.draw(data);
 }
 
-// IdP Chart
-function drawIdpsChart(elementId, data, url_str) {
+// Pie Chart
+function drawPieChart(elementId, data, type) {
 
     data.sort([{
         column: 2,
@@ -140,57 +140,8 @@ function drawIdpsChart(elementId, data, url_str) {
 
             var identifier = data.getValue(selection[0].row, 1);
             var legend = data.getValue(selection[0].row, 0);
-            type = "idp";
             goToSpecificProvider(identifier, legend, type);
         }
-    }
-}
-
-// Sp Chart 
-function drawSpsChart(elementId, data, url_str) {
-
-    data.sort([{
-        column: 2,
-        desc: true
-    }]);
-
-    var view = new google.visualization.DataView(data);
-    view.setColumns([0, 2]);
-
-    var options = {
-        pieSliceText: 'value',
-        width: '100%',
-        height: '350',
-        chartArea: {
-            left: "3%",
-            top: "3%",
-            height: "94%",
-            width: "94%"
-        },
-        sliceVisibilityThreshold: .005,
-        tooltip: { isHtml: true }
-    };
-
-    var chart = new google.visualization.PieChart(elementId);
-
-    chart.draw(view, options);
-
-    google.visualization.events.addListener(chart, 'select', selectHandler);
-
-    function selectHandler() {
-        var selection = chart.getSelection();
-        if (selection.length) {
-
-            var identifier = data.getValue(selection[0].row, 1);
-            var legend = data.getValue(selection[0].row, 0);
-            type = "sp";
-            goToSpecificProvider(identifier, legend, type);
-        }
-        //var ul = $("#tabs").find( "ul" );
-        // $( "<li><a href='#newtab'>New Tab</a></li>" ).appendTo( ul );
-        //$( "<div id='newtab'><p>New Content</p></div>" ).appendTo( tabs );
-        //$("#tabs").tabs( "refresh" );
-
     }
 }
 
@@ -232,7 +183,7 @@ function getLoginCountPerDay(url_str, days, identifier, type, linerangeChartId, 
                     fValues.push(temp);
                 })
                 var dataIdp = new google.visualization.arrayToDataTable(fValues);
-                drawIdpsChart(document.getElementById(idpChart), dataIdp, url_str_idp);
+                drawPieChart(document.getElementById(idpChart), dataIdp, "idp");
                 if (type == 'sp')
                     createDataTable($("#spSpecificDataTableContainer"), data['idps'], "idp")
                 else if (type == '' && spChart == null) //for Identity Providers Details Tab
@@ -251,7 +202,7 @@ function getLoginCountPerDay(url_str, days, identifier, type, linerangeChartId, 
                 })
 
                 var dataSp = new google.visualization.arrayToDataTable(fValues);
-                drawSpsChart(document.getElementById(spChart), dataSp, url_str_sp);
+                drawPieChart(document.getElementById(spChart), dataSp, "sp");
                 if (type == 'idp')
                     createDataTable($("#idpSpecificDataTableContainer"), data['sps'], "sp")
                 else if (type == '' && idpChart == null) //for Service Providers Details Tab
@@ -263,7 +214,7 @@ function getLoginCountPerDay(url_str, days, identifier, type, linerangeChartId, 
         error: function (x, status, error) {
             if (x.status == 403) {
                 //alert("Sorry, your session has expired. Please login again to continue");
-                generateSessionExpiredNotification("Sorry, your session has expired. Please login again to continue","error");
+                generateSessionExpiredNotification("Sorry, your session has expired. Please login again to continue", "error");
                 //location.reload();
             }
         }
@@ -271,7 +222,7 @@ function getLoginCountPerDay(url_str, days, identifier, type, linerangeChartId, 
 }
 
 function goToSpecificProvider(identifier, legend, type) {
-     $(".overlay").show();
+    $(".overlay").show();
     $('html,body').animate({
         scrollTop: 150
     }, 'slow');
@@ -354,9 +305,9 @@ function goToSpecificProvider(identifier, legend, type) {
 
             var dataTable = new google.visualization.arrayToDataTable(fValues);
             if (type == "idp")
-                drawSpsChart(document.getElementById(type + "SpecificChart"), dataTable);
+                drawPieChart(document.getElementById(type + "SpecificChart"), dataTable, "sp");
             else
-                drawIdpsChart(document.getElementById(type + "SpecificChart"), dataTable);
+                drawPieChart(document.getElementById(type + "SpecificChart"), dataTable, "idp");
             ////Draw Line - Range Chart
             fValues = [];
             fValues.push(['Date', 'Count'])
@@ -376,19 +327,15 @@ function goToSpecificProvider(identifier, legend, type) {
         error: function (x, status, error) {
             if (x.status == 403) {
                 //alert("Sorry, your session has expired. Please login again to continue");
-                generateSessionExpiredNotification("Sorry, your session has expired. Please login again to continue","error");
-               
+                generateSessionExpiredNotification("Sorry, your session has expired. Please login again to continue", "error");
+
             }
         }
     });
 }
 
-
-
 function createDataTable(element, data, type, idDataTable = null) {
-    console.log("Creating Datatable...")
-    console.log(type)
-    console.log(idDataTable)
+    
     if (type == "idp") {
         column1 = 'idpname'
         column2 = 'count'
@@ -424,24 +371,22 @@ function createDataTable(element, data, type, idDataTable = null) {
 
 }
 
+// Generate flash notifications for messages
+function generateSessionExpiredNotification(text, type) {
+    var n = noty({
+        text: text,
+        type: type,
+        dismissQueue: true,
+        layout: 'topCenter',
+        theme: 'comanage',
+        buttons: [
+            {
+                addClass: 'general-button red', text: 'Ok', onClick: function ($noty) {
 
-    // Generate flash notifications for messages
-    function generateSessionExpiredNotification(text, type) {
-        var n = noty({
-            text: text,
-            type: type,
-            dismissQueue: true,
-            layout: 'topCenter',
-            theme: 'comanage',
-            buttons: [
-                {
-                    addClass: 'general-button red', text: 'Ok', onClick: function($noty)
-                    {
-                          
-                       $noty.close();
-                       location.reload();
-                    }
-                },
-                ]
-        });
-    }
+                    $noty.close();
+                    location.reload();
+                }
+            },
+        ]
+    });
+}
