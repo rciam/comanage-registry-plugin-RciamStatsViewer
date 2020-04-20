@@ -228,16 +228,16 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
         $(document).on("click", ".tabset_tabs li a, .backToTotal", function() {
             if ($(this).hasClass("backToTotal")) {
                 if ($(this).parent().parent().attr("id") == "idpSpecificData")
-                    drawIdpsChart(document.getElementById('idpsChartDetail'), defaultdataIdp, url_str_idp);
+                    drawPieChart(document.getElementById('idpsChartDetail'), defaultdataIdp, "idp");
                 else
-                    drawSpsChart(document.getElementById('spsChartDetail'), defaultdataSp, url_str_sp);
+                    drawPieChart(document.getElementById('spsChartDetail'), defaultdataSp, "sp");
             }
             if ($(this).attr("data-draw") == "drawIdpsChart") {
-                drawIdpsChart(document.getElementById('idpsChartDetail'), defaultdataIdp, url_str_idp);
+                drawPieChart(document.getElementById('idpsChartDetail'), defaultdataIdp, "idp");
                 $(this).attr("data-draw", "")
 
             } else if ($(this).attr("data-draw") == "drawSpsChart") {
-                drawSpsChart(document.getElementById('spsChartDetail'), defaultdataSp, url_str_sp);
+                drawPieChart(document.getElementById('spsChartDetail'), defaultdataSp, "sp");
                 $(this).attr("data-draw", "")
             }
         })
@@ -266,7 +266,7 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
             }
             ?>
         ]);
-        drawIdpsChart(document.getElementById("summaryIdPChart"), defaultdataIdp, url_str_idp)
+        drawPieChart(document.getElementById("summaryIdPChart"), defaultdataIdp, "idp")
 
         defaultdataSp = google.visualization.arrayToDataTable([
             ['service', 'serviceIdentifier', 'Count'],
@@ -277,7 +277,7 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
             ?>
         ]);
 
-        drawSpsChart(document.getElementById("summarySpChart"), defaultdataSp, url_str_sp)
+        drawPieChart(document.getElementById("summarySpChart"), defaultdataSp, "sp")
     });
 </script>
 
