@@ -62,7 +62,6 @@
             <?php print $this->Form->label('hostname',_txt('pl.rciamstatsviewer.hostname')); ?>
             <span class="required">*</span>
           </div>
-          <div class="field-desc"><?php print _txt('pl.rciamstatsviewer.hostname.desc'); ?></div>
         </div>
         <div class="field-info">
           <?php 
@@ -77,7 +76,6 @@
           <div class="field-title">
             <?php print $this->Form->label('port',_txt('fd.server.port')); ?>
             </div>
-            <div class="field-desc"><?php print _txt('pl.rciamstatsviewer.port.desc'); ?></div>
           </div>
         <div class="field-info">
           <?php 
@@ -92,7 +90,6 @@
           <div class="field-title">
             <?php print ($e ? $this->Form->label('type', _txt('fd.type')) : _txt('fd.type')); ?><span class="required">*</span>
           </div>
-          <div class="field-desc"><?php print _txt('pl.rciamstatsviewer.type.desc'); ?></div>
         </div>
         <div class="field-info">
           <?php
@@ -117,11 +114,10 @@
       </li>
       <li>
         <div class="field-name">
-        <div class="field-title">
-          <?php print $this->Form->label('username',_txt('fd.server.username')); ?>
-          <span class="required">*</span>
+          <div class="field-title">
+            <?php print $this->Form->label('username',_txt('fd.server.username')); ?>
+            <span class="required">*</span>
           </div>
-          <div class="field-desc"><?php print _txt('pl.rciamstatsviewer.username.desc'); ?></div>
         </div>
         <div class="field-info">
           <?php 
@@ -133,11 +129,10 @@
       </li>
       <li>
         <div class="field-name">
-        <div class="field-title">
-          <?php print $this->Form->label('password',_txt('fd.password')); ?>
-          <span class="required">*</span>
+          <div class="field-title">
+            <?php print $this->Form->label('password',_txt('fd.password')); ?>
+            <span class="required">*</span>
           </div>
-          <div class="field-desc"><?php print _txt('pl.rciamstatsviewer.password.desc'); ?></div>
         </div>
         <div class="field-info">
           <?php 
@@ -149,11 +144,10 @@
       </li>
       <li>
         <div class="field-name">
-        <div class="field-title">
-          <?php print $this->Form->label('databas',_txt('pl.rciamstatsviewer.database')); ?>
-          <span class="required">*</span>
+          <div class="field-title">
+            <?php print $this->Form->label('databas',_txt('pl.rciamstatsviewer.database')); ?>
+            <span class="required">*</span>
           </div>
-           <div class="field-desc"><?php print _txt('pl.rciamstatsviewer.database.desc'); ?></div>
         </div>
         <div class="field-info">
           <?php 
@@ -165,10 +159,9 @@
       </li>
       <li>
         <div class="field-name">
-        <div class="field-title">
-          <?php print $this->Form->label('db_prefix',_txt('pl.rciamstatsviewer.db_prefix')); ?>
-        </div>
-        <div class="field-desc"><?php print _txt('pl.rciamstatsviewer.db_prefix.desc'); ?></div>
+          <div class="field-title">
+            <?php print $this->Form->label('db_prefix',_txt('pl.rciamstatsviewer.db_prefix')); ?>
+          </div>
         </div>
         <div class="field-info">
           <?php 
@@ -180,11 +173,10 @@
       </li>
       <li>
         <div class="field-name">
-        <div class="field-title">
-          <?php print $this->Form->label('persistent',_txt('fd.server.persistent')); ?>
-          <span class="required">*</span>
+          <div class="field-title">
+            <?php print $this->Form->label('persistent',_txt('fd.server.persistent')); ?>
+            <span class="required">*</span>
           </div>
-          <div class="field-desc"><?php print _txt('pl.rciamstatsviewer.persistent.desc'); ?></div>
         </div>
         <div class="field-info">
           <?php 
@@ -209,11 +201,10 @@
       </li>
       <li>
         <div class="field-name">
-         <div class="field-title">
-          <?php print $this->Form->label('encoding',_txt('fd.server.encoding')); ?>
-          <span class="required">*</span>
+          <div class="field-title">
+            <?php print $this->Form->label('encoding',_txt('fd.server.encoding')); ?>
+            <span class="required">*</span>
           </div>
-          <div class="field-desc"><?php print _txt('pl.rciamstatsviewer.encoding.desc'); ?></div>
         </div>
         <div class="field-info">
           <?php 
@@ -246,7 +237,7 @@
     <ul id="tabs-stats" class="fields data-list form-list">
       <li>
         <div class="field-name">
-           <div class="field-title">
+          <div class="field-title">
             <?php print _txt('pl.rciamstatsviewer.statisticsTableName'); ?>
             <span class="required">*</span>
           </div>
@@ -266,7 +257,7 @@
             <?php print _txt('pl.rciamstatsviewer.identityProvidersMapTableName'); ?>
             <span class="required">*</span>
           </div>
-                    <div class="field-desc"><?php print _txt('pl.rciamstatsviewer.identityProvidersMapTableName.desc'); ?></div>
+          <div class="field-desc"><?php print _txt('pl.rciamstatsviewer.identityProvidersMapTableName.desc'); ?></div>
         </div>
         <div class="field-info">
           <?php 
