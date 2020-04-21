@@ -145,8 +145,11 @@ function drawPieChart(elementId, data, type) {
     }
 }
 
-function getLoginCountPerDay(url_str, days, identifier, type, linerangeChartId, idpChart, spChart) {
 
+
+function getLoginCountPerDay(url_str, days, identifier, type, linerangeChartId, idpChart, spChart) {
+console.log("type=" + type)
+console.log("identifier=" + identifier)
     $.ajax({
 
         url: url_str,
@@ -213,9 +216,8 @@ function getLoginCountPerDay(url_str, days, identifier, type, linerangeChartId, 
         },
         error: function (x, status, error) {
             if (x.status == 403) {
-                //alert("Sorry, your session has expired. Please login again to continue");
                 generateSessionExpiredNotification("Sorry, your session has expired. Please login again to continue", "error");
-                //location.reload();
+               
             }
         }
     })
@@ -334,6 +336,7 @@ function goToSpecificProvider(identifier, legend, type) {
     });
 }
 
+// Create Datatables
 function createDataTable(element, data, type, idDataTable = null) {
     
     if (type == "idp") {
@@ -366,7 +369,21 @@ function createDataTable(element, data, type, idDataTable = null) {
         '</tbody>' +
         '</table>');
     $("#" + id).DataTable({
+        dom: 'Bfrtip',
         "order": [1, 'desc'],
+        buttons: [
+            {
+                extend: 'collection',
+                text: 'Export DataTable',
+                buttons: [
+                    'copy',
+                    'excel',
+                    'csv',
+                    'pdf',
+                    'print'
+                ]
+            }
+        ]
     });
 
 }

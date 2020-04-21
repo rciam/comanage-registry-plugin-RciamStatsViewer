@@ -43,7 +43,16 @@ print $this->Html->css('/RciamStatsViewer/css/ionicons.min');
 print $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
 print $this->Html->css('/RciamStatsViewer/css/style');
 print $this->Html->css('//cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css');
+print $this->Html->css('https://cdn.datatables.net/buttons/1.6.1/css/buttons.dataTables.min.css');
 print $this->Html->script('//cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js');
+print $this->Html->script('//cdn.datatables.net/buttons/1.6.1/js/dataTables.buttons.min.js');
+print $this->Html->script('//cdn.datatables.net/buttons/1.6.1/js/buttons.flash.min.js');
+print $this->Html->script('//cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js');
+print $this->Html->script('//cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js');
+print $this->Html->script('//cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js');
+print $this->Html->script('//cdn.datatables.net/buttons/1.6.1/js/buttons.html5.min.js');
+print $this->Html->script('//cdn.datatables.net/buttons/1.6.1/js/buttons.print.min.js');
+
 print $this->Html->script("https://www.gstatic.com/charts/loader.js");
 print $this->Html->script('/RciamStatsViewer/js/functions.js')
 ?>
@@ -315,7 +324,7 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
                     </div>
                     <div id="loginsDashboard">
                         <div id="line_div"></div>
-                        <div id="control_div"></div>
+                        <div id="control_div" style="height:50px"></div>
                     </div>
                 </div>
                 <div class="box">
@@ -361,7 +370,7 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
                                 </div>
                                 <div id="idpsloginsDashboard">
                                     <div id="idpline_div"></div>
-                                    <div id="idpcontrol_div"></div>
+                                    <div id="idpcontrol_div"  style="height:50px"></div>
                                 </div>
                             </div>
                         </div>
@@ -438,7 +447,7 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
                                 </div>
                                 <div id="spsloginsDashboard">
                                     <div id="spline_div"></div>
-                                    <div id="spcontrol_div"></div>
+                                    <div id="spcontrol_div"  style="height:50px"></div>
                                 </div>
                             </div>
                         </div>
