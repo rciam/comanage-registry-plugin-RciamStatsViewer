@@ -40,8 +40,6 @@ $cm_rciam_stats_viewer_texts['en_US'] = array(
   // Plugin texts
   'pl.rciamstatsviewer.hostname'        => 'Hostname',
   'pl.rciamstatsviewer.hostname.desc'   => 'Hostname of the external database you want to access',
-  'pl.rciamstatsviewer.stats_type'      => 'Type of Statistics',
-  'pl.rciamstatsviewer.stats_type.desc' => 'Select the type of statistics you want',
   'pl.rciamstatsviewer.database'        => 'Database',
   'pl.rciamstatsviewer.db_settings'     => 'Database Configuration',
   'pl.rciamstatsviewer.db_prefix'       => 'DB Prefix',
@@ -51,6 +49,18 @@ $cm_rciam_stats_viewer_texts['en_US'] = array(
   'pl.rciamstatsviewer.sp.pl'          => 'Service Providers',
   'pl.rciamstatsviewer.idp_details.pl' => 'Identity Providers Details',
   'pl.rciamstatsviewer.sp_details.pl'  => 'Service Providers Details',
+
+  'pl.rciamstatsviewer.statisticsTableName'   => 'Statistics Table Name',
+  'pl.rciamstatsviewer.databserviceProvidersMapTableName'   => 'Service Providers Map Table Name',
+  'pl.rciamstatsviewer.identityProvidersMapTableName'   => 'Identity Providers Map Table Name',
+
+  // TODO: We should remove this as soon as we upgrading to CM v3.3 or newer
+  'fd.server'                          => 'Server',
+  'fd.server.url'                      => 'Server URL',
+  'fd.server.username'                 => 'Username',
+  'fd.server.port'                     => 'Port',
+  'fd.server.persistent'               => 'Persistent',
+  'fd.server.encoding'                 => 'Encoding',
 
 
   //Database
