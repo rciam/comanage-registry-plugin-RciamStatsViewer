@@ -28,6 +28,7 @@ function createTile(row, bgClass, value, text, days, type = null) {
         '</div>');
 }
 
+// This is for Dates with no logins, we have to set 0 for these dates
 function setZerosIfNoDate(dataTable) {
     var datePattern = 'd.M.yy';
     var formatDate = new google.visualization.DateFormat({
@@ -58,7 +59,7 @@ function setZerosIfNoDate(dataTable) {
     return dataTable;
 }
 
-// Hide more-info link for 0 logins
+// Hide more-info link/ show no data for 0 logins
 function setHiddenElements(element, value) {
     console.log(element)
     console.log(value);
@@ -71,8 +72,8 @@ function setHiddenElements(element, value) {
     }
 }
 
-// Line Chart - Range
-function drawLoginsChart(elementId, data, type = '') {
+// Line Chart with Range
+function drawLineChart(elementId, data, type = '') {
 
     if (data.getNumberOfRows() > 0)
         data = setZerosIfNoDate(data);
@@ -172,7 +173,7 @@ console.log("identifier=" + identifier)
 
                 var dataRange = new google.visualization.arrayToDataTable(fValues);
 
-                drawLoginsChart(document.getElementById(linerangeChartId), dataRange, type)
+                drawLineChart(document.getElementById(linerangeChartId), dataRange, type)
             }
             if ((type == '' || type == 'sp') && idpChart != null) {
                 fValues = [];
@@ -321,7 +322,7 @@ function goToSpecificProvider(identifier, legend, type) {
                 fValues.push(temp);
             })
             var dataTable = new google.visualization.arrayToDataTable(fValues);
-            drawLoginsChart(document.getElementById(type + "sloginsDashboard"), dataTable, type)
+            drawLineChart(document.getElementById(type + "sloginsDashboard"), dataTable, type)
 
             createDataTable($("#" + type + "SpecificDataTableContainer"), data[dataCol], dataCol)
             $(".overlay").hide();
