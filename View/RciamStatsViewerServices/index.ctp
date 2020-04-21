@@ -73,10 +73,10 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
         //Initialize Tiles
         var tabsIds = ["dashboardTab", "totalIdpsInfo", "idpSpecificData", "totalSpsInfo", "spSpecificData"];
         tabsIds.forEach(function(item) {
-            createTile($("#" + item + " .row .col-lg-3").eq(0), "bg-aqua", <?php print($vv_totalloginscount[0] ?: 0); ?>, "Todays Logins", 1, item)
-            createTile($("#" + item + " .row .col-lg-3").eq(1), "bg-green", <?php print($vv_totalloginscount[1] ?: 0); ?>, "Last 7 days Logins", 7, item)
-            createTile($("#" + item + " .row .col-lg-3").eq(2), "bg-yellow", <?php print($vv_totalloginscount[2] ?: 0); ?>, "Last 30 days Logins", 30, item)
-            createTile($("#" + item + " .row .col-lg-3").eq(3), "bg-red", <?php print($vv_totalloginscount[3] ?: 0); ?>, "Last Year Logins", 365, item)
+            createTile($("#" + item + " .row .col-lg-3").eq(0), "bg-aqua", <?php print !empty($vv_totalloginscount[0]) ? $vv_totalloginscount[0] : '0'; ?>, "Todays Logins", 1, item)
+            createTile($("#" + item + " .row .col-lg-3").eq(1), "bg-green", <?php print !empty($vv_totalloginscount[1]) ? $vv_totalloginscount[1] : '0'; ?>, "Last 7 days Logins", 7, item)
+            createTile($("#" + item + " .row .col-lg-3").eq(2), "bg-yellow", <?php print !empty($vv_totalloginscount[2]) ? $vv_totalloginscount[2] : '0'; ?>, "Last 30 days Logins", 30, item)
+            createTile($("#" + item + " .row .col-lg-3").eq(3), "bg-red", <?php print !empty($vv_totalloginscount[3]) ? $vv_totalloginscount[3] : '0'; ?>, "Last Year Logins", 365, item)
         });
         //Initialize Datatables
         $("#idpDatatable").DataTable({

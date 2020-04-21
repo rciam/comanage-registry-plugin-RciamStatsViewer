@@ -31,7 +31,7 @@
 
   // Add page title & page buttons
   $params = array();
-  $params['title'] = $title_for_layout;
+  $params['title'] =  _txt('ct.rciam_stats_viewers.1');
   if(!empty($this->plugin)) {
     if(file_exists(APP . "Plugin/" . $this->plugin . "/View/" . $model . "/buttons.inc")) {
       include(APP . "Plugin/" . $this->plugin . "/View/" . $model . "/buttons.inc");

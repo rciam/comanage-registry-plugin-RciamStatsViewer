@@ -138,18 +138,6 @@ class RciamStatsViewer extends AppModel
             'required' => true,
             'allowEmpty' => false
         ),
-        'stats_type' => array(
-            'rule' => array(
-                'inList',
-                array(
-                    RciamStatsViewerStatsTypeEnum::Quantitative,
-                    RciamStatsViewerStatsTypeEnum::Qualitative
-                )
-
-            ),
-            'required' => true,
-            'message' => 'A valid type must be selected'
-        )
     );
 
     /**
