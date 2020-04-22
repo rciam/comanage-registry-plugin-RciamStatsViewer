@@ -1,5 +1,5 @@
 function createTile(row, bgClass, value, text, days, type = null) {
-    data_type = "";
+    data_type = 'data-tab="dashboard"';
     if (value == 0 || value == null) {
         nodata = "";
         more_info = "hidden";
@@ -9,13 +9,13 @@ function createTile(row, bgClass, value, text, days, type = null) {
     }
 
     if (type == "idpSpecificData")
-        data_type = 'data-type="idp"';
+        data_type = 'data-type="idp" data-tab="idp" data-spec="specific"';
     else if (type == "spSpecificData")
-        data_type = 'data-type="sp"';
+        data_type = 'data-type="sp" data-tab="sp" data-spec="specific"';
     else if (type == 'idpsTotalInfo')
-        data_type = 'data-type="totalIdps"';
+        data_type = 'data-tab="idp" data-spec="total"';
     else if (type == 'spsTotalInfo')
-        data_type = 'data-type="totalSps"';
+        data_type = 'data-tab="sp" data-spec="total"';
 
 
     row.append('<div class="small-box ' + bgClass + '">' +
@@ -148,9 +148,9 @@ function drawPieChart(elementId, data, type) {
 
 
 
-function getLoginCountPerDay(url_str, days, identifier, type, linerangeChartId, idpChart, spChart) {
-console.log("type=" + type)
-console.log("identifier=" + identifier)
+function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
+    console.log("type=" + type)
+    console.log("identifier=" + identifier)
     $.ajax({
 
         url: url_str,
@@ -160,8 +160,15 @@ console.log("identifier=" + identifier)
             type: type
         },
         success: function (data) {
-            console.log(data)
-            if (linerangeChartId != null) {
+            //console.log(data)
+
+            element = "#" + tabId + 'Tab'
+            //console.log("tabId "+ tabId)
+            if (specific != false)
+                element += ' .' + specific + 'Data'
+            //console.log(element)
+            //console.log($(element + " .lineChart").length)
+            if ($(element + " .lineChart").length > 0) {
                 fValues = [];
                 fValues.push(['Date', 'Count'])
                 data['range'].forEach(function (item) {
@@ -173,9 +180,10 @@ console.log("identifier=" + identifier)
 
                 var dataRange = new google.visualization.arrayToDataTable(fValues);
 
-                drawLineChart(document.getElementById(linerangeChartId), dataRange, type)
+                drawLineChart($(element + " .lineChart"), dataRange, type)
             }
-            if ((type == '' || type == 'sp') && idpChart != null) {
+            if (tabId == 'dashboard' || (tabId == 'idp' && specific == 'total') || (tabId == 'sp' && specific == 'specific')) {
+                //Summary. Idp Total or SP specific
                 fValues = [];
                 dataValues = "";
                 fValues.push(['sourceIdp', 'sourceIdPEntityId', 'Count'])
@@ -187,13 +195,21 @@ console.log("identifier=" + identifier)
                     fValues.push(temp);
                 })
                 var dataIdp = new google.visualization.arrayToDataTable(fValues);
-                drawPieChart(document.getElementById(idpChart), dataIdp, "idp");
-                if (type == 'sp')
-                    createDataTable($("#spSpecificDataTableContainer"), data['idps'], "idp")
-                else if (type == '' && spChart == null) //for Identity Providers Details Tab
-                    createDataTable($("#idpDatatableContainer"), data['idps'], "idp", "idpDatatable")
+                console.log($(element + " .pieChart").length)
+                if (tabId == 'dashboard') {
+                    pieId = $(element + " .pieChart").eq(0).attr("id");
+                }
+                else {
+                    pieId = $(element + " .pieChart").attr("id");
+                }
+                drawPieChart(document.getElementById(pieId), dataIdp, "idp");
+                if (tabId == 'sp' && specific == 'specific')
+                    createDataTable($(element + " .dataTableContainer"), data['idps'], "idp")
+                else if (tabId == 'idp' && specific == 'total') //for Identity Providers Details Tab
+                    createDataTable($(element + " .dataTableContainer"), data['idps'], "idp", "idpDatatable")
             }
-            if ((type == '' || type == 'idp') && spChart != null) {
+            if (tabId == 'dashboard' || (tabId == 'sp' && specific == 'total') || (tabId == 'idp' && specific == 'specific')) {
+
                 fValues = [];
                 dataValues = "";
                 fValues.push(['service', 'serviceIdentifier', 'Count'])
@@ -206,11 +222,19 @@ console.log("identifier=" + identifier)
                 })
 
                 var dataSp = new google.visualization.arrayToDataTable(fValues);
-                drawPieChart(document.getElementById(spChart), dataSp, "sp");
-                if (type == 'idp')
-                    createDataTable($("#idpSpecificDataTableContainer"), data['sps'], "sp")
-                else if (type == '' && idpChart == null) //for Service Providers Details Tab
-                    createDataTable($("#spDatatableContainer"), data['sps'], "sp", "spDatatable")
+
+                if (tabId == 'dashboard') {
+                    pieId = $(element + " .pieChart").eq(0).attr("id");
+                }
+                else {
+                    pieId = $(element + " .pieChart").attr("id");
+                }
+
+                drawPieChart(document.getElementById(pieId), dataSp, "sp");
+                if (tabId == 'idp' && specific == 'specific')
+                    createDataTable($(element + " .dataTableContainer"), data['sps'], "sp")
+                else if (tabId == 'sp' && specific == 'total') //for Service Providers Details Tab
+                    createDataTable($(element + " .dataTableContainer"), data['sps'], "sp", "spDatatable")
             }
 
             $(".overlay").hide();
@@ -218,7 +242,7 @@ console.log("identifier=" + identifier)
         error: function (x, status, error) {
             if (x.status == 403) {
                 generateSessionExpiredNotification("Sorry, your session has expired. Please login again to continue", "error");
-               
+
             }
         }
     })
@@ -339,7 +363,7 @@ function goToSpecificProvider(identifier, legend, type) {
 
 // Create Datatables
 function createDataTable(element, data, type, idDataTable = null) {
-    
+
     if (type == "idp") {
         column1 = 'idpname'
         column2 = 'count'

@@ -87,6 +87,7 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
             createTile($("#" + item + " .row .col-lg-3").eq(2), "bg-yellow", <?php print !empty($vv_totalloginscount[2]) ? $vv_totalloginscount[2] : '0'; ?>, "Last 30 days Logins", 30, item)
             createTile($("#" + item + " .row .col-lg-3").eq(3), "bg-red", <?php print !empty($vv_totalloginscount[3]) ? $vv_totalloginscount[3] : '0'; ?>, "Last Year Logins", 365, item)
         });
+
         //Initialize Datatables
         $("#idpDatatable").DataTable({
             "order": [1, 'desc']
@@ -94,7 +95,6 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
         $("#spDatatable").DataTable({
             "order": [1, 'desc']
         });
-
         createDataTable($("#idpDatatableContainer"), <?php print json_encode($vv_logincount_per_idp); ?>, "idp", "idpDatatable")
         createDataTable($("#spDatatableContainer"), <?php print json_encode($vv_logincount_per_sp); ?>, "sp", "spDatatable")
 
@@ -103,14 +103,11 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
             $(".overlay").show();
             idSpecData = $(this).parent().parent().attr("id");
 
-            // $( "#"+idSpecData ).toggle("slide", {direction: "right"}, 500);
             $("#" + idSpecData).hide();
 
             if (idSpecData == "spSpecificData") {
-                //$("#totalSpsInfo").toggle("slide", {direction: "left"}, 500);
                 $("#spsTotalInfo").show()
             } else {
-                //$("#totalIdpsInfo").toggle("slide", {direction: "left"}, 500);
                 $("#idpsTotalInfo").show()
             }
             $(".overlay").hide();
@@ -118,28 +115,12 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
 
         // when clear filter is clicked
         $(document).on("click", ".back-to-overall", function() {
-            var type = '';
-            var linerangeChartId = "loginsDashboard";
-            var identifier = null;
-            var spChart = "summarySpChart";
-            var idpChart = "summaryIdPChart";
-            if ($(this).attr("data-type") == "totalIdps") {
 
-                linerangeChartId = null;
-                var spChart = null;
-                var idpChart = "idpsChartDetail";
-            } else if ($(this).attr("data-type") == "totalSps") {
+            type = $(this).attr("data-type") != undefined ? $(this).attr("data-type") : '';
+            tabId = $(this).attr("data-tab");
+            specific = ($(this).attr("data-spec") != undefined ? $(this).attr("data-spec") : false);
+            identifier = ($(this).attr("identifier") != undefined ? $(this).attr("identifier") : null);
 
-                linerangeChartId = null;
-                var spChart = "spsChartDetail";
-                var idpChart = null;
-            } else if ($(this).attr("data-type") != undefined) {
-                type = $(this).attr("data-type");
-                linerangeChartId = type + "loginsDashboard";
-                identifier = $(this).attr("identifier");
-                spChart = type + "SpecificChart";
-                idpChart = type + "SpecificChart";
-            }
             var row = $(this).closest(".row");
             $(".overlay").show();
 
@@ -161,34 +142,17 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
                                 'action' => 'getlogincountperday',
                                 'co'  => $cur_co['Co']['id']
                             )); ?>';
-            getLoginCountPerDay(url_str, days, identifier, type, linerangeChartId, idpChart, spChart);
+            getLoginCountPerDay(url_str, days, identifier, type, tabId, specific);
 
         })
 
         // Get Data For Specific Days 
         $(document).on("click", ".more-info", function() {
-            var type = '';
-            var linerangeChartId = "loginsDashboard";
-            var identifier = null;
-            var spChart = "summarySpChart";
-            var idpChart = "summaryIdPChart";
-            if ($(this).attr("data-type") == "totalIdps") {
 
-                linerangeChartId = null;
-                var spChart = null;
-                var idpChart = "idpsChartDetail";
-            } else if ($(this).attr("data-type") == "totalSps") {
-
-                linerangeChartId = null;
-                var spChart = "spsChartDetail";
-                var idpChart = null;
-            } else if ($(this).attr("data-type") != undefined) {
-                type = $(this).attr("data-type");
-                linerangeChartId = type + "loginsDashboard";
-                identifier = $(this).attr("identifier");
-                spChart = type + "SpecificChart";
-                idpChart = type + "SpecificChart";
-            }
+            type = $(this).attr("data-type") != undefined ? $(this).attr("data-type") : '';
+            tabId = $(this).attr("data-tab");
+            specific = ($(this).attr("data-spec") != undefined ? $(this).attr("data-spec") : false);
+            identifier = ($(this).attr("identifier") != undefined ? $(this).attr("identifier") : null);
 
             $(".overlay").show();
 
@@ -223,9 +187,10 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
                                 'co'  => $cur_co['Co']['id']
                             )); ?>';
 
-            getLoginCountPerDay(url_str, days, identifier, type, linerangeChartId, idpChart, spChart);
+            getLoginCountPerDay(url_str, days, identifier, type, tabId, specific);
         })
 
+        // Datable Links Functionality 
         $(document).on("click", ".datatable-link", function() {
             identifier = $(this).attr("data-identifier")
             type = $(this).attr("data-type")
@@ -233,7 +198,7 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
             goToSpecificProvider(identifier, legend, type);
         })
 
-        // draw IdP/ Sp  Charts when click at the tab or backToTotal for the first time 
+        // Draw IdP/ Sp  Charts when click at the tab or backToTotal for the first time 
         $(document).on("click", ".tabset_tabs li a, .backToTotal", function() {
             if ($(this).hasClass("backToTotal")) {
                 if ($(this).parent().parent().attr("id") == "idpSpecificData")
@@ -295,16 +260,16 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
         <div id="tabs">
             <ul class="tabset_tabs" width="100px">
                 <li><a href='#dashboardTab'><?php print _txt('pl.rciamstatsviewer.summary'); ?></a></li>
-                <li><a data-draw="drawIdpsChart" href='#idpProvidersTab'><?php print _txt('pl.rciamstatsviewer.idp_details.pl'); ?></a></li>
-                <li><a data-draw="drawSpsChart" href='#spProvidersTab'><?php print _txt('pl.rciamstatsviewer.sp_details.pl'); ?></a></li>
+                <li><a data-draw="drawIdpsChart" href='#idpTab'><?php print _txt('pl.rciamstatsviewer.idp_details.pl'); ?></a></li>
+                <li><a data-draw="drawSpsChart" href='#spTab'><?php print _txt('pl.rciamstatsviewer.sp_details.pl'); ?></a></li>
             </ul>
             <?php
             print $this->element('dashboard');
-            
+
             foreach ($vv_tab_settings as $key => $value) {
                 print $this->element($value['ctpName'], $value);
             }
-            
+
             ?>
         </div>
     </div>

@@ -22,7 +22,7 @@
         <div class="box-header with-border">
             <h3 class="box-title">Overall number of logins per day</h3>
         </div>
-        <div id="loginsDashboard">
+        <div class="lineChart" id="loginsDashboard">
             <div id="line_div"></div>
             <div id="control_div" style="height:50px"></div>
         </div>
@@ -31,12 +31,12 @@
         <div class="box-header with-border">
             <h3 class="box-title">Overall number of logins per IdP</h3>
         </div>
-        <div id="summaryIdPChart"></div>
+        <div class="pieChart idpPieChart" id="summaryIdPChart"></div>
     </div>
     <div class="box">
         <div class="box-header with-border">
             <h3 class="box-title">Overall number of logins per SP</h3>
         </div>
-        <div id="summarySpChart"></div>
+        <div class="pieChart spPieChart" id="summarySpChart"></div>
     </div>
 </div>

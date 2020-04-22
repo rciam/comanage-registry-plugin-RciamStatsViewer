@@ -63,7 +63,7 @@ $cm_rciam_stats_viewer_texts['en_US'] = array(
   'pl.rciamstatsviewer.idp.numberoflogins.desc' => 'Click a specific identity provider to view detailed statistics.',
   'pl.rciamstatsviewer.sp.numberoflogins.desc'  => 'Click a specific service provider to view detailed statistics.',
   'pl.rciamstatsviewer.idp.specific'            => 'Service Providers that have been accessed by this Identity Provider',
-  'pl.rciamstatsviewer.sp.specific'             => 'Identiy Providers that have been accessed by this Service Provider',
+  'pl.rciamstatsviewer.sp.specific'             => 'Identity Providers that have been accessed by this Service Provider',
 
   // TODO: We should remove this as soon as we upgrading to CM v3.3 or newer
   'fd.server'                          => 'Server',
