@@ -80,7 +80,7 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
         var tabs = $("#tabs").tabs();
 
         //Initialize Tiles
-        var tabsIds = ["dashboardTab", "totalIdpsInfo", "idpSpecificData", "totalSpsInfo", "spSpecificData"];
+        var tabsIds = ["dashboardTab", "idpsTotalInfo", "idpSpecificData", "spsTotalInfo", "spSpecificData"];
         tabsIds.forEach(function(item) {
             createTile($("#" + item + " .row .col-lg-3").eq(0), "bg-aqua", <?php print !empty($vv_totalloginscount[0]) ? $vv_totalloginscount[0] : '0'; ?>, "Todays Logins", 1, item)
             createTile($("#" + item + " .row .col-lg-3").eq(1), "bg-green", <?php print !empty($vv_totalloginscount[1]) ? $vv_totalloginscount[1] : '0'; ?>, "Last 7 days Logins", 7, item)
@@ -108,10 +108,10 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
 
             if (idSpecData == "spSpecificData") {
                 //$("#totalSpsInfo").toggle("slide", {direction: "left"}, 500);
-                $("#totalSpsInfo").show()
+                $("#spsTotalInfo").show()
             } else {
                 //$("#totalIdpsInfo").toggle("slide", {direction: "left"}, 500);
-                $("#totalIdpsInfo").show()
+                $("#idpsTotalInfo").show()
             }
             $(".overlay").hide();
         })
@@ -265,7 +265,7 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
             }
             ?>
         ]);
-        drawLoginsChart(document.getElementById("loginsDashboard"), data)
+        drawLineChart(document.getElementById("loginsDashboard"), data)
 
         defaultdataIdp = google.visualization.arrayToDataTable([
             ['sourceIdp', 'sourceIdPEntityId', 'Count'],
@@ -298,203 +298,14 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
                 <li><a data-draw="drawIdpsChart" href='#idpProvidersTab'><?php print _txt('pl.rciamstatsviewer.idp_details.pl'); ?></a></li>
                 <li><a data-draw="drawSpsChart" href='#spProvidersTab'><?php print _txt('pl.rciamstatsviewer.sp_details.pl'); ?></a></li>
             </ul>
-            <div id="dashboardTab">
-                <h1><?php print _txt('pl.rciamstatsviewer.summary'); ?></h1>
-                <div class="row">
-                    <div class="col-lg-3 col-xs-6">
-                        <!-- small box -->
-                    </div>
-                    <!-- ./col -->
-                    <div class="col-lg-3 col-xs-6">
-                        <!-- small box -->
-                    </div>
-                    <!-- ./col -->
-                    <div class="col-lg-3 col-xs-6">
-                        <!-- small box -->
-                    </div>
-                    <!-- ./col -->
-                    <div class="col-lg-3 col-xs-6">
-                        <!-- small box -->
-                    </div>
-                    <!-- ./col -->
-                </div>
-                <div class="box">
-                    <div class="box-header with-border">
-                        <h3 class="box-title">Overall number of logins per day</h3>
-                    </div>
-                    <div id="loginsDashboard">
-                        <div id="line_div"></div>
-                        <div id="control_div" style="height:50px"></div>
-                    </div>
-                </div>
-                <div class="box">
-                    <div class="box-header with-border">
-                        <h3 class="box-title">Overall number of logins per IdP</h3>
-                    </div>
-                    <div id="summaryIdPChart"></div>
-                </div>
-                <div class="box">
-                    <div class="box-header with-border">
-                        <h3 class="box-title">Overall number of logins per SP</h3>
-                    </div>
-                    <div id="summarySpChart"></div>
-                </div>
-            </div>
-
-            <div id="idpProvidersTab">
-                <div id="idpSpecificData">
-                    <h1></h1>
-                    <div class="row">
-                        <div class="col-lg-3 col-xs-6">
-                            <!-- small box -->
-                        </div>
-                        <!-- ./col -->
-                        <div class="col-lg-3 col-xs-6">
-                            <!-- small box -->
-                        </div>
-                        <!-- ./col -->
-                        <div class="col-lg-3 col-xs-6">
-                            <!-- small box -->
-                        </div>
-                        <!-- ./col -->
-                        <div class="col-lg-3 col-xs-6">
-                            <!-- small box -->
-                        </div>
-                        <!-- ./col -->
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <div class="box">
-                                <div class="box-header with-border">
-                                    <h3 class="box-title">Overall number of logins from this IdP per day</h3>
-                                </div>
-                                <div id="idpsloginsDashboard">
-                                    <div id="idpline_div"></div>
-                                    <div id="idpcontrol_div"  style="height:50px"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <div class="box">
-                                <div class="box-header with-border">
-                                    <h3 class="box-title">Service Providers that have been accessed by this Identity Provider</h3>
-                                </div>
-                                <div id="idpSpecificChart"></div>
-                            </div>
-                            <div id="idpSpecificDataTableContainer"></div>
-                        </div>
-                    </div>
-                    <!-- ./col -->
-                </div>
-                <div id="totalIdpsInfo">
-                    <h1><?php print _txt('pl.rciamstatsviewer.idp.pl'); ?></h1>
-                    <div class="row">
-                        <div class="col-lg-3 col-xs-6">
-                            <!-- small box -->
-                        </div>
-                        <!-- ./col -->
-                        <div class="col-lg-3 col-xs-6">
-                            <!-- small box -->
-                        </div>
-                        <!-- ./col -->
-                        <div class="col-lg-3 col-xs-6">
-                            <!-- small box -->
-                        </div>
-                        <!-- ./col -->
-                        <div class="col-lg-3 col-xs-6">
-                            <!-- small box -->
-                        </div>
-                        <!-- ./col -->
-                    </div>
-                    <div class="box">
-                        <div class="box-header with-border">
-                            <h3 class="box-title">Number of logins per Identity Provider</h3>
-                            <div>Click a specific identity provider to view detailed statistics.</div>
-                        </div>
-                        <div id="idpsChartDetail"></div>
-                    </div>
-                    <div id="idpDatatableContainer"></div>
-                    <!-- Create Datatable -->
-                </div>
-            </div>
-            <div id="spProvidersTab">
-                <div id="spSpecificData">
-                    <h1></h1>
-                    <div class="row">
-                        <div class="col-lg-3 col-xs-6">
-                            <!-- small box -->
-                        </div>
-                        <!-- ./col -->
-                        <div class="col-lg-3 col-xs-6">
-                            <!-- small box -->
-                        </div>
-                        <!-- ./col -->
-                        <div class="col-lg-3 col-xs-6">
-                            <!-- small box -->
-                        </div>
-                        <!-- ./col -->
-                        <div class="col-lg-3 col-xs-6">
-                            <!-- small box -->
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <div class="box">
-                                <div class="box-header with-border">
-                                    <h3 class="box-title">Overall number of accesses to this Service Provider per day</h3>
-                                </div>
-                                <div id="spsloginsDashboard">
-                                    <div id="spline_div"></div>
-                                    <div id="spcontrol_div"  style="height:50px"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <div class="box">
-                                <div class="box-header with-border">
-                                    <h3 class="box-title">IdP logins for this SP</h3>
-                                </div>
-                                <div id="spSpecificChart"></div>
-                            </div>
-                            <div id="spSpecificDataTableContainer"></div>
-                        </div>
-                    </div>
-                    <!-- ./col -->
-                </div>
-                <div id="totalSpsInfo">
-                    <h1><?php print _txt('pl.rciamstatsviewer.sp.pl'); ?></h1>
-                    <div class="row">
-                        <div class="col-lg-3 col-xs-6">
-                            <!-- small box -->
-                        </div>
-                        <!-- ./col -->
-                        <div class="col-lg-3 col-xs-6">
-                            <!-- small box -->
-                        </div>
-                        <!-- ./col -->
-                        <div class="col-lg-3 col-xs-6">
-                            <!-- small box -->
-                        </div>
-                        <!-- ./col -->
-                        <div class="col-lg-3 col-xs-6">
-                            <!-- small box -->
-                        </div>
-                    </div>
-                    <div class="box">
-                        <div class="box-header with-border">
-                            <h3 class="box-title">Number of logins per Service Provider</h3>
-                            <div>Click a specific service provider to view detailed statistics.</div>
-                        </div>
-                        <div id="spsChartDetail"></div>
-                    </div>
-                    <!-- Create Datatable -->
-                    <div id="spDatatableContainer"></div>
-                </div>
-            </div>
+            <?php
+            print $this->element('dashboard');
+            
+            foreach ($vv_tab_settings as $key => $value) {
+                print $this->element($value['ctpName'], $value);
+            }
+            
+            ?>
         </div>
     </div>
     <div class="overlay">

@@ -70,7 +70,6 @@ class RciamStatsViewer extends AppModel
             Configure::write('Security.useOpenSsl', true);
             $password = base64_encode(Security::encrypt($this->data['RciamStatsViewer']['password'], $key));
             $this->data['RciamStatsViewer']['password'] = $password;
-            var_dump($password);
         }
     }
 

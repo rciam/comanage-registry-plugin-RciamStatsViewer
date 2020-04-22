@@ -12,9 +12,9 @@ function createTile(row, bgClass, value, text, days, type = null) {
         data_type = 'data-type="idp"';
     else if (type == "spSpecificData")
         data_type = 'data-type="sp"';
-    else if (type == 'totalIdpsInfo')
+    else if (type == 'idpsTotalInfo')
         data_type = 'data-type="totalIdps"';
-    else if (type == 'totalSpsInfo')
+    else if (type == 'spsTotalInfo')
         data_type = 'data-type="totalSps"';
 
 
@@ -278,7 +278,7 @@ function goToSpecificProvider(identifier, legend, type) {
             $("#" + type + "SpecificData h1").html("<a href='#' onclick='return false;' style='font-size:2.5rem' class='backToTotal'>" + root_title + "</a> > " + legend);
             // Hide to left / show from left
             //$("#totalIdpsInfo").toggle("slide", {direction: "left"}, 500);
-            $("#total" + type.charAt(0).toUpperCase() + type.slice(1) + "sInfo").hide();
+            $("#" + type + "sTotalInfo").hide();
             // Show from right / hide to right
             //$("#idpSpecificData").toggle("slide", {direction: "right"}, 500);
             $("#" + type + "SpecificData").show();
