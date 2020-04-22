@@ -56,6 +56,15 @@ $cm_rciam_stats_viewer_texts['en_US'] = array(
   'pl.rciamstatsviewer.identityProvidersMapTableName'        => 'Identity Providers Map Table Name',
   'pl.rciamstatsviewer.identityProvidersMapTableName.desc'   => 'Name of the identity providers table at the database',
 
+  'pl.rciamstatsviewer.idp.overall'             => 'Overall number of logins from this IdP per day',
+  'pl.rciamstatsviewer.sp.overall'              => 'Overall number of logins from this SP per day',
+  'pl.rciamstatsviewer.idp.numberoflogins'      => 'Number of logins per Identity Provider',
+  'pl.rciamstatsviewer.sp.numberoflogins'       => 'Number of logins per Service Provider',
+  'pl.rciamstatsviewer.idp.numberoflogins.desc' => 'Click a specific identity provider to view detailed statistics.',
+  'pl.rciamstatsviewer.sp.numberoflogins.desc'  => 'Click a specific service provider to view detailed statistics.',
+  'pl.rciamstatsviewer.idp.specific'            => 'Service Providers that have been accessed by this Identity Provider',
+  'pl.rciamstatsviewer.sp.specific'             => 'Identiy Providers that have been accessed by this Service Provider',
+
   // TODO: We should remove this as soon as we upgrading to CM v3.3 or newer
   'fd.server'                          => 'Server',
   'fd.server.url'                      => 'Server URL',
