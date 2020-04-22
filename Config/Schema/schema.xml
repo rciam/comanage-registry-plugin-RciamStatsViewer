@@ -33,6 +33,9 @@
         <field name="co_id" type="I">
             <constraint>REFERENCES cm_cos(id)</constraint>
         </field>
+        <field name="rciam_stats_viewer_id" type="I">
+            <constraint>REFERENCES cm_rciam_stats_viewers(id)</constraint>
+        </field>
         <field name="type" type="C" size="2" />
         <field name="hostname" type="C" size="128" />
         <field name="port" type="I" />
@@ -46,7 +49,11 @@
         <field name="statisticsTableName" type="C" size="128" />
         <field name="identityProvidersMapTableName" type="C" size="128" />
         <field name="serviceProvidersMapTableName" type="C" size="128" />
+        <!-- Changelog Required fields -->
         <field name="created" type="T" />
+        <field name="revision" type="I" />
+        <field name="deleted" type="L" />
         <field name="modified" type="T" />
+        <field name="actor_identifier" type="C" size="256" />
     </table>
 </schema>
