@@ -12,6 +12,9 @@ class RciamStatsViewer extends AppModel
     // Default display field for cake generated views
     public $displayField = 'name';
 
+    public $actsAs = array('Containable',
+                           'Changelog' => array('priority' => 5));
+
     /**
      * Expose menu items.
      *
