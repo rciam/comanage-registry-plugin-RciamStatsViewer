@@ -6,6 +6,18 @@ class RciamStatsViewersController extends StandardController
   // Class name, used by Cake
   public $name = "RciamStatsViewers";
   
+   /*
+  * By default a new CSRF token is generated for each request, and each token can only be used once.
+  * If a token is used twice, the request will be blackholed. Sometimes, this behaviour is not desirable,
+  * as it can create issues with single page applications.
+  * */
+  public $components = array(
+    'RequestHandler',
+    'Security' => array(
+      'csrfUseOnce' => false,
+      'csrfExpires' => '+10 minutes'
+  ));
+  
   // This controller needs a CO to be set
   public $requires_co = true;
   
@@ -13,7 +25,65 @@ class RciamStatsViewersController extends StandardController
     "RciamStatsViewer.RciamStatsViewer",
     "Co",
   );
+  
+  /**
+   * Test DB connectivity
+   *
+   * @param null $id
+   * @return CakeResponse|null
+   */
+  public function testconnection() {
+    $this->log(__METHOD__ . "::@", LOG_DEBUG);
+    $this->autoRender = false; // We don't render a view in this example
+    $this->request->onlyAllow('ajax'); // No direct access via browser URL
 
+    if( $this->request->is('ajax') && $this->request->is('post') ) {
+      $this->layout=null;
+      $db_config = $this->request->data;
+      $db_config['datasource'] = 'Database/' . RciamStatsViewerDBDriverTypeEnum::type[$db_config['datasource']];
+      try {
+        // Try to connect to the database
+        $conn = $this->RciamStatsViewer->connect($this->cur_co['Co']['id'], $db_config);
+        $this->response->type('json');
+        $status = 200;
+        $response = array(
+          'status' => 'success',
+          'msg'    => _txt('rs.rciam_stats_viewer.db.connect')
+        );
+      } catch (MissingConnectionException $e) {
+        // Currently Postgre driver of Cakephp wraps all errors of PDO into MissingConnectionException
+        $this->log(__METHOD__ . ':: Database Connection failed. Error Message::' . $e->getMessage(), LOG_DEBUG);
+        $status = 503;
+        $response = array(
+          'status' => 'error',
+          'msg'    => _txt('er.rciam_stats_viewer.db.connect', array($e->getMessage()))
+        );
+      }
+  
+      $this->response->statusCode((int)$status);
+      $this->response->body(json_encode($response));
+      $this->response->type('json');
+      return $this->response;
+    }
+  }
+  
+  /**
+   * Callback before other controller methods are invoked or views are rendered.
+   * - postcondition: post request should be of type ajax
+   *
+   * @since  RciamStatsViewer v1.0
+   */
+  public function beforeFilter() {
+    // Since we're overriding, we need to call the parent to run the authz check
+    parent::beforeFilter();
+    // For ajax i accept only json format
+    if( $this->request->is('ajax') ) {
+      $this->RequestHandler->addInputType('json', array('json_decode', true));
+      $this->Security->validatePost = false;
+      $this->Security->enabled = true;
+      $this->Security->csrfCheck = true;
+    }
+  }
     
   /**
    * Edit Rciam Stats Viewer Settings
@@ -21,7 +91,6 @@ class RciamStatsViewersController extends StandardController
    * @param  $id
    * @return void
    */
-  
   public function edit($id=null) {
     //Get data if any for the configuration of RciamStatsViewer  
     $configData = $this->RciamStatsViewer->getConfiguration($this->cur_co['Co']['id']);
@@ -83,7 +152,8 @@ class RciamStatsViewersController extends StandardController
    */
 
   public function parseCOID($data = null) {
-    if($this->action == 'edit') {
+    if($this->action == 'edit'
+       || $this->action == 'testconnection') {
       if(isset($this->request->params['named']['co'])) {
         return $this->request->params['named']['co'];
       }
@@ -110,6 +180,7 @@ class RciamStatsViewersController extends StandardController
   
     // Determine what operations this user can perform
     $p['edit'] = ($roles['cmadmin'] || $roles['coadmin']);
+    $p['testconnection'] = true;
     $this->set('permissions', $p);
     
     return($p[$this->action]);

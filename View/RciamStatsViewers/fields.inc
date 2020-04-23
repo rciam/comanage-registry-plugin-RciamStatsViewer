@@ -46,7 +46,13 @@
   $this->Html->addCrumb($crumbTxt);
   
   print $this->Form->hidden('co_id', array('default' => $cur_co['Co']['id'])) . "\n";
+  // Store the token
+  $token_key = $this->request->params['_Token']['key'];
+
+  // Load CSS and JS Libraries
+  print $this->Html->css('/RciamStatsViewer/css/bootstrap.min');
 ?>
+
 <div id="<?php print $this->action; ?>_rciam_stats" class="explorerContainer">
     <div id="rciamStats" class="personExplorer">
         <ul>
@@ -164,20 +170,6 @@
               <li>
                 <div class="field-name">
                   <div class="field-title">
-                    <?php print $this->Form->label('db_prefix',_txt('fd.server.db_prefix')); ?>
-                  </div>
-                </div>
-                <div class="field-info">
-                  <?php
-                    $value = empty($rciam_stats_viewers['RciamStatsViewer']['db_prefix']) ? ''
-                    : filter_var($rciam_stats_viewers['RciamStatsViewer']['db_prefix'],FILTER_SANITIZE_SPECIAL_CHARS);
-                    print $this->Form->input('db_prefix', array('size' => 50,'value' => $value));
-                  ?>
-                </div>
-              </li>
-              <li>
-                <div class="field-name">
-                  <div class="field-title">
                     <?php print $this->Form->label('persistent',_txt('fd.server.persistent')); ?>
                     <span class="required">*</span>
                   </div>
@@ -230,6 +222,16 @@
 
                   ?>
                 </div>
+              </li>
+              <li class="fields-submit">
+                  <div id="connection-test-lbl" class="field-name"></div>
+                  <div class="field-info">
+                      <button type='button'
+                              id='connection-test-btn'
+                              class='ui-button ui-corner-all ui-widget'>
+                        <?php print _txt('fd.server.test_connection'); ?>
+                      </button>
+                  </div>
               </li>
             </ul>
             </div>
@@ -296,15 +298,15 @@
             <div id="names-container" class="fields">
               <ul class="fields form-list">
                  <?php if($e): ?>
-                          <li class="fields-submit">
-                              <div class="field-name">
-                                  <span class="required"><?php print _txt('fd.req'); ?></span>
-                              </div>
-                              <div class="field-info">
-                                <?php print $this->Form->submit($submit_label); ?>
-                              </div>
-                          </li>
-                      <?php endif; ?>
+                      <li class="fields-submit">
+                          <div class="field-name">
+                              <span class="required"><?php print _txt('fd.req'); ?></span>
+                          </div>
+                          <div class="field-info">
+                            <?php print $this->Form->submit($submit_label); ?>
+                          </div>
+                      </li>
+                  <?php endif; ?>
               </ul>
             </div>
           </li>
@@ -313,18 +315,85 @@
 <!-- This is currently not supported due to a bug in COmanage. --><?php //print $this->element("changelog"); ?>
 </div> <!-- explorerContainer -->
 <script type="text/javascript">
-  <!-- /* JS specific to these fields */ -->
-  $(function() {
-    // Explorer menu toggles
-    $(".fieldGroupName").click(function(event) {
-      event.preventDefault();
-      $(this).next(".fields").slideToggle("fast");
-      // toggle the +/- icon:
-      if ($(this).find(".material-icons").text() == "indeterminate_check_box") {
-        $(this).find(".material-icons").text("add_box");
-      } else {
-        $(this).find(".material-icons").text("indeterminate_check_box");
-      }
-    });   
-  });
+    function responseConstruct(msg, status, testBtn) {
+        color = (status === 'error') ? 'red' : 'green';
+        text = "<span style='color:" + color + "'>" + msg + "</span>";
+        $("#connection-test-lbl").html(text);
+
+        testBtn.toggleClass('ui-state-disabled');
+        testBtn.find('span').remove();
+        testBtn.text("<?php print _txt('fd.server.test_connection'); ?>");
+        testBtn.removeAttr('disabled');
+    }
+    
+    <!-- /* JS specific to these fields */ -->
+    $(function() {
+      // Explorer menu toggles
+      $(".fieldGroupName").click(function(event) {
+          event.preventDefault();
+          $(this).next(".fields").slideToggle("fast");
+          // toggle the +/- icon:
+          if ($(this).find(".material-icons").text() == "indeterminate_check_box") {
+            $(this).find(".material-icons").text("add_box");
+          } else {
+            $(this).find(".material-icons").text("indeterminate_check_box");
+          }
+        });
+      
+      // Update the default value each time i change
+      $('input').on('keyup', function() {
+          this.defaultValue = this.value;
+      });
+      $('select').on('change', function() {
+          $("option[value=" + this.value + "]", this)
+              .attr("selected", true).siblings()
+              .removeAttr("selected");
+      });
+
+      $("#connection-test-btn").click(function(e) {
+          // Toggle the button
+          var testBtn = $(this);
+          var loadingSpan = $("<span class='spinner-border spinner-border-sm' role='status' aria-hidden='true'></span>");
+          testBtn.text('Connecting..');
+          testBtn.toggleClass('ui-state-disabled');
+          testBtn.prepend(loadingSpan);
+          testBtn.attr('disabled', true);
+          
+          model = '<?php print Inflector::singularize($model);?>';
+          // The data we will Post to COmanage. We include the token as well.
+          var db_config = {
+              _Token: {}
+          };
+          db_config.host = $("input[name='data[" + model + "][hostname]']").attr('value');
+          db_config.database = $("input[name='data[" + model + "][databas]']").attr('value');
+          db_config.persistent = $("select[name='data[" + model + "][persistent]'] option:selected").attr('value');
+          db_config.password = $("input[name='data[" + model + "][password]']").attr('value');
+          db_config.datasource = $("select[name='data[" + model + "][type]'] option:selected").attr('value');
+          db_config.encoding = $("select[name='data[" + model + "][encoding]'] option:selected").attr('value');
+          db_config.login = $("input[name='data[" + model + "][username]']").attr('value');
+          db_config._Token.key = '<?php echo $token_key;?>';
+
+          $.ajax({
+              type: "POST",
+              url: '<?php echo $this->Html->url(array(
+                'plugin' => Inflector::singularize(Inflector::tableize($this->plugin)),
+                'controller' => 'rciam_stats_viewers',
+                'action' => 'testconnection',
+                'co'  => $cur_co['Co']['id'])); ?>',
+              beforeSend: function(xhr) {
+                  xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+                  xhr.setRequestHeader('X-CSRF-Token', '<?php echo $token_key;?>');
+              },
+              cache:false,
+              data: db_config,
+              success: function(response) {
+                  responseConstruct(response.msg, response.status, testBtn);
+              },
+              error: function(jqxhr) {
+                  var response = jqxhr.responseJSON;
+                  responseConstruct(response.msg, response.status, testBtn);
+              }
+          }); // ajax
+      }); // Click event
+    });
 </script>

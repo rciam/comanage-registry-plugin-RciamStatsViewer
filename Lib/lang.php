@@ -75,9 +75,11 @@ $cm_rciam_stats_viewer_texts['en_US'] = array(
   'fd.server.port'                     => 'Port',
   'fd.server.persistent'               => 'Persistent',
   'fd.server.encoding'                 => 'Encoding',
-  'fd.server.db_prefix'                => 'Prefix',
+  'fd.server.test_connection'          => 'Test Connection',
 
 
   //Database
-  'rs.rciam_stats_viewer.error' => 'Save failed'
+  'er.rciam_stats_viewer.db.save'    => 'Save failed',
+  'er.rciam_stats_viewer.db.connect' => 'Failed to connect to database: %1$s',
+  'rs.rciam_stats_viewer.db.connect' => 'Database Connect Successful'
 );
