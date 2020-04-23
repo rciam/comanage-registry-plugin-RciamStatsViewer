@@ -20,6 +20,16 @@ class RciamStatsViewerDBDriverTypeEnum
     );
 }
 
+class RciamStatsViewerDBPortsEnum
+{
+  const Mysql     = '3306';
+  const Postgres  = '5432';
+  const port      = array(
+    'MY' => '3306',
+    'PG' => '5432'
+  );
+}
+
 class RciamStatsViewerDBEncodingTypeEnum
 {
     const utf_8      = 'utf8';

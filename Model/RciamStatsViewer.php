@@ -115,11 +115,6 @@ class RciamStatsViewer extends AppModel
             'required' => false,
             'allowEmpty' => true
         ),
-        'db_prefix' => array(
-            'rule' => 'notBlank',
-            'required' => false,
-            'allowEmpty' => true
-        ),
         'persistent' => array(
             'rule' => 'boolean',
             'required' => true,
@@ -145,11 +140,12 @@ class RciamStatsViewer extends AppModel
     /**
      * Establish a connection (via Cake's ConnectionManager) to the specified SQL server.
      * @param $coId
+     * @param array $dbconfig
      * @return DataSource|null
      * @throws InvalidArgumentException   Plugins Configuration is not valid
      * @throws MissingConnectionException The database connection failed
      */
-    public function connect($coId)
+    public function connect($coId, $dbconfig=array())
     {
         // Get our connection information
         $args = array();
@@ -158,30 +154,31 @@ class RciamStatsViewer extends AppModel
 
         $rciamstatsviewer = $this->find('first', $args);
 
-        if (empty($rciamstatsviewer)) {
+        if (empty($rciamstatsviewer)
+            && empty($dbconfig)) {
             throw new InvalidArgumentException(_txt('er.notfound', array(_txt('ct.rciam_stats_viewers.1'), $coId)));
         }
 
-
         Configure::write('Security.useOpenSsl', true);
-        $dbconfig = array(
+        if(empty($dbconfig)) {
+          $dbconfig = array(
             'datasource' => 'Database/' . RciamStatsViewerDBDriverTypeEnum::type[$rciamstatsviewer['RciamStatsViewer']['type']],
             'persistent' => $rciamstatsviewer['RciamStatsViewer']['persistent'],
             'host'       => $rciamstatsviewer['RciamStatsViewer']['hostname'],
             'login'      => $rciamstatsviewer['RciamStatsViewer']['username'],
             'password'   => Security::decrypt(base64_decode($rciamstatsviewer['RciamStatsViewer']['password']), Configure::read('Security.salt')),
             'database'   => $rciamstatsviewer['RciamStatsViewer']['databas'],
-            'prefix'     => $rciamstatsviewer['RciamStatsViewer']['db_prefix'],
             'encoding'   => $rciamstatsviewer['RciamStatsViewer']['encoding'],
-        );
+          );
+        }
 
         // Port Value
         if (!isset($rciamstatsviewer['RciamStatsViewer']['port']) || $rciamstatsviewer['RciamStatsViewer']['port'] === '') {
             if ($dbconfig['datasource'] === 'Database/Mysql') {
-              $dbconfig['port'] = '3306';
+              $dbconfig['port'] = RciamStatsViewerDBPortsEnum::Mysql;
             }
             else if ($dbconfig['datasource'] === 'Database/Postgres') {
-              $dbconfig['port'] = '5432';
+              $dbconfig['port'] = RciamStatsViewerDBPortsEnum::Postgres;
             }
         }
 

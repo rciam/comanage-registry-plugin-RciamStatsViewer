@@ -64,7 +64,7 @@ class RciamStatsViewerServicesController extends StandardController
       
     } catch (MissingConnectionException $e) {
       $this->log(__METHOD__ . ':: Database Connection failed. Error Message::' . $e->getMessage(), LOG_DEBUG);
-      $this->Flash->set(_txt('er.db.connect', array($e->getMessage())), array('key' => 'error'));
+      $this->Flash->set(_txt('er.rciam_stats_viewer.db.connect', array($e->getMessage())), array('key' => 'error'));
 
       // Initialize frontend placeholders
       $this->set('vv_totalloginscount', array());
