@@ -56,6 +56,9 @@ $cm_rciam_stats_viewer_texts['en_US'] = array(
   'pl.rciamstatsviewer.identityProvidersMapTableName'        => 'Identity Providers Map Table Name',
   'pl.rciamstatsviewer.identityProvidersMapTableName.desc'   => 'Name of the identity providers table at the database',
 
+  'pl.rciamstatsviewer.dashboard.overall'       => 'Overall number of logins per day',
+  'pl.rciamstatsviewer.dashboard.idp'           =>'Overall number of logins per IdP',
+  'pl.rciamstatsviewer.dashboard.sp'            =>'Overall number of logins per SP',
   'pl.rciamstatsviewer.idp.overall'             => 'Overall number of logins from this IdP per day',
   'pl.rciamstatsviewer.sp.overall'              => 'Overall number of logins from this SP per day',
   'pl.rciamstatsviewer.idp.numberoflogins'      => 'Number of logins per Identity Provider',

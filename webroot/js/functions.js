@@ -1,5 +1,5 @@
 function createTile(row, bgClass, value, text, days, type = null) {
-    data_type = 'data-tab="dashboard"';
+    
     if (value == 0 || value == null) {
         nodata = "";
         more_info = "hidden";
@@ -8,6 +8,7 @@ function createTile(row, bgClass, value, text, days, type = null) {
         more_info = "";
     }
 
+    data_type = 'data-tab="dashboard"';
     if (type == "idpSpecificData")
         data_type = 'data-type="idp" data-tab="idp" data-spec="specific"';
     else if (type == "spSpecificData")
@@ -146,8 +147,6 @@ function drawPieChart(elementId, data, type) {
     }
 }
 
-
-
 function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
     console.log("type=" + type)
     console.log("identifier=" + identifier)
@@ -160,14 +159,10 @@ function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
             type: type
         },
         success: function (data) {
-            //console.log(data)
-
             element = "#" + tabId + 'Tab'
             //console.log("tabId "+ tabId)
             if (specific != false)
                 element += ' .' + specific + 'Data'
-            //console.log(element)
-            //console.log($(element + " .lineChart").length)
             if ($(element + " .lineChart").length > 0) {
                 fValues = [];
                 fValues.push(['Date', 'Count'])
@@ -179,7 +174,6 @@ function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
                 })
 
                 var dataRange = new google.visualization.arrayToDataTable(fValues);
-
                 drawLineChart($(element + " .lineChart"), dataRange, type)
             }
             if (tabId == 'dashboard' || (tabId == 'idp' && specific == 'total') || (tabId == 'sp' && specific == 'specific')) {
@@ -195,7 +189,7 @@ function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
                     fValues.push(temp);
                 })
                 var dataIdp = new google.visualization.arrayToDataTable(fValues);
-                console.log($(element + " .pieChart").length)
+                
                 if (tabId == 'dashboard') {
                     pieId = $(element + " .pieChart").eq(0).attr("id");
                 }
@@ -300,12 +294,8 @@ function goToSpecificProvider(identifier, legend, type) {
             $("#" + type + "SpecificData .bg-red h3").text(data['tiles'][3] != null ? data['tiles'][3] : 0);
             setHiddenElements($("#" + type + "SpecificData .bg-red"), data['tiles'][3])
             $("#" + type + "SpecificData h1").html("<a href='#' onclick='return false;' style='font-size:2.5rem' class='backToTotal'>" + root_title + "</a> > " + legend);
-            // Hide to left / show from left
-            //$("#totalIdpsInfo").toggle("slide", {direction: "left"}, 500);
             $("#" + type + "sTotalInfo").hide();
-            // Show from right / hide to right
-            //$("#idpSpecificData").toggle("slide", {direction: "right"}, 500);
-            $("#" + type + "SpecificData").show();
+             $("#" + type + "SpecificData").show();
 
             fValues = [];
             dataValues = "";
@@ -432,3 +422,4 @@ function generateSessionExpiredNotification(text, type) {
         ]
     });
 }
+

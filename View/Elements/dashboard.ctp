@@ -20,7 +20,7 @@
     </div>
     <div class="box">
         <div class="box-header with-border">
-            <h3 class="box-title">Overall number of logins per day</h3>
+            <h3 class="box-title"><?php print _txt('pl.rciamstatsviewer.dashboard.overall')?></h3>
         </div>
         <div class="lineChart" id="loginsDashboard">
             <div id="line_div"></div>
@@ -29,13 +29,13 @@
     </div>
     <div class="box">
         <div class="box-header with-border">
-            <h3 class="box-title">Overall number of logins per IdP</h3>
+            <h3 class="box-title"><?php print _txt('pl.rciamstatsviewer.dashboard.idp')?></h3>
         </div>
         <div class="pieChart idpPieChart" id="summaryIdPChart"></div>
     </div>
     <div class="box">
         <div class="box-header with-border">
-            <h3 class="box-title">Overall number of logins per SP</h3>
+            <h3 class="box-title"><?php print _txt('pl.rciamstatsviewer.dashboard.sp')?></h3>
         </div>
         <div class="pieChart spPieChart" id="summarySpChart"></div>
     </div>

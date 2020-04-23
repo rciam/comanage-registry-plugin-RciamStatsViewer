@@ -14,7 +14,15 @@ class RciamStatsViewerServicesController extends StandardController
     'RciamStatsViewer.RciamStatsViewerUtils'
   );
   private $utils;
-
+  
+  /**
+   * __construct
+   *
+   * @param  mixed $request
+   * @param  mixed $response
+   * @return void
+   */
+  
   public function __construct($request, $response)
   {
     parent::__construct($request, $response);
@@ -28,6 +36,7 @@ class RciamStatsViewerServicesController extends StandardController
    *
    * @return void
    */
+  
   public function index()
   {
     try {
@@ -72,6 +81,7 @@ class RciamStatsViewerServicesController extends StandardController
    *
    * @return CakeResponse
    */
+
   public function getlogincountperday()
   {
     $this->log(__METHOD__ . '::@', LOG_DEBUG);
@@ -111,6 +121,7 @@ class RciamStatsViewerServicesController extends StandardController
    *
    * @return CakeResponse
    */
+
   public function getdataforsp()
   {
     $this->log(__METHOD__ . "::@", LOG_DEBUG);
@@ -141,6 +152,7 @@ class RciamStatsViewerServicesController extends StandardController
    *
    * @return CakeResponse
    */
+
   public function getdataforidp()
   {
     $this->log(__METHOD__ . "::@", LOG_DEBUG);
@@ -166,7 +178,13 @@ class RciamStatsViewerServicesController extends StandardController
     $this->response->body(json_encode($vv_logincounts));
     return $this->response;
   }
-
+  
+  /**
+   * beforeRender
+   *
+   * @return void
+   */
+  
   public function beforeRender()
   {
     parent::beforeRender();
@@ -180,6 +198,12 @@ class RciamStatsViewerServicesController extends StandardController
     );
     $this->set('vv_tab_settings', $tab_settings);
   }
+    
+  /**
+   * beforeFilter
+   *
+   * @return void
+   */
   public function beforeFilter()
   {
     // For ajax i accept only json format

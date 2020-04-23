@@ -59,8 +59,6 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
 <script type="text/javascript">
     //Global Variables
     var defaultdataIdp, defaultdataSp;
-    var dashboard;
-    var chartRangeFilter;
     var url_str_idp = '<?php print $this->Html->url(array(
                             'plugin' => Inflector::singularize(Inflector::tableize($this->plugin)),
                             'controller' => 'rciam_stats_viewer_services',
@@ -250,7 +248,6 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
             }
             ?>
         ]);
-
         drawPieChart(document.getElementById("summarySpChart"), defaultdataSp, "sp")
     });
 </script>
