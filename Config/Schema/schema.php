@@ -21,7 +21,6 @@ class AppSchema extends CakeSchema
         'username'                      => array('type' => 'string', 'null' => false, 'length' => 128),
         'password'                      => array('type' => 'string', 'null' => false, 'length' => 256),
         'databas'                       => array('type' => 'string', 'null' => false, 'length' => 128),
-        'db_prefix'                     => array('type' => 'string', 'null' => true,  'length' => 128),
         'persistent'                    => array('type' => 'boolean', 'null' => false),
         'encoding'                      => array('type' => 'string', 'null' => false,  'length' => 128),
         'statisticsTableName'           => array('type' => 'string', 'null' => true,  'length' => 128),
