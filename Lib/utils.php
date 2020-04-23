@@ -286,9 +286,6 @@ class RciamStatsViewerUtils
             );
         }
         $result = $conn->fetchAll($query, $queryParams);
-        //while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        //  echo "['" . str_replace("'", "\'", $row["spname"]) . "', " . $row["count"] . "],";
-        //}
         return $result;
     }
 }
