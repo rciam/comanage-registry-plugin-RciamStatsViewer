@@ -1,5 +1,5 @@
 function createTile(row, bgClass, value, text, days, type = null) {
-    
+
     if (value == 0 || value == null) {
         nodata = "";
         more_info = "hidden";
@@ -128,15 +128,36 @@ function drawPieChart(elementId, data, type) {
             width: "94%"
         },
         sliceVisibilityThreshold: .005,
-        tooltip: { isHtml: true }
+        tooltip: { isHtml: true, trigger: 'selection' }
     };
 
     var chart = new google.visualization.PieChart(elementId);
     chart.draw(view, options);
 
-    google.visualization.events.addListener(chart, 'select', selectHandler);
+    
+    google.visualization.events.addListener(chart, 'onmouseover', function (entry) {
+        chart.setSelection([{ row: entry.row }]);
+        //Add Identifier to tooltip
+        $(".google-visualization-tooltip-item-list li:eq(0)").append('<li> (' + data.getValue(entry.row, 1) + ')</li>').css("font-family", "Arial");
+        
+        widthNew = data.getValue(entry.row, 1).length * 9;
+        heightNew = $(".google-visualization-tooltip").height() + 30;
+        
+        if (widthNew > $(".google-visualization-tooltip").outerWidth())
+            $(".google-visualization-tooltip").css("width", widthNew + "px")
+        $(".google-visualization-tooltip").css("height", heightNew + "px")
+        
+    });
+
+    google.visualization.events.addListener(chart, 'onmouseout', function (entry) {
+        chart.setSelection([]);
+    });
+
+
+    google.visualization.events.addListener(chart, 'click', selectHandler);
 
     function selectHandler() {
+        console.log("select generate")
         var selection = chart.getSelection();
         if (selection.length) {
 
@@ -148,8 +169,7 @@ function drawPieChart(elementId, data, type) {
 }
 
 function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
-    console.log("type=" + type)
-    console.log("identifier=" + identifier)
+    
     $.ajax({
 
         url: url_str,
@@ -160,7 +180,7 @@ function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
         },
         success: function (data) {
             element = "#" + tabId + 'Tab'
-            //console.log("tabId "+ tabId)
+            
             if (specific != false)
                 element += ' .' + specific + 'Data'
             if ($(element + " .lineChart").length > 0) {
@@ -189,8 +209,8 @@ function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
                     fValues.push(temp);
                 })
                 var dataIdp = new google.visualization.arrayToDataTable(fValues);
-                
-                if (tabId == 'dashboard') {
+
+                if (tabId == 'dashboard') { // Dashboard has 2 pieCharts
                     pieId = $(element + " .pieChart").eq(0).attr("id");
                 }
                 else {
@@ -294,8 +314,9 @@ function goToSpecificProvider(identifier, legend, type) {
             $("#" + type + "SpecificData .bg-red h3").text(data['tiles'][3] != null ? data['tiles'][3] : 0);
             setHiddenElements($("#" + type + "SpecificData .bg-red"), data['tiles'][3])
             $("#" + type + "SpecificData h1").html("<a href='#' onclick='return false;' style='font-size:2.5rem' class='backToTotal'>" + root_title + "</a> > " + legend);
+            $("#" + type + "SpecificData > p").html("<b>Identifier:</b> " + identifier);
             $("#" + type + "sTotalInfo").hide();
-             $("#" + type + "SpecificData").show();
+            $("#" + type + "SpecificData").show();
 
             fValues = [];
             dataValues = "";

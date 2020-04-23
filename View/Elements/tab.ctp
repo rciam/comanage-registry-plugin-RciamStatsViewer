@@ -1,6 +1,7 @@
 <div id="<?php print $prefix; ?>Tab">
     <div class="specificData" id="<?php print $prefix; ?>SpecificData">
         <h1></h1>
+        <p class="subTitle"></p>
         <div class="row">
             <div class="col-lg-3 col-xs-6">
                 <!-- small box -->
