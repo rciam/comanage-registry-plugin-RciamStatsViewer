@@ -50,7 +50,7 @@
   $token_key = $this->request->params['_Token']['key'];
 
   // Load CSS and JS Libraries
-  print $this->Html->css('/RciamStatsViewer/css/bootstrap.min');
+  print $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
 ?>
 
 <div id="<?php print $this->action; ?>_rciam_stats" class="explorerContainer">
@@ -358,7 +358,7 @@
       $("#connection-test-btn").click(function(e) {
           // Toggle the button
           var testBtn = $(this);
-          var loadingSpan = $("<span class='spinner-border spinner-border-sm' role='status' aria-hidden='true'></span>");
+          var loadingSpan = $("<i class='fa fa-spinner fa-spin'></i>");
           testBtn.text('Connecting..');
           testBtn.toggleClass('ui-state-disabled');
           testBtn.prepend(loadingSpan);
