@@ -264,9 +264,9 @@ function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
 function goToSpecificProvider(identifier, legend, type) {
 
     $(".overlay").show();
-    // $('html,body').animate({
-    //   scrollTop: 150
-    // }, 'slow');
+     $('html,body').animate({
+       scrollTop: 150
+     }, 'slow');
 
 
     //initialize tiles
