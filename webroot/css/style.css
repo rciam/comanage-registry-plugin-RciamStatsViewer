@@ -18,9 +18,14 @@
         margin-top: 100px;
     }
 
-    table[id$="idpDatatable"],table[id$="Datatable"] {
+    table[id$="Datatable"] {
         padding-top: 15px;
+        
     }
+    table[id$="Datatable"] tbody td{
+        word-break: break-all;
+    }
+
 
     #spSpecificData,
     #idpSpecificData {
@@ -53,5 +58,6 @@
     svg > g:last-child > g:last-child { pointer-events: none }
     div.google-visualization-tooltip { pointer-events: none }
     .google-visualization-tooltip { white-space:nowrap; word-break: break-all;  }
+    
     
     

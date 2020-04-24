@@ -133,19 +133,19 @@ function drawPieChart(elementId, data, type) {
     var chart = new google.visualization.PieChart(elementId);
     chart.draw(view, options);
 
-    
+
     google.visualization.events.addListener(chart, 'onmouseover', function (entry) {
         chart.setSelection([{ row: entry.row }]);
         //Add Identifier to tooltip
         $(".google-visualization-tooltip-item-list li:eq(0)").append('<li> (' + data.getValue(entry.row, 1) + ')</li>').css("font-family", "Arial");
-        
+
         widthNew = data.getValue(entry.row, 1).length * 9;
         heightNew = $(".google-visualization-tooltip").height() + 30;
-        
+
         if (widthNew > $(".google-visualization-tooltip").outerWidth())
             $(".google-visualization-tooltip").css("width", widthNew + "px")
         $(".google-visualization-tooltip").css("height", heightNew + "px")
-        
+
     });
 
     google.visualization.events.addListener(chart, 'onmouseout', function (entry) {
@@ -168,7 +168,7 @@ function drawPieChart(elementId, data, type) {
 }
 
 function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
-    
+
     $.ajax({
 
         url: url_str,
@@ -179,7 +179,7 @@ function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
         },
         success: function (data) {
             element = "#" + tabId + 'Tab'
-            
+
             if (specific != false)
                 element += ' .' + specific + 'Data'
             if ($(element + " .lineChart").length > 0) {
@@ -262,10 +262,11 @@ function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
 }
 
 function goToSpecificProvider(identifier, legend, type) {
+
     $(".overlay").show();
-    $('html,body').animate({
-        scrollTop: 150
-    }, 'slow');
+    // $('html,body').animate({
+    //   scrollTop: 150
+    // }, 'slow');
 
 
     //initialize tiles
@@ -299,7 +300,7 @@ function goToSpecificProvider(identifier, legend, type) {
         data: obj,
         success: function (data) {
             var ref_this = $("ul.tabset_tabs li.ui-state-active");
-            
+
             $('#tabs').tabs({
                 active: tab_active
             }); // first tab selected
@@ -388,7 +389,7 @@ function createDataTable(element, data, type, idDataTable = null) {
     }
     dataAppend = '';
     data.forEach(function (item) {
-        dataAppend += '<tr><td><a class="datatable-link" href="#" onclick="return false;" data-type="' + type + '" data-identifier="' + item[0][data_param] + '">' + item[0][column1] + '</a></td><td>' + item[0][column2] + '</td></tr>';
+        dataAppend += '<tr><td><a class="datatable-link" href="#" onclick="return false;" data-type="' + type + '" data-identifier="' + item[0][data_param] + '">' + item[0][column1] + '</a></td><td>' + item[0][data_param] + '</td><td>' + item[0][column2] + '</td></tr>';
     })
 
     id = (idDataTable != null ? idDataTable : type + 'SpecificDatatable');
@@ -396,6 +397,7 @@ function createDataTable(element, data, type, idDataTable = null) {
         '<thead>' +
         '<tr>' +
         '<th>' + th + '</th>' +
+        '<th>Identifier</th>' +
         '<th>Number of Logins</th>' +
         '</tr>' +
         '</thead>' +
