@@ -90,8 +90,13 @@
                 <div class="field-info">
                   <?php
                     $value = empty($rciam_stats_viewers['RciamStatsViewer']['port']) ? ''
-                    : filter_var($rciam_stats_viewers['RciamStatsViewer']['port'],FILTER_SANITIZE_SPECIAL_CHARS);
-                    print $this->Form->input('port', array('size' => 50,'value' => $value));
+                             : filter_var($rciam_stats_viewers['RciamStatsViewer']['port'],FILTER_SANITIZE_SPECIAL_CHARS);
+                    $options = array(
+                      'value' => $value,
+                      'type'  => 'number',
+                      'min'   => 1024,
+                      'max'   => 65535);
+                    print $this->Form->input('port', $options);
                   ?>
                 </div>
               </li>
