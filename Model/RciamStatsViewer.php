@@ -95,9 +95,20 @@ class RciamStatsViewer extends AppModel
             'allowEmpty' => false
         ),
         'port' => array(
-            'rule' => 'notBlank',
+          'numeric' => array(
+            'rule' => 'naturalNumber',
+            'message' => 'Please provide the number of DB port',
             'required' => false,
-            'allowEmpty' => true
+            'allowEmpty' => true,
+            'last' => 'true',
+          ),
+          'valid_range' => array(
+            'rule' => array('range', 1024, 65535),
+            'message' => 'Port must be between 1024-65535',
+            'required' => false,
+            'allowEmpty' => true,
+            'last' => 'true',
+          ),
         ),
         'username' => array(
             'rule' => 'notBlank',
