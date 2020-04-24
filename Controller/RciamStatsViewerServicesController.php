@@ -39,6 +39,7 @@ class RciamStatsViewerServicesController extends StandardController
   
   public function index()
   {
+    $fail = false;
     try {
       // Try to connect to the database
       $conn = $this->RciamStatsViewer->connect($this->cur_co['Co']['id']);
@@ -65,12 +66,18 @@ class RciamStatsViewerServicesController extends StandardController
     } catch (MissingConnectionException $e) {
       $this->log(__METHOD__ . ':: Database Connection failed. Error Message::' . $e->getMessage(), LOG_DEBUG);
       $this->Flash->set(_txt('er.rciam_stats_viewer.db.connect', array($e->getMessage())), array('key' => 'error'));
-
-      // Initialize frontend placeholders
-      $this->set('vv_totalloginscount', array());
-      $this->set('vv_logincount_per_sp', array());
-      $this->set('vv_logincount_per_idp', array());
-      $this->set('vv_logincount_per_day', array());
+      $fail = true;
+    } catch (RuntimeException $e) {
+      $this->Flash->set(_txt('er.rciam_stats_viewer.db.action', array($e->getMessage())), array('key' => 'error'));
+      $fail = true;
+    } finally {
+      if($fail) {
+        // Initialize frontend placeholders
+        $this->set('vv_totalloginscount', array());
+        $this->set('vv_logincount_per_sp', array());
+        $this->set('vv_logincount_per_idp', array());
+        $this->set('vv_logincount_per_day', array());
+      }
     }
   }
 
