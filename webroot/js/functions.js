@@ -62,8 +62,7 @@ function setZerosIfNoDate(dataTable) {
 
 // Hide more-info link/ show no data for 0 logins
 function setHiddenElements(element, value) {
-    console.log(element)
-    console.log(value);
+
     if (value == null || value == 0) {
         element.find(".more-info").addClass("hidden")
         element.find(".no-data").removeClass("hidden")
@@ -157,7 +156,7 @@ function drawPieChart(elementId, data, type) {
     google.visualization.events.addListener(chart, 'click', selectHandler);
 
     function selectHandler() {
-        console.log("select generate")
+
         var selection = chart.getSelection();
         if (selection.length) {
 
@@ -300,7 +299,7 @@ function goToSpecificProvider(identifier, legend, type) {
         data: obj,
         success: function (data) {
             var ref_this = $("ul.tabset_tabs li.ui-state-active");
-            console.log(ref_this.attr("aria-controls"));
+            
             $('#tabs').tabs({
                 active: tab_active
             }); // first tab selected
