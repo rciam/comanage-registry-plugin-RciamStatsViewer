@@ -95,7 +95,7 @@ class RciamStatsViewerServicesController extends StandardController
     $this->autoRender = false; // We don't render a view
     $this->request->onlyAllow('ajax'); // No direct access via browser URL
     $this->layout = null;
-    $days = $this->request->query['days'];
+    $days = intVal($this->request->query['days']);
     $identifier = (isset($this->request->query['identifier']) ? $this->request->query['identifier'] : null);
     $type = (isset($this->request->query['type']) && $this->request->query['type'] != '' ? $this->request->query['type'] : null);
     $conn = $this->RciamStatsViewer->connect($this->request->params['named']['co']);
