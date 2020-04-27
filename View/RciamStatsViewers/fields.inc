@@ -370,6 +370,7 @@
               _Token: {}
           };
           db_config.host = $("input[name='data[" + model + "][hostname]']").attr('value');
+          db_config.port = $("input[name='data[" + model + "][port]']").attr('value');
           db_config.database = $("input[name='data[" + model + "][databas]']").attr('value');
           db_config.persistent = $("select[name='data[" + model + "][persistent]'] option:selected").attr('value');
           db_config.password = $("input[name='data[" + model + "][password]']").attr('value');
