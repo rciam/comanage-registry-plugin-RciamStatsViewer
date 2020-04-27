@@ -54,7 +54,8 @@ print $this->Html->script('//cdn.datatables.net/buttons/1.6.1/js/buttons.html5.m
 print $this->Html->script('//cdn.datatables.net/buttons/1.6.1/js/buttons.print.min.js');
 
 print $this->Html->script("https://www.gstatic.com/charts/loader.js");
-print $this->Html->script('/RciamStatsViewer/js/functions.js')
+print $this->Html->script('/RciamStatsViewer/js/functions.js');
+print $this->Html->script('/RciamStatsViewer/js/bootstrap.min.js');
 ?>
 <script type="text/javascript">
     //Global Variables
@@ -273,4 +274,6 @@ print $this->Html->script('/RciamStatsViewer/js/functions.js')
     <div class="overlay">
         <i class="fa fa-refresh fa-spin"></i>
     </div>
+
 </div>
+

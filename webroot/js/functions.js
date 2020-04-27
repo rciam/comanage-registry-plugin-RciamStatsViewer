@@ -191,7 +191,7 @@ function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
                     temp.push(parseInt(item[0]["count"]));
                     fValues.push(temp);
                 })
-
+                
                 var dataRange = new google.visualization.arrayToDataTable(fValues);
                 drawLineChart($(element + " .lineChart"), dataRange, type)
             }
