@@ -78,6 +78,11 @@ print $this->Html->script('/RciamStatsViewer/js/bootstrap.min.js');
         //Initialize Tabs
         var tabs = $("#tabs").tabs();
 
+        //Initialize Spinner
+        var coSpinnerTarget = document.getElementById('coSpinner');
+        // coSpinnerOpts are set in js/comanage.js
+        var coSpinner = new Spinner(coSpinnerOpts).spin(coSpinnerTarget);
+
         //Initialize Tiles
         var tabsIds = ["dashboardTab", "idpsTotalInfo", "idpSpecificData", "spsTotalInfo", "spSpecificData"];
         tabsIds.forEach(function(item) {
@@ -272,7 +277,7 @@ print $this->Html->script('/RciamStatsViewer/js/bootstrap.min.js');
         </div>
     </div>
     <div class="overlay">
-        <i class="fa fa-refresh fa-spin"></i>
+        <div id="coSpinner"></div>
     </div>
 
 </div>
