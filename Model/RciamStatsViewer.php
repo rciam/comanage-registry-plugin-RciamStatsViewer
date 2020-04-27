@@ -180,15 +180,15 @@ class RciamStatsViewer extends AppModel
             'password'   => Security::decrypt(base64_decode($rciamstatsviewer['RciamStatsViewer']['password']), Configure::read('Security.salt')),
             'database'   => $rciamstatsviewer['RciamStatsViewer']['databas'],
             'encoding'   => $rciamstatsviewer['RciamStatsViewer']['encoding'],
+            'port'       => $rciamstatsviewer['RciamStatsViewer']['port'],
           );
         }
 
         // Port Value
-        if (!isset($rciamstatsviewer['RciamStatsViewer']['port']) || $rciamstatsviewer['RciamStatsViewer']['port'] === '') {
+        if (empty($dbconfig['port'])) {
             if ($dbconfig['datasource'] === 'Database/Mysql') {
               $dbconfig['port'] = RciamStatsViewerDBPortsEnum::Mysql;
-            }
-            else if ($dbconfig['datasource'] === 'Database/Postgres') {
+            } else if ($dbconfig['datasource'] === 'Database/Postgres') {
               $dbconfig['port'] = RciamStatsViewerDBPortsEnum::Postgres;
             }
         }
