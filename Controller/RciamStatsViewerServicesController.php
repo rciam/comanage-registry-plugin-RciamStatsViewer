@@ -67,6 +67,9 @@ class RciamStatsViewerServicesController extends StandardController
       $this->log(__METHOD__ . ':: Database Connection failed. Error Message::' . $e->getMessage(), LOG_DEBUG);
       $this->Flash->set(_txt('er.rciam_stats_viewer.db.connect', array($e->getMessage())), array('key' => 'error'));
       $fail = true;
+    } catch (InvalidArgumentException $e) {
+      $this->Flash->set(_txt('er.rciam_stats_viewer.db.action', array($e->getMessage())), array('key' => 'error'));
+      $fail = true;
     } catch (RuntimeException $e) {
       $this->Flash->set(_txt('er.rciam_stats_viewer.db.action', array($e->getMessage())), array('key' => 'error'));
       $fail = true;
