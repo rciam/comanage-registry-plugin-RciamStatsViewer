@@ -12,6 +12,7 @@ class RciamStatsViewer extends AppModel
     // Default display field for cake generated views
     public $displayField = 'name';
 
+    // Add behaviors
     public $actsAs = array('Containable',
                            'Changelog' => array('priority' => 5));
 
@@ -63,6 +64,12 @@ class RciamStatsViewer extends AppModel
     }
 
 
+  /**
+   * Actions to take before a save operation is executed.
+   *
+   * @since  COmanage Registry v3.1.0
+   */
+
     public function beforeSave($options = array())
     {
         if (isset($this->data['RciamStatsViewer']['password'])) {
@@ -73,6 +80,7 @@ class RciamStatsViewer extends AppModel
         }
     }
 
+    // Validation rules for table elements
     public $validate = array(
         'co_id' => array(
             'rule' => 'numeric',

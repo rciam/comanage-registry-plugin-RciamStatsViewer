@@ -80,6 +80,7 @@ $cm_rciam_stats_viewer_texts['en_US'] = array(
 
   //Database
   'er.rciam_stats_viewer.db.save'    => 'Save failed',
+  'er.rciam_stats_viewer.db.blackhauled'    => 'Token expired.Please try again.',
   'er.rciam_stats_viewer.db.connect' => 'Failed to connect to database: %1$s',
   'er.rciam_stats_viewer.db.action'  => 'Database action failed [PDO Code:%1$s]',
   'rs.rciam_stats_viewer.db.connect' => 'Database Connect Successful'

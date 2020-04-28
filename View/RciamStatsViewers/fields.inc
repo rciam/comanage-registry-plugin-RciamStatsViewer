@@ -397,7 +397,12 @@
               },
               error: function(jqxhr) {
                   var response = jqxhr.responseJSON;
-                  responseConstruct(response.msg, response.status, testBtn);
+                  if(jqxhr.status === 401) {
+                      // Reload page
+                      location.reload();
+                  } else {
+                      responseConstruct(response.msg, response.status, testBtn);
+                  }
               }
           }); // ajax
       }); // Click event
