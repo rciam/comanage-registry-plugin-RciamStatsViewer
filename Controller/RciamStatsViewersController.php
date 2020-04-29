@@ -1,16 +1,17 @@
 <?php
-App::uses("StandardController","Controller");
+App::uses('StandardController', 'Controller');
 
 class RciamStatsViewersController extends StandardController
 {
   // Class name, used by Cake
-  public $name = "RciamStatsViewers";
+  public $name = 'RciamStatsViewers';
   
-   /*
+   /**
   * By default a new CSRF token is generated for each request, and each token can only be used once.
   * If a token is used twice, the request will be blackholed. Sometimes, this behaviour is not desirable,
   * as it can create issues with single page applications.
-  * */
+   */
+
   public $components = array(
     'RequestHandler',
     'Security' => array(
@@ -21,9 +22,10 @@ class RciamStatsViewersController extends StandardController
   // This controller needs a CO to be set
   public $requires_co = true;
   
+  // When using additional models, we must also specify our own
   public $uses = array(
-    "RciamStatsViewer.RciamStatsViewer",
-    "Co",
+    'RciamStatsViewer.RciamStatsViewer',
+    'Co',
   );
   
   /**
@@ -33,11 +35,15 @@ class RciamStatsViewersController extends StandardController
    * @return CakeResponse|null
    */
   public function testconnection() {
-    $this->log(__METHOD__ . "::@", LOG_DEBUG);
+    $this->log(__METHOD__ . '::@', LOG_DEBUG);
     $this->autoRender = false; // We don't render a view in this example
-    $this->request->onlyAllow('ajax'); // No direct access via browser URL
 
-    if( $this->request->is('ajax') && $this->request->is('post') ) {
+    if( $this->request->is('ajax')
+        && $this->request->is('post') ) {
+      if(!empty($this->response->body())) {
+        $this->Flash->set(_txt('er.rciam_stats_viewer.db.blackhauled'), array('key' => 'error'));
+        return $this->response;
+      }
       $this->layout=null;
       $db_config = $this->request->data;
       $db_config['datasource'] = 'Database/' . RciamStatsViewerDBDriverTypeEnum::type[$db_config['datasource']];
@@ -51,7 +57,7 @@ class RciamStatsViewersController extends StandardController
           'msg'    => _txt('rs.rciam_stats_viewer.db.connect')
         );
       } catch (MissingConnectionException $e) {
-        // Currently Postgre driver of Cakephp wraps all errors of PDO into MissingConnectionException
+        // Currently Postgress driver of Cakephp wraps all errors of PDO into MissingConnectionException
         $this->log(__METHOD__ . ':: Database Connection failed. Error Message::' . $e->getMessage(), LOG_DEBUG);
         $status = 503;
         $response = array(
@@ -74,14 +80,44 @@ class RciamStatsViewersController extends StandardController
    * @since  RciamStatsViewer v1.0
    */
   public function beforeFilter() {
-    // Since we're overriding, we need to call the parent to run the authz check
-    parent::beforeFilter();
     // For ajax i accept only json format
     if( $this->request->is('ajax') ) {
       $this->RequestHandler->addInputType('json', array('json_decode', true));
       $this->Security->validatePost = false;
       $this->Security->enabled = true;
       $this->Security->csrfCheck = true;
+    }
+    $this->Security->blackHoleCallback = 'reloadConfig';
+    // Since we're overriding, we need to call the parent to run the authz check
+    parent::beforeFilter();
+  }
+
+  /**
+   * Ignore blackHoleCallback for Test DB Connection action
+   */
+
+  public function reloadConfig() {
+    // Handle Ajax request
+    if( $this->request->is('ajax') ) {
+      $status = 401;
+      $response = array(
+        'status' => 'error',
+        'msg'    => _txt('er.rciam_stats_viewer.db.blackhauled')
+      );
+      $this->response->statusCode((int)$status);
+      $this->response->body(json_encode($response));
+      $this->response->type('json');
+    } else {
+      // Handle all other requests
+      $location = array(
+        'plugin' => 'rciam_stats_viewer',
+        'controller' => 'rciam_stats_viewers',
+        'action' => 'edit',
+        'co' => 2
+      );
+      $this->log(__METHOD__ . 'location => ' . print_r($location, true), LOG_DEBUG);
+      $this->Flash->set(_txt('er.rciam_stats_viewer.db.blackhauled'), array('key' => 'error'));
+      return $this->redirect($location);
     }
   }
     
@@ -114,12 +150,12 @@ class RciamStatsViewersController extends StandardController
           $this->Flash->set(_txt('rs.saved'), array('key' => 'success'));
         } else {
           $invalidFields = $this->RciamStatsViewer->invalidFields();
-          $this->log(__METHOD__ . "::exception error => ".print_r($invalidFields, true), LOG_DEBUG);
+          $this->log(__METHOD__ . '::exception error => ' . print_r($invalidFields, true), LOG_DEBUG);
           $this->Flash->set(_txt('rs.rciam_stats_viewer.error'), array('key' => 'error'));
         }
       }
       catch(Exception $e) {
-        $this->log(__METHOD__ . "::exception error => ".$e, LOG_DEBUG);
+        $this->log(__METHOD__ . '::exception error => ' .$e, LOG_DEBUG);
         $this->Flash->set($e->getMessage(), array('key' => 'error'));
       }
       // Redirect back to a GET
@@ -172,7 +208,7 @@ class RciamStatsViewersController extends StandardController
    */
 
   function isAuthorized() {
-    $this->log(__METHOD__ . "::@", LOG_DEBUG);
+    $this->log(__METHOD__ . '::@', LOG_DEBUG);
     $roles = $this->Role->calculateCMRoles();
   
     // Construct the permission set for this user, which will also be passed to the view.
