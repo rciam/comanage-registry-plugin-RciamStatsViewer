@@ -94,7 +94,7 @@ print $this->Html->script('/RciamStatsViewer/js/bootstrap.min.js');
         })
 
         // Initialize Tiles
-        var tabsIds = ["dashboardTab", "idpsTotalInfo", "idpSpecificData", "spsTotalInfo", "spSpecificData"];
+        var tabsIds = ["dashboardTab", "idpsTotalInfo", "spsTotalInfo"];
         tabsIds.forEach(function(item) {
             createTile($("#" + item + " .row .col-lg-3").eq(0), "bg-aqua", <?php print !empty($vv_totalloginscount[0]) ? $vv_totalloginscount[0] : '0'; ?>, "Todays Logins", 1, item)
             createTile($("#" + item + " .row .col-lg-3").eq(1), "bg-green", <?php print !empty($vv_totalloginscount[1]) ? $vv_totalloginscount[1] : '0'; ?>, "Last 7 days Logins", 7, item)
@@ -111,21 +111,6 @@ print $this->Html->script('/RciamStatsViewer/js/bootstrap.min.js');
         });
         createDataTable($("#idpDatatableContainer"), <?php print json_encode($vv_logincount_per_idp); ?>, "idp", "idpDatatable")
         createDataTable($("#spDatatableContainer"), <?php print json_encode($vv_logincount_per_sp); ?>, "sp", "spDatatable")
-
-        // Going Back to General Idp/ Sp Details
-        $(document).on("click", ".backToTotal", function() {
-            $(".overlay").show();
-            idSpecData = $(this).parent().parent().attr("id");
-
-            $("#" + idSpecData).hide();
-
-            if (idSpecData == "spSpecificData") {
-                $("#spsTotalInfo").show()
-            } else {
-                $("#idpsTotalInfo").show()
-            }
-            $(".overlay").hide();
-        })
 
         // when clear filter is clicked
         $(document).on("click", ".back-to-overall", function() {
