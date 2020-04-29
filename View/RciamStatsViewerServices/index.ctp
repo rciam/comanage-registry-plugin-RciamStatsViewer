@@ -60,6 +60,13 @@ print $this->Html->script('/RciamStatsViewer/js/bootstrap.min.js');
 <script type="text/javascript">
     //Global Variables
     var defaultdataIdp, defaultdataSp;
+    var overallText = [];
+    var specificText = [];
+    overallText['idp'] = '<?php print _txt('pl.rciamstatsviewer.idp.overall'); ?>'
+    overallText['sp'] = '<?php print _txt('pl.rciamstatsviewer.sp.overall'); ?>'
+    specificText['idp'] = '<?php print _txt('pl.rciamstatsviewer.idp.specific'); ?>'
+    specificText['sp'] = '<?php print _txt('pl.rciamstatsviewer.sp.specific'); ?>'
+
     var url_str_idp = '<?php print $this->Html->url(array(
                             'plugin' => Inflector::singularize(Inflector::tableize($this->plugin)),
                             'controller' => 'rciam_stats_viewer_services',
@@ -75,15 +82,18 @@ print $this->Html->script('/RciamStatsViewer/js/bootstrap.min.js');
 
     $(function() {
 
-        //Initialize Tabs
+        // Initialize Tabs
         var tabs = $("#tabs").tabs();
 
-        //Initialize Spinner
-        var coSpinnerTarget = document.getElementById('coSpinner');
-        // coSpinnerOpts are set in js/comanage.js
-        var coSpinner = new Spinner(coSpinnerOpts).spin(coSpinnerTarget);
+        // Initialize Modal
+        createModal();
 
-        //Initialize Tiles
+        // Initialize Spinners
+        $("div[id^=coSpinner]").each(function() {
+            new Spinner(coSpinnerOpts).spin(document.getElementById($(this).attr("id")));
+        })
+
+        // Initialize Tiles
         var tabsIds = ["dashboardTab", "idpsTotalInfo", "idpSpecificData", "spsTotalInfo", "spSpecificData"];
         tabsIds.forEach(function(item) {
             createTile($("#" + item + " .row .col-lg-3").eq(0), "bg-aqua", <?php print !empty($vv_totalloginscount[0]) ? $vv_totalloginscount[0] : '0'; ?>, "Todays Logins", 1, item)
@@ -92,7 +102,7 @@ print $this->Html->script('/RciamStatsViewer/js/bootstrap.min.js');
             createTile($("#" + item + " .row .col-lg-3").eq(3), "bg-red", <?php print !empty($vv_totalloginscount[3]) ? $vv_totalloginscount[3] : '0'; ?>, "Last Year Logins", 365, item)
         });
 
-        //Initialize Datatables
+        // Initialize Datatables
         $("#idpDatatable").DataTable({
             "order": [1, 'desc']
         });
@@ -203,13 +213,8 @@ print $this->Html->script('/RciamStatsViewer/js/bootstrap.min.js');
         })
 
         // Draw IdP/ Sp  Charts when click at the tab or backToTotal for the first time 
-        $(document).on("click", ".tabset_tabs li a, .backToTotal", function() {
-            if ($(this).hasClass("backToTotal")) {
-                if ($(this).parent().parent().attr("id") == "idpSpecificData")
-                    drawPieChart(document.getElementById('idpsChartDetail'), defaultdataIdp, "idp");
-                else
-                    drawPieChart(document.getElementById('spsChartDetail'), defaultdataSp, "sp");
-            }
+        $(document).on("click", ".tabset_tabs li a", function() {
+            
             if ($(this).attr("data-draw") == "drawIdpsChart") {
                 drawPieChart(document.getElementById('idpsChartDetail'), defaultdataIdp, "idp");
                 $(this).attr("data-draw", "")
@@ -281,4 +286,3 @@ print $this->Html->script('/RciamStatsViewer/js/bootstrap.min.js');
     </div>
 
 </div>
-

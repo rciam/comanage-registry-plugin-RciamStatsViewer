@@ -187,76 +187,45 @@ class RciamStatsViewerUtils
      * @param $conn
      * @param $days
      * @param $idpIdentifier
+     * @param $type
      * @return mixed
      */
-    public function getLoginCountPerDayForIdp($conn, $days, $idpIdentifier)
+    public function getLoginCountPerDayForProvider($conn, $days, $identifier, $providerType)
     {
         $dbDriver = $this->configData['RciamStatsViewer']['type'];
         $queryParams = array();  // Initialize
         assert($conn !== NULL);
         $table_name =  $this->configData['RciamStatsViewer']['statisticsTableName'];
-
+        if($providerType == "idp"){
+            $column = "sourceidp";
+        }
+        else if($providerType == "sp"){
+            $column = "service";
+        }
         if ($days === 0) {    // 0 = all time
             if ($dbDriver === 'PG') {
-                $sql = "SELECT year, month, day, SUM(count) AS count FROM $table_name WHERE sourceidp=? GROUP BY year, month,day ORDER BY year DESC,month DESC,day DESC";
+                $sql = "SELECT year, month, day, SUM(count) AS count FROM $table_name WHERE $column=? GROUP BY year, month,day ORDER BY year DESC,month DESC,day DESC";
             } else {
-                $sql = "SELECT year, month, day, SUM(count) AS count FROM $table_name WHERE sourceidp=? GROUP BY year DESC,month DESC,day DESC";
+                $sql = "SELECT year, month, day, SUM(count) AS count FROM $table_name WHERE $column=? GROUP BY year DESC,month DESC,day DESC";
             }
             $queryParams = array(
-                $idpIdentifier
+                $identifier
             );
         } else {
             if ($dbDriver === 'PG') {
-                $sql = "SELECT year, month, day, SUM(count) AS count FROM $table_name WHERE sourceidp=? AND CAST(CONCAT(year,'-',LPAD(CAST(month AS varchar),2,'0'),'-',LPAD(CAST(day AS varchar),2,'0')) AS date) > current_date - INTERVAL '1 days' * ? GROUP BY year, month, day ORDER BY year DESC,month DESC,day DESC";
+                $sql = "SELECT year, month, day, SUM(count) AS count FROM $table_name WHERE $column=? AND CAST(CONCAT(year,'-',LPAD(CAST(month AS varchar),2,'0'),'-',LPAD(CAST(day AS varchar),2,'0')) AS date) > current_date - INTERVAL '1 days' * ? GROUP BY year, month, day ORDER BY year DESC,month DESC,day DESC";
             } else {
-                $sql = "SELECT year, month, day, SUM(count) AS count FROM $table_name WHERE sourceidp=? AND CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE() GROUP BY year DESC,month DESC,day DESC";
+                $sql = "SELECT year, month, day, SUM(count) AS count FROM $table_name WHERE $column=? AND CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE() GROUP BY year DESC,month DESC,day DESC";
             }
             $queryParams = array(
-                $idpIdentifier,
+                $identifier,
                 $days
             );
         }
 
         return $this->execQuery($conn, $sql, $queryParams);
     }
-
-    /**
-     * @param $conn
-     * @param $days
-     * @param $spIdentifier
-     * @return mixed
-     */
-    public function getLoginCountPerDayForSp($conn, $days, $spIdentifier)
-    {
-        $dbDriver = $this->configData['RciamStatsViewer']['type'];
-        $queryParams = array();  // Initialize
-        assert($conn !== NULL);
-        $table_name =  $this->configData['RciamStatsViewer']['statisticsTableName'];
-
-        if ($days === 0) {    // 0 = all time
-            if ($dbDriver === 'PG') {
-                $sql = "SELECT year, month, day, SUM(count) AS count FROM $table_name WHERE service=? GROUP BY year, month,day ORDER BY year DESC,month DESC,day DESC";
-            } else {
-                $sql = "SELECT year, month, day, SUM(count) AS count FROM $table_name WHERE service=? GROUP BY year DESC,month DESC,day DESC";
-            }
-            $queryParams = array(
-                $spIdentifier
-            );
-        } else {
-            if ($dbDriver === 'PG') {
-                $sql = "SELECT year, month, day, SUM(count) AS count FROM $table_name WHERE service=? AND CAST(CONCAT(year,'-',LPAD(CAST(month AS varchar),2,'0'),'-',LPAD(CAST(day AS varchar),2,'0')) AS date) > current_date - INTERVAL '1 days' * ? GROUP BY year, month, day ORDER BY year DESC,month DESC,day DESC";
-            } else {
-                $sql = "SELECT year, month, day, SUM(count) AS count FROM $table_name WHERE service=? AND CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE() GROUP BY year DESC,month DESC,day DESC";
-            }
-            $queryParams = array(
-                $spIdentifier,
-                $days
-            );
-        }
-
-        return $this->execQuery($conn, $sql, $queryParams);
-    }
-
+    
     /**
      * @param $conn
      * @param $days
