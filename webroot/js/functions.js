@@ -7,7 +7,7 @@ function createTile(row, bgClass, value, text, days, type = null) {
         nodata = "hidden";
         more_info = "";
     }
-
+    
     data_type = 'data-tab="dashboard"';
     if (type == "idpSpecificData")
         data_type = 'data-type="idp" data-tab="idp" data-spec="specific"';
@@ -19,7 +19,7 @@ function createTile(row, bgClass, value, text, days, type = null) {
         data_type = 'data-tab="sp" data-spec="total"';
 
 
-    row.append('<div class="small-box ' + bgClass + '">' +
+    row.html('<div class="small-box ' + bgClass + '">' +
         '<div class="inner">' +
         '<h3>' + (value != 0 ? value : 0) + '</h3>' +
         '<p>' + text + '</p>' +
@@ -27,6 +27,74 @@ function createTile(row, bgClass, value, text, days, type = null) {
         '<div class="small-box-footer no-data ' + nodata + '">No data</div>' +
         '<a href="#" onclick="return false" ' + data_type + ' data-days="' + days + '" class="more-info small-box-footer ' + more_info + '">More info <i class="fa fa-arrow-circle-right"></i></a>' +
         '</div>');
+}
+
+// Create Modal
+function createModal(){
+    $("body").append('<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">'+
+        '<div class="modal-dialog modal-xl" role="document">'+
+            '<div class="modal-content  overlay-wrapper">'+
+            '<div class="modal-header">'+
+                '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+
+                '<h1 class="modal-title" id="myModalLabel">Modal title</h1>'+
+            '</div>'+
+            '<div class="modal-body">'+
+                '<div class="specificData" id="specificData">'+         
+                    '<p class="subTitle"></p>'+
+                    '<div class="row">'+
+                        '<div class="col-lg-3 col-xs-6">'+
+                            '<!-- small box -->'+
+                    '</div>'+
+                        '<!-- ./col -->'+
+                    '<div class="col-lg-3 col-xs-6">'+
+                            '<!-- small box -->'+
+                    '</div>'+
+                        '<!-- ./col -->'+
+                    '<div class="col-lg-3 col-xs-6">'+
+                            '<!-- small box -->'+
+                    '</div>'+
+                        '<!-- ./col -->'+
+                    '<div class="col-lg-3 col-xs-6">'+
+                            '<!-- small box -->'+
+                    '</div>'+
+                        '<!-- ./col -->'+
+                    '</div>'+
+                        '<div class="row">'+
+                            '<div class="col-lg-12">'+
+                                '<div class="box">'+
+                                    '<div class="box-header with-border">'+
+                                        '<h3 class="box-title"></h3>'+
+                                    '</div>'+
+                                    '<div class="lineChart" id="loginLineChart">'+
+                                        '<div id="modalline_div"></div>'+
+                                        '<div id="modalcontrol_div" style="height:50px"></div>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>'+
+                        '<div class="row">'+
+                            '<div class="col-lg-12">'+
+                                '<div class="box">'+
+                                    '<div class="box-header with-border">'+
+                                        '<h3 class="box-title"></h3>'+
+                                    '</div>'+
+                                    '<div class="pieChart" id="specificChart"></div>'+
+                                '</div>'+
+                                '<div class="dataTableContainer" id="specificDataTableContainer"></div>'+
+                            '</div>'+
+                        '</div>'+
+                        '<!-- ./col -->'+
+                '</div>'+
+            '</div>'+
+            '<div class="modal-footer">'+
+            '<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>'+
+            '</div>'+
+            '<div class="overlay">'+
+                '<div id="coSpinnerModal"></div>'+
+            '</div>'+
+        '</div>'+
+    '</div>'+
+'</div>');
 }
 
 // This is for Dates with no logins, we have to set 0 for these dates
@@ -170,7 +238,6 @@ function drawPieChart(elementId, data, type) {
 function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
 
     $.ajax({
-
         url: url_str,
         data: {
             days: days,
@@ -180,8 +247,13 @@ function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
         success: function (data) {
             element = "#" + tabId + 'Tab'
 
-            if (specific != false)
+            if (specific == "specific"){
+                element = '.modal-body .specificData'
+                type = 'modal'
+            }
+            else  if (specific != false)
                 element += ' .' + specific + 'Data'
+
             if ($(element + " .lineChart").length > 0) {
                 fValues = [];
                 fValues.push(['Date', 'Count'])
@@ -261,16 +333,25 @@ function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
     })
 }
 
+// Modal Functionality
 function goToSpecificProvider(identifier, legend, type) {
-
-    $(".overlay").show();
-     $('html,body').animate({
-       scrollTop: 150
+    $("#myModal").modal();
+    
+    $(".modal .overlay").show();
+     $('#myModal').animate({
+       scrollTop: 0
      }, 'slow');
-
+     
+    item="specificData";
 
     //initialize tiles
-    $("#" + type + "SpecificData .more-info").each(function () {
+    createTile($("#" + item + " .row .col-lg-3").eq(0), "bg-aqua", "0", "Todays Logins", 1, type+"SpecificData")
+    createTile($("#" + item + " .row .col-lg-3").eq(1), "bg-green", "0", "Last 7 days Logins", 7, type+"SpecificData")
+    createTile($("#" + item + " .row .col-lg-3").eq(2), "bg-yellow", "0", "Last 30 days Logins", 30, type+"SpecificData")
+    createTile($("#" + item + " .row .col-lg-3").eq(3), "bg-red", "0", "Last Year Logins", 365, type+"SpecificData")
+
+    
+    $("#specificData .more-info").each(function () {
         $(this).attr("identifier", identifier);
         $(this).parent().removeClass("inactive");
 
@@ -285,39 +366,27 @@ function goToSpecificProvider(identifier, legend, type) {
     if (type == "idp") {
         url_str = url_str_idp
         obj = { idp: identifier };
-        tab_active = 1;
-        root_title = 'Identity Providers';
-
     }
     else {
         url_str = url_str_sp
         obj = { sp: identifier };
-        tab_active = 2;
-        root_title = 'Service Providers';
     }
     $.ajax({
         url: url_str,
         data: obj,
         success: function (data) {
-            var ref_this = $("ul.tabset_tabs li.ui-state-active");
-
-            $('#tabs').tabs({
-                active: tab_active
-            }); // first tab selected
-
-            $("#" + type + "SpecificData .bg-aqua h3").text(data['tiles'][0] != null ? data['tiles'][0] : 0);
-            setHiddenElements($("#" + type + "SpecificData .bg-aqua"), data['tiles'][0])
-            $("#" + type + "SpecificData .bg-green h3").text(data['tiles'][1] != null ? data['tiles'][1] : 0);
-            setHiddenElements($("#" + type + "SpecificData .bg-green"), data['tiles'][1])
-            $("#" + type + "SpecificData .bg-yellow h3").text(data['tiles'][2] != null ? data['tiles'][2] : 0);
-            setHiddenElements($("#" + type + "SpecificData .bg-yellow"), data['tiles'][2])
-            $("#" + type + "SpecificData .bg-red h3").text(data['tiles'][3] != null ? data['tiles'][3] : 0);
-            setHiddenElements($("#" + type + "SpecificData .bg-red"), data['tiles'][3])
-            $("#" + type + "SpecificData h1").html("<a href='#' onclick='return false;' style='font-size:2.5rem' class='backToTotal'>" + root_title + "</a> > " + legend);
-            $("#" + type + "SpecificData > p").html("<b>Identifier:</b> " + identifier);
-            $("#" + type + "sTotalInfo").hide();
-            $("#" + type + "SpecificData").show();
-
+        
+            $(".modal-body .specificData .bg-aqua h3").text(data['tiles'][0] != null ? data['tiles'][0] : 0);
+            setHiddenElements($(".modal-body .specificData .bg-aqua"), data['tiles'][0])
+            $(".modal-body .specificData .bg-green h3").text(data['tiles'][1] != null ? data['tiles'][1] : 0);
+            setHiddenElements($(".modal-body .specificData .bg-green"), data['tiles'][1])
+            $(".modal-body .specificData .bg-yellow h3").text(data['tiles'][2] != null ? data['tiles'][2] : 0);
+            setHiddenElements($(".modal-body .specificData .bg-yellow"), data['tiles'][2])
+            $(".modal-body .specificData .bg-red h3").text(data['tiles'][3] != null ? data['tiles'][3] : 0);
+            setHiddenElements($(".modal-body .specificData .bg-red"), data['tiles'][3])
+            $("h1.modal-title").html(legend);
+            $(".modal-body .specificData > p").html("<b>Identifier:</b> " + identifier);
+        
             fValues = [];
             dataValues = "";
             if (type == 'idp') {
@@ -340,13 +409,14 @@ function goToSpecificProvider(identifier, legend, type) {
                 fValues.push(temp);
             })
 
-
             var dataTable = new google.visualization.arrayToDataTable(fValues);
+            $("#specificChart").closest(".box").find(".box-title").html(specificText[type])
             if (type == "idp")
-                drawPieChart(document.getElementById(type + "SpecificChart"), dataTable, "sp");
+                drawPieChart(document.getElementById("specificChart"), dataTable, "sp");
             else
-                drawPieChart(document.getElementById(type + "SpecificChart"), dataTable, "idp");
-            ////Draw Line - Range Chart
+                drawPieChart(document.getElementById("specificChart"), dataTable, "idp");
+            
+            //Draw Line - Range Chart
             fValues = [];
             fValues.push(['Date', 'Count'])
 
@@ -357,14 +427,16 @@ function goToSpecificProvider(identifier, legend, type) {
                 fValues.push(temp);
             })
             var dataTable = new google.visualization.arrayToDataTable(fValues);
-            drawLineChart(document.getElementById(type + "sloginsDashboard"), dataTable, type)
+            
+            $("#loginLineChart").closest(".box").find(".box-title").html(overallText[type])
+            drawLineChart(document.getElementById("loginLineChart"), dataTable, 'modal')
 
-            createDataTable($("#" + type + "SpecificDataTableContainer"), data[dataCol], dataCol)
-            $(".overlay").hide();
+            createDataTable($("#specificDataTableContainer"), data[dataCol], dataCol)
+            $(".modal .overlay").hide();
+         
         },
         error: function (x, status, error) {
             if (x.status == 403) {
-                //alert("Sorry, your session has expired. Please login again to continue");
                 generateSessionExpiredNotification("Sorry, your session has expired. Please login again to continue", "error");
 
             }
@@ -379,13 +451,13 @@ function createDataTable(element, data, type, idDataTable = null) {
         column1 = 'idpname'
         column2 = 'count'
         data_param = 'sourceidp'
-        th = 'Identity Providers'
+        th = 'Identity Provider'
     }
     else {
         column1 = 'spname'
         column2 = 'count'
         data_param = 'service'
-        th = 'Service Providers'
+        th = 'Service Provider'
     }
     dataAppend = '';
     data.forEach(function (item) {
@@ -396,8 +468,8 @@ function createDataTable(element, data, type, idDataTable = null) {
     element.html('<table id="' + id + '" class="stripe row-border hover">' +
         '<thead>' +
         '<tr>' +
-        '<th>' + th + '</th>' +
-        '<th>Identifier</th>' +
+        '<th>' + th + ' Name</th>' +
+        '<th>' + th + ' Identifier</th>' +
         '<th>Number of Logins</th>' +
         '</tr>' +
         '</thead>' +
@@ -444,4 +516,3 @@ function generateSessionExpiredNotification(text, type) {
         ]
     });
 }
-

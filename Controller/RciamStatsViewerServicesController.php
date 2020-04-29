@@ -111,11 +111,11 @@ class RciamStatsViewerServicesController extends StandardController
       $vv_logincount_per_day['idps'] = $vv_logincount_idp_per_day;
       $vv_logincount_per_day['sps'] = $vv_logincount_sp_per_day;
     } else if ($type === "idp") {
-      $vv_logincount_per_day_range = $this->utils->getLoginCountPerDayForIdp($conn, $days, $identifier);
+      $vv_logincount_per_day_range = $this->utils->getLoginCountPerDayForProvider($conn, $days, $identifier, $type);
       $vv_logincount_per_day['sps'] = $this->utils->getLoginCountPerSp($conn, $days, $identifier);
       $vv_logincount_per_day['range'] = $vv_logincount_per_day_range;
     } else if ($type === "sp") {
-      $vv_logincount_per_day_range = $this->utils->getLoginCountPerDayForSp($conn, $days, $identifier);
+      $vv_logincount_per_day_range = $this->utils->getLoginCountPerDayForProvider($conn, $days, $identifier, $type);
       $vv_logincount_per_day['idps'] = $this->utils->getLoginCountPerIdp($conn, $days, $identifier);
       $vv_logincount_per_day['range'] = $vv_logincount_per_day_range;
     }
@@ -149,7 +149,7 @@ class RciamStatsViewerServicesController extends StandardController
     );
     $vv_logincounts['tiles'] = $vv_totalloginscount;
     $vv_logincounts['idp'] = $this->utils->getAccessCountForServicePerIdentityProviders($conn, $days, $sp);
-    $vv_logincounts['sp'] = $this->utils->getLoginCountPerDayForSp($conn, $days, $sp);
+    $vv_logincounts['sp'] = $this->utils->getLoginCountPerDayForProvider($conn, $days, $sp, "sp");
 
     $this->response->type('json');
     $this->response->statusCode(200);
@@ -180,7 +180,7 @@ class RciamStatsViewerServicesController extends StandardController
     );
 
     $vv_logincounts['sp'] = $this->utils->getAccessCountForIdentityProviderPerServiceProviders($conn, $days, $idp);
-    $vv_logincounts['idp'] = $this->utils->getLoginCountPerDayForIdp($conn, $days, $idp);
+    $vv_logincounts['idp'] = $this->utils->getLoginCountPerDayForProvider($conn, $days, $idp, "idp");
     $vv_logincounts['tiles'] = $vv_totalloginscount;
 
     $this->response->type('json');
