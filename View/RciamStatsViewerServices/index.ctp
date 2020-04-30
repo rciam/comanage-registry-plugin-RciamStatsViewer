@@ -60,7 +60,7 @@ print $this->Html->script('/RciamStatsViewer/js/bootstrap.min.js');
 <script type="text/javascript">
     //Global Variables
     var defaultdataIdp, defaultdataSp;
-    var datatableExport = <?php print (($permissions['idps']) ? 1 : 0) ?>;
+    var datatableExport = <?php print (($permissions['idp']) ? 1 : 0) ?>;
     var overallText = [];
     var specificText = [];
     overallText['idp'] = '<?php print _txt('pl.rciamstatsviewer.idp.overall'); ?>'
@@ -189,6 +189,7 @@ print $this->Html->script('/RciamStatsViewer/js/bootstrap.min.js');
 
             getLoginCountPerDay(url_str, days, identifier, type, tabId, specific);
         })
+
 
         // Datable Links Functionality 
         $(document).on("click", ".datatable-link", function() {
