@@ -244,10 +244,14 @@ class RciamStatsViewerServicesController extends StandardController
     $p = array();
 
     // Determine what operations this user can perform
-    $p['index'] = ($roles['cmadmin'] || $roles['coadmin']);
-    $p['getdataforsp'] = ($roles['cmadmin'] || $roles['coadmin']);
-    $p['getdataforidp'] = ($roles['cmadmin'] || $roles['coadmin']);
-    $p['getlogincountperday'] = ($roles['cmadmin'] || $roles['coadmin']);
+    $p['index'] = ($roles['user']);
+    $p['getdataforsp'] = ($roles['user']);
+    $p['getdataforidp'] = ($roles['user']);
+    $p['getlogincountperday'] = ($roles['user']);
+
+    // Tab Permissions
+    $p['idp'] = ($roles['cmadmin'] || $roles['coadmin'] || $roles['couadmin']);
+    $p['sp'] = ($roles['cmadmin'] || $roles['coadmin'] || $roles['couadmin']);
     $this->set('permissions', $p);
 
     return ($p[$this->action]);

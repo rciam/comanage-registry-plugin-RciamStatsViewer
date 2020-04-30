@@ -222,7 +222,14 @@ function drawPieChart(elementId, data, type) {
 
 
     google.visualization.events.addListener(chart, 'click', selectHandler);
-
+    google.visualization.events.addListener(chart, 'onmouseover', uselessHandler2);
+    google.visualization.events.addListener(chart, 'onmouseout', uselessHandler3);
+    function uselessHandler2() {
+        $('.pieChart').css('cursor','pointer')
+         }  
+               function uselessHandler3() {
+        $('.pieChart').css('cursor','default')
+         } 
     function selectHandler() {
 
         var selection = chart.getSelection();
@@ -477,24 +484,30 @@ function createDataTable(element, data, type, idDataTable = null) {
         dataAppend +
         '</tbody>' +
         '</table>');
-    $("#" + id).DataTable({
-        dom: 'Bfrtip',
-        "order": [1, 'desc'],
-        buttons: [
-            {
-                extend: 'collection',
-                text: 'Export DataTable',
-                buttons: [
-                    'copy',
-                    'excel',
-                    'csv',
-                    'pdf',
-                    'print'
-                ]
-            }
-        ]
-    });
-
+        
+    if(datatableExport){
+        $("#" + id).DataTable({
+            dom: 'Bfrtip',
+            order: [1, 'desc'],
+            buttons: [
+                {
+                    extend: 'collection',
+                    text: 'Export DataTable',
+                    buttons: [
+                        'copy',
+                        'excel',
+                        'csv',
+                        'pdf',
+                        'print'
+                    ]
+                }
+            ]
+        });
+    }
+    else
+        $("#" + id).DataTable({
+            order: [1, 'desc']
+        });
 }
 
 // Generate flash notifications for messages

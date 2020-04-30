@@ -19,6 +19,7 @@
             </div>
             <!-- ./col -->
         </div>
+        <?php if ($prefix != 'users') {?>
         <div class="box">
             <div class="box-header with-border">
                 <h3 class="box-title"><?php print _txt('pl.rciamstatsviewer.' . $prefix . '.numberoflogins'); ?></h3>
@@ -28,5 +29,6 @@
         </div>
         <div class="dataTableContainer" id="<?php print $prefix; ?>DatatableContainer"></div>
         <!-- Create Datatable -->
+        <?php } ?>
     </div>
 </div>
