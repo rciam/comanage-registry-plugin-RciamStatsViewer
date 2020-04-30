@@ -55,7 +55,7 @@
         font-size: 1.1em;
     }
     svg > g > g:last-child {  word-break: break-all;}
-    svg > g:last-child > g:last-child { pointer-events: none }
+    svg > g:last-child > g:last-child { pointer-events: none;  }
     div.google-visualization-tooltip { pointer-events: none }
     .google-visualization-tooltip { white-space:nowrap; word-break: break-all;  }
     
