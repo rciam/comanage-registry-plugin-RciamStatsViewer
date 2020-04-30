@@ -333,7 +333,7 @@ function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
         },
         error: function (x, status, error) {
             if (x.status == 403) {
-                generateSessionExpiredNotification("Sorry, your session has expired. Please login again to continue", "error");
+                generateSessionExpiredNotification("Sorry, your session has expired. Please click here to renew your session.", "error");
 
             }
         }
@@ -440,11 +440,11 @@ function goToSpecificProvider(identifier, legend, type) {
 
             createDataTable($("#specificDataTableContainer"), data[dataCol], dataCol)
             $(".modal .overlay").hide();
-         
+            
         },
         error: function (x, status, error) {
             if (x.status == 403) {
-                generateSessionExpiredNotification("Sorry, your session has expired. Please login again to continue", "error");
+                generateSessionExpiredNotification("Sorry, your session has expired. Please click here to renew your session.", "error");
 
             }
         }
@@ -510,22 +510,20 @@ function createDataTable(element, data, type, idDataTable = null) {
         });
 }
 
+function reloadPage(){
+   
+    location.reload();
+};
+
 // Generate flash notifications for messages
 function generateSessionExpiredNotification(text, type) {
-    var n = noty({
-        text: text,
+     noty({
+        text: '<span onclick="reloadPage()">' + text + '</span>',
         type: type,
         dismissQueue: true,
         layout: 'topCenter',
         theme: 'comanage',
-        buttons: [
-            {
-                addClass: 'general-button red', text: 'Ok', onClick: function ($noty) {
-
-                    $noty.close();
-                    location.reload();
-                }
-            },
-        ]
+        id: 'session-expired',
+        closeWith: ['click'],
     });
 }
