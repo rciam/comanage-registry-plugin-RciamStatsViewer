@@ -59,6 +59,12 @@
     div.google-visualization-tooltip { pointer-events: none }
     .google-visualization-tooltip { white-space:nowrap; word-break: break-all;  }
     
+    #selectPeriodContainer {
+        text-align: right;
+        width: 87%;
+        padding-top: 30px;
+    }
+
     @media (min-width: 768px) {
         .modal-dialog {
             width: 80%;

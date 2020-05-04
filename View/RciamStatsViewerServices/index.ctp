@@ -80,6 +80,12 @@ print $this->Html->script('/RciamStatsViewer/js/bootstrap.min.js');
                             'action' => 'getdataforsp',
                             'co'  => $cur_co['Co']['id']
                         )); ?>';
+    var url_str_users = '<?php print $this->Html->url(array(
+                            'plugin' => Inflector::singularize(Inflector::tableize($this->plugin)),
+                            'controller' => 'rciam_stats_viewer_services',
+                            'action' => 'getdataforusers',
+                            'co'  => $cur_co['Co']['id']
+                        )); ?>';
 
     $(function() {
 
@@ -97,10 +103,12 @@ print $this->Html->script('/RciamStatsViewer/js/bootstrap.min.js');
         // Initialize Tiles
         var tabsIds = ["dashboardTab", "idpsTotalInfo", "spsTotalInfo"];
         tabsIds.forEach(function(item) {
+            if($("#" + item).length > 0) {
             createTile($("#" + item + " .row .col-lg-3").eq(0), "bg-aqua", <?php print !empty($vv_totalloginscount[0]) ? $vv_totalloginscount[0] : '0'; ?>, "Todays Logins", 1, item)
             createTile($("#" + item + " .row .col-lg-3").eq(1), "bg-green", <?php print !empty($vv_totalloginscount[1]) ? $vv_totalloginscount[1] : '0'; ?>, "Last 7 days Logins", 7, item)
             createTile($("#" + item + " .row .col-lg-3").eq(2), "bg-yellow", <?php print !empty($vv_totalloginscount[2]) ? $vv_totalloginscount[2] : '0'; ?>, "Last 30 days Logins", 30, item)
             createTile($("#" + item + " .row .col-lg-3").eq(3), "bg-red", <?php print !empty($vv_totalloginscount[3]) ? $vv_totalloginscount[3] : '0'; ?>, "Last Year Logins", 365, item)
+            }
         });
 
         // Initialize Datatables
@@ -199,6 +207,10 @@ print $this->Html->script('/RciamStatsViewer/js/bootstrap.min.js');
             goToSpecificProvider(identifier, legend, type);
         })
 
+        $(document).on("change", "#dateRegisteredUsersSelect", function (){
+            updateColumnChart(document.getElementById("registeredsChartDetail"), $(this).val());
+        })
+
         // Draw IdP/ Sp  Charts when click at the tab or backToTotal for the first time 
         $(document).on("click", ".tabset_tabs li a", function() {
             
@@ -210,12 +222,20 @@ print $this->Html->script('/RciamStatsViewer/js/bootstrap.min.js');
                 drawPieChart(document.getElementById('spsChartDetail'), defaultdataSp, "sp");
                 $(this).attr("data-draw", "")
             }
+            else if ($(this).attr("data-draw") == "drawUsersChart"){ //Initialize whole tab
+                createTile($("#registeredsTotalInfo .row .col-lg-3").eq(0), "bg-aqua", <?php print !empty($vv_totalloginscount1[0]) ? $vv_totalloginscount[0] : '0'; ?>, "Todays Registered Users", 1, 'registerdTotalInfo')
+                createTile($("#registeredsTotalInfo .row .col-lg-3").eq(1), "bg-green", <?php print !empty($vv_totalloginscount1[1]) ? $vv_totalloginscount[1] : '0'; ?>, "Last 7 days Registered Users", 7, 'registerdTotalInfo')
+                createTile($("#registeredsTotalInfo .row .col-lg-3").eq(2), "bg-yellow", <?php print !empty($vv_totalloginscount1[2]) ? $vv_totalloginscount[2] : '0'; ?>, "Last 30 days Registered Users", 30, 'registerdTotalInfo')
+                createTile($("#registeredsTotalInfo .row .col-lg-3").eq(3), "bg-red", <?php print !empty($vv_totalloginscount1[3]) ? $vv_totalloginscount[3] : '0'; ?>, "Last Year Registered Users", 365, 'registerdTotalInfo')
+                updateColumnChart(document.getElementById("registeredsChartDetail"), 'monthly');
+                $(this).attr("data-draw", "")
+            }
         })
 
     });
 
     google.charts.load('current', {
-        'packages': ['corechart', 'controls', 'table']
+        'packages': ['corechart', 'controls', 'table', 'bar']
     });
     google.charts.setOnLoadCallback(function() {
         var data = google.visualization.arrayToDataTable([
@@ -260,6 +280,9 @@ print $this->Html->script('/RciamStatsViewer/js/bootstrap.min.js');
                 <?php } ?>
                 <?php if ($permissions["sp"]) {?>
                 <li><a data-draw="drawSpsChart" href='#spTab'><?php print _txt('pl.rciamstatsviewer.sp_details.pl'); ?></a></li>
+                <?php } ?>
+                <?php if ($permissions["registered"]) {?>
+                <li><a data-draw="drawUsersChart" href='#registeredTab'><?php print _txt('pl.rciamstatsviewer.registered_details.pl'); ?></a></li>
                 <?php } ?>
             </ul>
             <?php

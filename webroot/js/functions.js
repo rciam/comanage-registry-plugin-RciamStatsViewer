@@ -18,15 +18,24 @@ function createTile(row, bgClass, value, text, days, type = null) {
     else if (type == 'spsTotalInfo')
         data_type = 'data-tab="sp" data-spec="total"';
 
-
-    row.html('<div class="small-box ' + bgClass + '">' +
-        '<div class="inner">' +
-        '<h3>' + (value != 0 ? value : 0) + '</h3>' +
-        '<p>' + text + '</p>' +
-        '</div>' +
-        '<div class="small-box-footer no-data ' + nodata + '">No data</div>' +
-        '<a href="#" onclick="return false" ' + data_type + ' data-days="' + days + '" class="more-info small-box-footer ' + more_info + '">More info <i class="fa fa-arrow-circle-right"></i></a>' +
-        '</div>');
+    if (type != 'registerdTotalInfo') {
+        row.html('<div class="small-box ' + bgClass + '">' +
+            '<div class="inner">' +
+            '<h3>' + (value != 0 ? value : 0) + '</h3>' +
+            '<p>' + text + '</p>' +
+            '</div>' +
+            '<div class="small-box-footer no-data ' + nodata + '">No data</div>' +
+            '<a href="#" onclick="return false" ' + data_type + ' data-days="' + days + '" class="more-info small-box-footer ' + more_info + '">More info <i class="fa fa-arrow-circle-right"></i></a>' +
+            '</div>');
+    }
+    else {
+        row.html('<div class="small-box ' + bgClass + '">' +
+            '<div class="inner">' +
+            '<h3>' + (value != 0 ? value : 0) + '</h3>' +
+            '<p>' + text + '</p>' +
+            '</div>' +
+            '</div>');
+    }
 }
 
 // Create Modal
@@ -204,15 +213,16 @@ function drawPieChart(elementId, data, type) {
 
     google.visualization.events.addListener(chart, 'onmouseover', function (entry) {
         chart.setSelection([{ row: entry.row }]);
+        
         //Add Identifier to tooltip
-        $(".google-visualization-tooltip-item-list li:eq(0)").append('<li> (' + data.getValue(entry.row, 1) + ')</li>').css("font-family", "Arial");
+        $("#" + chart.container.id + " .google-visualization-tooltip-item-list li:eq(0)").append('<li> (' + data.getValue(entry.row, 1) + ')</li>').css("font-family", "Arial");
 
         widthNew = data.getValue(entry.row, 1).length * 9;
-        heightNew = $(".google-visualization-tooltip").height() + 30;
+        heightNew =  $("#" + chart.container.id + " .google-visualization-tooltip").height() + 30;
 
-        if (widthNew > $(".google-visualization-tooltip").outerWidth())
-            $(".google-visualization-tooltip").css("width", widthNew + "px")
-        $(".google-visualization-tooltip").css("height", heightNew + "px")
+        if (widthNew >  $("#" + chart.container.id + " .google-visualization-tooltip").outerWidth())
+        $("#" + chart.container.id + " .google-visualization-tooltip").css("width", widthNew + "px")
+        $("#" + chart.container.id + " .google-visualization-tooltip").css("height", heightNew + "px")
 
     });
 
@@ -240,6 +250,77 @@ function drawPieChart(elementId, data, type) {
             goToSpecificProvider(identifier, legend, type);
         }
     }
+}
+
+// Column Chart
+function drawColumnChart(elementId, data, type) {
+    if (type == 'monthly')
+        format = 'M/y'
+    else if (type == 'yearly')
+        format = 'Y'
+    else if (type == 'weekly')
+        format = 'dd/M/YY'
+    data.sort([{
+        column: 1,
+        desc: false
+    }]);
+
+    //var formatter = new google.visualization.DateFormat({pattern: 'yyyy'});
+    //formatter.format(data, 0)
+    var view = new google.visualization.DataView(data);
+    
+      /*view.setColumns([0, 1,
+                       { calc: "stringify",
+                         sourceColumn: 1,
+                         type: "string",
+                         role: "annotation" },
+                       2]);*/
+    view.setColumns([0, 1]);
+    var options = {
+        hAxis: {
+            format: format,
+           // slantedText: true,
+            ticks: data.getDistinctValues(0)
+          },
+        width: '100%',
+        height: '350',
+        bar: {groupWidth: "95%"},
+        legend: { position: "none" },
+    };
+
+    var chart = new google.visualization.ColumnChart(elementId);
+    chart.draw(view, options);  
+}
+
+// Update Column Chart AJAX 
+function updateColumnChart(elementId, range = null) {
+    $(".overlay").show();
+    $.ajax({
+        url: url_str_users,
+        data: {
+            range: range,      
+        },
+        success: function (data) {
+            //console.log(data);
+            fValues = [];
+                fValues.push(['Date', 'Count'])
+                data.forEach(function (item) {
+                    var temp = [];
+                    //console.log(item)
+                    //if (range == 'yearly')
+                     //   valueRange = new Date(item[0]['range_date']).getFullYear()
+                    //else 
+                        valueRange = new Date(item[0]['range_date']);
+                    temp.push(valueRange);
+                    temp.push(parseInt(item[0]['count']));
+                    fValues.push(temp);
+                })
+            //console.log(fValues)
+            var dataRange = new google.visualization.arrayToDataTable(fValues);
+            drawColumnChart(elementId, dataRange, range)
+            $(".overlay").hide();
+        }
+    })
 }
 
 function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
