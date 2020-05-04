@@ -84,6 +84,26 @@ class RciamStatsViewerServicesController extends StandardController
     }
   }
 
+  public function getdataforusers(){
+    $this->log(__METHOD__ . '::@', LOG_DEBUG);
+    $this->autoRender = false; // We don't render a view
+    $this->request->onlyAllow('ajax'); // No direct access via browser URL
+    $this->layout = null;
+    $range = $this->request->query['range'];
+    if ($range == null || $range == 'monthly')
+      $sql = "select count(*), date_trunc( 'month', created ) as range_date from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=2 AND status='A' group by date_trunc( 'month', created )";
+    else if ($range == 'yearly')
+      $sql = "select count(*), date_trunc( 'year', created ) as range_date from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=2 AND status='A' group by date_trunc( 'year', created )";  
+    else if ($range == 'weekly')
+      $sql = "select count(*), date_trunc( 'week', created ) as range_date from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=2 AND status='A' group by date_trunc( 'week', created )";  
+    
+      $data = $this->RciamStatsViewer->query($sql);
+    
+    $this->response->type('json');
+    $this->response->statusCode(201);
+    $this->response->body(json_encode($data));
+    return $this->response;
+  }
     
   /**
    * Get data for summary tab or Idp/Sp Details Tabs depending
@@ -206,6 +226,10 @@ class RciamStatsViewerServicesController extends StandardController
       'prefix' => 'sp',
       'ctpName' => 'tab',      
     );
+    $tab_settings["registered"] = array(
+      'prefix' => 'registered',
+      'ctpName' => 'tab',      
+    );
     $this->set('vv_tab_settings', $tab_settings);
   }
     
@@ -252,7 +276,7 @@ class RciamStatsViewerServicesController extends StandardController
     // Tab Permissions
     $p['idp'] = ($roles['cmadmin'] || $roles['coadmin'] || $roles['couadmin']);
     $p['sp'] = ($roles['cmadmin'] || $roles['coadmin'] || $roles['couadmin']);
-
+    $p['registered'] = ($roles['cmadmin'] || $roles['coadmin'] || $roles['couadmin']);
     $this->set('permissions', $p);
 
     return ($p[$this->action]);
