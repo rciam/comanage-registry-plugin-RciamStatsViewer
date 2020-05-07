@@ -38,11 +38,32 @@
                 <div id="selectPeriodContainer">Select Period:&nbsp;
                     <select name="dateRegisteredUsersSelect" id="dateRegisteredUsersSelect">
                         <option value="weekly">Weekly</option>
-                        <option value="monthly" selected = "selected">Monthly</option>
+                        <option value="monthly" selected="selected">Monthly</option>
                         <option value="yearly">Yearly</option>
                     </select>
                 </div>
                 <div class="columnChart" id="<?php print Inflector::pluralize($prefix); ?>ChartDetail"></div>
+            </div>
+            <div class="box">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Registered Users Datatable</h3>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body dataTableWithFilter">
+                    <div class="dataTableDateFilter bg-box-silver">
+                        From: &nbsp;<input type="text" id="<?php print $prefix ?>DateFrom" name="<?php print $prefix ?>DateFrom" data-provide="datepicker" />
+                        &nbsp;&nbsp;&nbsp;To: &nbsp;<input type="text" id="<?php print $prefix ?>DateTo" name="<?php print $prefix ?>DateTo" data-provide="datepicker" />
+                        &nbsp;<select name="groupDataByDate" class="groupDataByDate">
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly" selected="selected">Monthly</option>
+                            <option value="yearly">Yearly</option>
+                        </select>
+                        &nbsp;<button class="searchDateFilter">Filter</button>
+                    </div>
+                    <div class="dataTableContainer" id="<?php print $prefix; ?>DatatableContainer"></div>
+                </div>            
+                <!-- /.box-body -->
             </div>
         <?php } ?>
     </div>

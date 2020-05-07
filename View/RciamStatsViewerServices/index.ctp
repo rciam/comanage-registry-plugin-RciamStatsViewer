@@ -38,6 +38,7 @@ $params['title'] = _txt('ct.rciam_stats_viewer_services.pl');
 
 // For tiles
 print $this->Html->css('/RciamStatsViewer/css/bootstrap.min');
+print $this->Html->css('/RciamStatsViewer/css/bootstrap-datepicker3.min');
 print $this->Html->css('/RciamStatsViewer/css/AdminLTE.min');
 print $this->Html->css('/RciamStatsViewer/css/ionicons.min');
 print $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
@@ -56,6 +57,7 @@ print $this->Html->script('//cdn.datatables.net/buttons/1.6.1/js/buttons.print.m
 print $this->Html->script("https://www.gstatic.com/charts/loader.js");
 print $this->Html->script('/RciamStatsViewer/js/functions.js');
 print $this->Html->script('/RciamStatsViewer/js/bootstrap.min.js');
+print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker.min.js');
 ?>
 <script type="text/javascript">
     //Global Variables
@@ -80,10 +82,22 @@ print $this->Html->script('/RciamStatsViewer/js/bootstrap.min.js');
                             'action' => 'getdataforsp',
                             'co'  => $cur_co['Co']['id']
                         )); ?>';
-    var url_str_users = '<?php print $this->Html->url(array(
+    var url_str_userschart = '<?php print $this->Html->url(array(
                             'plugin' => Inflector::singularize(Inflector::tableize($this->plugin)),
                             'controller' => 'rciam_stats_viewer_services',
-                            'action' => 'getdataforusers',
+                            'action' => 'getdataforuserschart',
+                            'co'  => $cur_co['Co']['id']
+                        )); ?>';
+    var url_str_userstiles = '<?php print $this->Html->url(array(
+                            'plugin' => Inflector::singularize(Inflector::tableize($this->plugin)),
+                            'controller' => 'rciam_stats_viewer_services',
+                            'action' => 'getdataforuserstiles',
+                            'co'  => $cur_co['Co']['id']
+                        )); ?>';
+    var url_str_datatable_ranges = '<?php print $this->Html->url(array(
+                            'plugin' => Inflector::singularize(Inflector::tableize($this->plugin)),
+                            'controller' => 'rciam_stats_viewer_services',
+                            'action' => 'getdatafordatatable',
                             'co'  => $cur_co['Co']['id']
                         )); ?>';
 
@@ -95,7 +109,7 @@ print $this->Html->script('/RciamStatsViewer/js/bootstrap.min.js');
         // Initialize Modal
         createModal();
 
-        // Initialize Spinners
+        // Initialize Spinners - we have one spinner for body and one for modal
         $("div[id^=coSpinner]").each(function() {
             new Spinner(coSpinnerOpts).spin(document.getElementById($(this).attr("id")));
         })
@@ -110,14 +124,7 @@ print $this->Html->script('/RciamStatsViewer/js/bootstrap.min.js');
             createTile($("#" + item + " .row .col-lg-3").eq(3), "bg-red", <?php print !empty($vv_totalloginscount[3]) ? $vv_totalloginscount[3] : '0'; ?>, "Last Year Logins", 365, item)
             }
         });
-
-        // Initialize Datatables
-        $("#idpDatatable").DataTable({
-            "order": [1, 'desc']
-        });
-        $("#spDatatable").DataTable({
-            "order": [1, 'desc']
-        });
+        
         createDataTable($("#idpDatatableContainer"), <?php print json_encode($vv_logincount_per_idp); ?>, "idp", "idpDatatable")
         createDataTable($("#spDatatableContainer"), <?php print json_encode($vv_logincount_per_sp); ?>, "sp", "spDatatable")
 
@@ -198,7 +205,6 @@ print $this->Html->script('/RciamStatsViewer/js/bootstrap.min.js');
             getLoginCountPerDay(url_str, days, identifier, type, tabId, specific);
         })
 
-
         // Datable Links Functionality 
         $(document).on("click", ".datatable-link", function() {
             identifier = $(this).attr("data-identifier")
@@ -207,6 +213,7 @@ print $this->Html->script('/RciamStatsViewer/js/bootstrap.min.js');
             goToSpecificProvider(identifier, legend, type);
         })
 
+        // When change Period at RegisteredUsers Column Chart
         $(document).on("change", "#dateRegisteredUsersSelect", function (){
             updateColumnChart(document.getElementById("registeredsChartDetail"), $(this).val());
         })
@@ -223,11 +230,9 @@ print $this->Html->script('/RciamStatsViewer/js/bootstrap.min.js');
                 $(this).attr("data-draw", "")
             }
             else if ($(this).attr("data-draw") == "drawUsersChart"){ //Initialize whole tab
-                createTile($("#registeredsTotalInfo .row .col-lg-3").eq(0), "bg-aqua", <?php print !empty($vv_totalloginscount1[0]) ? $vv_totalloginscount[0] : '0'; ?>, "Todays Registered Users", 1, 'registerdTotalInfo')
-                createTile($("#registeredsTotalInfo .row .col-lg-3").eq(1), "bg-green", <?php print !empty($vv_totalloginscount1[1]) ? $vv_totalloginscount[1] : '0'; ?>, "Last 7 days Registered Users", 7, 'registerdTotalInfo')
-                createTile($("#registeredsTotalInfo .row .col-lg-3").eq(2), "bg-yellow", <?php print !empty($vv_totalloginscount1[2]) ? $vv_totalloginscount[2] : '0'; ?>, "Last 30 days Registered Users", 30, 'registerdTotalInfo')
-                createTile($("#registeredsTotalInfo .row .col-lg-3").eq(3), "bg-red", <?php print !empty($vv_totalloginscount1[3]) ? $vv_totalloginscount[3] : '0'; ?>, "Last Year Registered Users", 365, 'registerdTotalInfo')
-                updateColumnChart(document.getElementById("registeredsChartDetail"), 'monthly');
+                dataTiles = getDataForUsersTiles();
+                updateColumnChart(document.getElementById("registeredsChartDetail"), 'monthly', true);
+
                 $(this).attr("data-draw", "")
             }
         })

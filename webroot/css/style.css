@@ -65,6 +65,19 @@
         padding-top: 30px;
     }
 
+    .dataTableDateFilter {
+        margin: 20px 0px;
+        
+    }
+    .bg-box-silver {
+        background-color: #fafafa;
+    }
+    .datepicker table tr td, .datepicker table tr th {
+        border-radius: 0;
+    }
+    .groupDataByDate{
+        height: 29px;
+    }
     @media (min-width: 768px) {
         .modal-dialog {
             width: 80%;

@@ -226,25 +226,19 @@ function drawPieChart(elementId, data, type) {
 
     });
 
-    google.visualization.events.addListener(chart, 'onmouseout', function (entry) {
-        chart.setSelection([]);
-    });
-
-
     google.visualization.events.addListener(chart, 'click', selectHandler);
     google.visualization.events.addListener(chart, 'onmouseover', uselessHandler2);
     google.visualization.events.addListener(chart, 'onmouseout', uselessHandler3);
     function uselessHandler2() {
         $('.pieChart').css('cursor','pointer')
          }  
-               function uselessHandler3() {
+    function uselessHandler3() {
+        chart.setSelection([]);
         $('.pieChart').css('cursor','default')
          } 
     function selectHandler() {
-
         var selection = chart.getSelection();
         if (selection.length) {
-
             var identifier = data.getValue(selection[0].row, 1);
             var legend = data.getValue(selection[0].row, 0);
             goToSpecificProvider(identifier, legend, type);
@@ -254,70 +248,84 @@ function drawPieChart(elementId, data, type) {
 
 // Column Chart
 function drawColumnChart(elementId, data, type) {
-    if (type == 'monthly')
-        format = 'M/y'
-    else if (type == 'yearly')
+    if (type == 'monthly') {
+        format = 'MM/YY'
+        formatter = new google.visualization.DateFormat({ pattern: 'MM/YY' })
+        formatter.format(data, 0)
+    }
+    else if (type == 'yearly') {
         format = 'Y'
-    else if (type == 'weekly')
+        formatter = new google.visualization.DateFormat({ pattern: 'yyyy' })
+        formatter.format(data, 0)
+    }
+    else if (type == 'weekly') {
         format = 'dd/M/YY'
+        formatter = new google.visualization.DateFormat({ pattern: 'dd/M/YY' })
+        formatter.format(data, 0)
+    }
+
     data.sort([{
         column: 1,
         desc: false
     }]);
 
-    //var formatter = new google.visualization.DateFormat({pattern: 'yyyy'});
-    //formatter.format(data, 0)
+
     var view = new google.visualization.DataView(data);
-    
-      /*view.setColumns([0, 1,
-                       { calc: "stringify",
-                         sourceColumn: 1,
-                         type: "string",
-                         role: "annotation" },
-                       2]);*/
+
     view.setColumns([0, 1]);
     var options = {
         hAxis: {
             format: format,
-           // slantedText: true,
+            // slantedText: true,
             ticks: data.getDistinctValues(0)
-          },
+        },
+        tooltip: {isHtml: true},
         width: '100%',
         height: '350',
-        bar: {groupWidth: "95%"},
+        bar: { groupWidth: "95%" },
         legend: { position: "none" },
     };
 
     var chart = new google.visualization.ColumnChart(elementId);
-    chart.draw(view, options);  
+    chart.draw(data, options);
 }
 
 // Update Column Chart AJAX 
-function updateColumnChart(elementId, range = null) {
+function updateColumnChart(elementId, range = null, init = false) {
     $(".overlay").show();
     $.ajax({
-        url: url_str_users,
+        url: url_str_userschart,
         data: {
             range: range,      
         },
         success: function (data) {
-            //console.log(data);
+            
             fValues = [];
-                fValues.push(['Date', 'Count'])
+                fValues.push(['Date', 'Count' , {'type': 'string', 'role': 'tooltip', 'p': {'html': true}}])
                 data.forEach(function (item) {
-                    var temp = [];
-                    //console.log(item)
-                    //if (range == 'yearly')
-                     //   valueRange = new Date(item[0]['range_date']).getFullYear()
-                    //else 
-                        valueRange = new Date(item[0]['range_date']);
+                    var temp = [];    
+                    valueRange = new Date(item[0]['range_date']);
+                    
                     temp.push(valueRange);
                     temp.push(parseInt(item[0]['count']));
+                    temp.push('<div style="padding:5px 5px 5px 5px;">' + convertDateByGroup (valueRange, range) + "<br/> Registered Users: " + parseInt(item[0]['count']) + '</div>');
                     fValues.push(temp);
                 })
             //console.log(fValues)
             var dataRange = new google.visualization.arrayToDataTable(fValues);
             drawColumnChart(elementId, dataRange, range)
+            if(init === true){
+                
+                data.forEach(function (item){
+                    newDate = new Date(item[0]['range_date']);
+                    fDate = newDate.getMonth()+1
+                    if (fDate < 10)
+                        fDate = '0' + fDate
+                    item[0]['show_date'] = fDate + "/" + newDate.getFullYear();
+                })
+                createDataTable($("#registeredDatatableContainer"), data , "registered", "registeredDatatable")
+
+            }
             $(".overlay").hide();
         }
     })
@@ -532,6 +540,101 @@ function goToSpecificProvider(identifier, legend, type) {
     });
 }
 
+
+function convertDate(jsDate){
+    date = null;
+    if (jsDate != null && jsDate instanceof Date) {
+        month = (jsDate.getMonth() + 1).toString()
+        if (month.length < 2)
+            month = '0' + month;
+        day = jsDate.getDate().toString()
+        if (day.length < 2)
+            day = '0' + day;
+        date = jsDate.getFullYear() + '-' + month + '-' + day;
+    }
+    return date;
+}
+
+function convertDateByGroup(jsDate, groupBy) {
+
+    month = (jsDate.getMonth() + 1).toString()
+    if (month.length < 2)
+        month = '0' + month;
+    day = jsDate.getDate().toString()
+    if (day.length < 2)
+        day = '0' + day;
+    if (groupBy == 'daily')
+        showDate = day + '/' + month + '/' + jsDate.getFullYear();
+    else if (groupBy == 'weekly') {
+        showDate = day + '/' + month + '/' + jsDate.getFullYear();
+        var nextWeek = new Date(jsDate.setDate(jsDate.getDate() + 6));
+        month = (nextWeek.getMonth() + 1).toString()
+        if (month.length < 2)
+            month = '0' + month;
+        day = nextWeek.getDate().toString()
+        if (day.length < 2)
+            day = '0' + day;
+        showDate += " - " + day + '/' + month + '/' + nextWeek.getFullYear();
+    }
+    else if (groupBy == 'monthly')
+        showDate = month + '/' + jsDate.getFullYear();
+    else if (groupBy == 'yearly')
+        showDate = jsDate.getFullYear();
+
+        return showDate
+}
+// From - To Functionality 
+function from_to_range(element) {
+
+    $('input[id$="DateFrom"],input[id$="DateTo"]').each(function () {
+        $(this).datepicker({ changeMonth: true, changeYear: true, format: "dd/mm/yyyy", autoclose: true });
+    })
+
+    $(document).on("click", ".searchDateFilter", function () {
+        $(".overlay").show();
+        dataTableToUpdate = $(this).closest(".dataTableWithFilter").find(".dataTableContainer")
+        $(this).closest(".dataTableDateFilter").find('input[id$="DateFrom"]').each(function () {
+            jsDate = ($(this).datepicker("getDate"))
+            dateFrom = convertDate(jsDate);
+        })
+        $(this).closest(".dataTableDateFilter").find('input[id$="DateTo"]').each(function () {
+            jsDate = ($(this).datepicker("getDate"))
+            dateTo = convertDate(jsDate);
+        })
+        if (dateFrom != null && dateTo != null) {
+            groupBy = $(this).closest(".dataTableDateFilter").find('.groupDataByDate').val()
+            dates = { dateFrom: dateFrom, dateTo: dateTo, groupBy: groupBy }
+            $.ajax({
+                url: url_str_datatable_ranges,
+                data: dates,
+                success: function (data) {
+
+                    data.forEach(function (item) {
+                        jsDate = new Date(item[0]['show_date']);
+                        item[0]['show_date'] = convertDateByGroup (jsDate, groupBy)
+                    })
+                    
+                    createDataTable(dataTableToUpdate, data, "registered", dataTableToUpdate.attr("id").replace("Container",""))
+                    $(".overlay").hide();
+                }
+            })
+        }
+    })
+}
+
+function getDataForUsersTiles() {
+    $.ajax({
+        url: url_str_userstiles,
+            success: function (dataTiles) {
+            createTile($("#registeredsTotalInfo .row .col-lg-3").eq(0), "bg-aqua", (dataTiles[0][0][0]['count'] ? dataTiles[0][0][0]['count'] : '0'),  "Todays Registered Users", 1, 'registerdTotalInfo')
+            createTile($("#registeredsTotalInfo .row .col-lg-3").eq(1), "bg-aqua", (dataTiles[1][0][0]['count'] ? dataTiles[1][0][0]['count'] : '0'), "Last 7 days Registered Users", 7, 'registerdTotalInfo')
+            createTile($("#registeredsTotalInfo .row .col-lg-3").eq(2), "bg-aqua", (dataTiles[2][0][0]['count'] ? dataTiles[2][0][0]['count'] : '0'), "Last 30 days Registered Users", 30, 'registerdTotalInfo')
+            createTile($("#registeredsTotalInfo .row .col-lg-3").eq(3), "bg-aqua", (dataTiles[3][0][0]['count'] ? dataTiles[3][0][0]['count'] : '0'), "Last Year Registered Users", 365, 'registerdTotalInfo')       
+        }
+    })
+    
+}
+
 // Create Datatables
 function createDataTable(element, data, type, idDataTable = null) {
 
@@ -540,36 +643,63 @@ function createDataTable(element, data, type, idDataTable = null) {
         column2 = 'count'
         data_param = 'sourceidp'
         th = 'Identity Provider'
+        ths = '<th>' + th + ' Name</th>' +
+        '<th>' + th + ' Identifier</th>' +
+        '<th>Number of Logins</th>'
+        sort_order = 1
+        from_to = false
     }
-    else {
+    else if (type == "sp") {
         column1 = 'spname'
         column2 = 'count'
         data_param = 'service'
         th = 'Service Provider'
+        ths = '<th>' + th + ' Name</th>' +
+        '<th>' + th + ' Identifier</th>' +
+        '<th>Number of Logins</th>'
+        sort_order = 1
+        from_to = false
+    }
+    else if (type == "registered") {
+        column1 = 'show_date'
+        column2 = 'count'
+        data_param = false
+        th = 'Dates'
+        ths = '<th> Date </th>' +
+        '<th> Number of Registered Users </th>' 
+        sort_order = 0
+        from_to =true
     }
     dataAppend = '';
+
     data.forEach(function (item) {
-        dataAppend += '<tr><td><a class="datatable-link" href="#" onclick="return false;" data-type="' + type + '" data-identifier="' + item[0][data_param] + '">' + item[0][column1] + '</a></td><td>' + item[0][data_param] + '</td><td>' + item[0][column2] + '</td></tr>';
+        
+        if(type != 'registered')
+            dataAppend += '<tr><td><a class="datatable-link" href="#" onclick="return false;" data-type="' + type + '" data-identifier="' + item[0][data_param] + '">' + item[0][column1] + '</a></td><td>' + item[0][data_param] + '</td><td>' + item[0][column2] + '</td></tr>';
+        else if (type == 'registered')
+            dataAppend += '<tr><td data-sort=' + item[0]['range_date'] + '>' + item[0][column1] + '</td><td>' + item[0][column2] + '</td></tr>';
     })
 
     id = (idDataTable != null ? idDataTable : type + 'SpecificDatatable');
+    
     element.html('<table id="' + id + '" class="stripe row-border hover">' +
         '<thead>' +
         '<tr>' +
-        '<th>' + th + ' Name</th>' +
-        '<th>' + th + ' Identifier</th>' +
-        '<th>Number of Logins</th>' +
+        ths +
         '</tr>' +
         '</thead>' +
         '<tbody>' +
         dataAppend +
         '</tbody>' +
         '</table>');
-        
+    if (from_to === true)
+    {
+        from_to_range(element)
+    }
     if(datatableExport){
         $("#" + id).DataTable({
             dom: 'Bfrtip',
-            order: [1, 'desc'],
+            order: [sort_order, 'desc'],
             buttons: [
                 {
                     extend: 'collection',
@@ -591,8 +721,7 @@ function createDataTable(element, data, type, idDataTable = null) {
         });
 }
 
-function reloadPage(){
-   
+function reloadPage(){ 
     location.reload();
 };
 
