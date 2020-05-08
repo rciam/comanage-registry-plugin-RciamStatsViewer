@@ -158,9 +158,25 @@ class RciamStatsViewerServicesController extends StandardController
     $this->layout = null;
 
     $range = $this->request->query['range'];
-    if ($range == null || $range == 'monthly')
+    if ($range == null || $range == 'monthly'){
+      $data = $this->CoPerson->find('list', array(
+        'fields' => array(
+        'date_trunc(\'month\', "CoPerson"."created") as range_date' , 'count(CoPerson.co_id) as count'
+        ),
+        'conditions' => array(
+          'CoPerson.co_person_id' => NULL,
+          'CoPerson.deleted' => false,
+          'CoPerson.co_id' => intVal($this->request->params['named']['co']),
+          'CoPerson.status' => 'A',
+          'CoPerson.created >  date_trunc(\'month\', CURRENT_DATE) - INTERVAL \'1 year\'',
+        ),
+        'group' => array('date_trunc( \'month\', CoPerson.created )'),
+        'order' => array('date_trunc( \'month\', CoPerson.created ) DESC'),
+        'callbacks' => 'after', // other possible values are false, 'before', 'after'
+      ));
       $sql = "select count(*), date_trunc( 'month', created ) as range_date from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=2 AND status='A' AND created >
       date_trunc('month', CURRENT_DATE) - INTERVAL '1 year' group by date_trunc( 'month', created ) ORDER BY date_trunc( 'month', created ) DESC";
+    }
     else if ($range == 'yearly')
       $sql = "select count(*), date_trunc( 'year', created ) as range_date from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=2 AND status='A' group by date_trunc( 'year', created ) ORDER BY date_trunc( 'year', created ) DESC";
     else if ($range == 'weekly')

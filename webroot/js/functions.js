@@ -1,3 +1,63 @@
+$(document).on("click", "a.groupDataByDate", function () {
+    
+    $(".overlay").show();
+    dataTableToUpdate = $(this).closest(".dataTableWithFilter").find(".dataTableContainer")
+    boxTitle = $(this).closest(".box").find(".box-title").text();
+    $(this).closest(".dataTableDateFilter").find('input[id$="DateFrom"]').each(function () {
+        jsDate = ($(this).datepicker("getDate"))
+        dateFrom = convertDate(jsDate);
+    })
+    $(this).closest(".dataTableDateFilter").find('input[id$="DateTo"]').each(function () {
+        jsDate = ($(this).datepicker("getDate"))
+        dateTo = convertDate(jsDate);
+    })
+    
+    if (dateFrom != null && dateTo != null && dateTo >= dateFrom) {
+        //groupBy = $(this).closest(".dataTableDateFilter").find('.groupDataByDate').val()
+        groupBy = $(this).attr('data-value')
+        dates = { dateFrom: dateFrom, dateTo: dateTo, groupBy: groupBy }
+        $.ajax({
+            url: url_str_datatable_ranges,
+            data: dates,
+            success: function (data) {
+
+                data.forEach(function (item) {
+                    jsDate = new Date(item[0]['show_date']);
+                    item[0]['show_date'] = convertDateByGroup (jsDate, groupBy)
+                })
+                var options = {}
+                options['idDataTable'] = dataTableToUpdate.attr("id").replace("Container","")
+                options['title'] = boxTitle +' for period ' + dateFrom + ' to ' + dateTo + ' in ' + groupBy + ' basis';
+                createDataTable(dataTableToUpdate, data, "registered", options)
+                $(".overlay").hide();
+            }
+        })
+    }
+    else if (dateFrom != null && dateTo != null && dateTo < dateFrom) {
+        $(".overlay").hide();
+        noty({
+            text: '"Date From" must be prior to "Date To"',
+            type: 'error',
+            timeout: 2000,
+            dismissQueue: true,
+            layout: 'topCenter',
+            theme: 'comanage',
+        })
+    }
+    else {
+        $(".overlay").hide();
+        
+        noty({
+            text: 'You must fill both Dates From and To',
+            type: 'alert',
+            timeout: 1200,
+            dismissQueue: true,
+            layout: 'topCenter',
+            theme: 'comanage',
+        })
+    }
+})
+
 function createTile(row, bgClass, value, text, days, type = null) {
 
     if (value == 0 || value == null) {
@@ -250,16 +310,19 @@ function drawPieChart(elementId, data, type) {
 function drawColumnChart(elementId, data, type, hticks = null) {
     if (type == 'monthly') {
         format = 'MM/YY'
+        title = 'Dates in Month/Year Format' 
     //    formatter = new google.visualization.DateFormat({ pattern: 'MM/YY' })
       //  formatter.format(data, 0)
     }
     else if (type == 'yearly') {
         format = 'Y'
+        title = 'Dates in Year Format' 
        // formatter = new google.visualization.DateFormat({ pattern: 'yyyy' })
         //formatter.format(data, 0)
     }
     else if (type == 'weekly') {
         format = ''
+        title = 'Dates in No. of Week (Year) Format' 
         //console.log(hticks)
         //formatter = new google.visualization.DateFormat({ pattern: 'dd/M/YY' })
         //formatter.format(data, 0)
@@ -273,10 +336,14 @@ function drawColumnChart(elementId, data, type, hticks = null) {
     //var view = new google.visualization.DataView(data);
     //view.setColumns([0, 2]);
     var options = {
+        vAxis: {
+            title: 'Number of Registered Users'
+        },
         hAxis: {
             format: format,
             //slantedText: true,
             maxTextLines: 2,
+            title: title,
             textStyle: {fontSize: 15},
             ticks: (type != 'weekly' ? data.getDistinctValues(0) : hticks)
         },
@@ -320,8 +387,7 @@ function updateColumnChart(elementId, range = null, init = false) {
                 fValues.push(['Date', 'Count' , {'type': 'string', 'role': 'tooltip', 'p': {'html': true}}])
                 data.forEach(function (item) {
                     var temp = [];    
-                    valueRange = new Date(item[0]['range_date']);
-                    
+                    valueRange = new Date(item[0]['range_date']);                 
                     temp.push(valueRange);
                     temp.push(parseInt(item[0]['count']));
                     temp.push('<div style="padding:5px 5px 5px 5px;">' + convertDateByGroup (valueRange, range) + "<br/> Registered Users: " + parseInt(item[0]['count']) + '</div>');
@@ -617,50 +683,7 @@ function from_to_range(element) {
         $(this).datepicker({ changeMonth: true, changeYear: true, format: "dd/mm/yyyy", autoclose: true });
     })
 
-    $(document).on("click", ".searchDateFilter, .groupDataByDate", function () {
-        $(".overlay").show();
-        dataTableToUpdate = $(this).closest(".dataTableWithFilter").find(".dataTableContainer")
-        boxTitle = $(this).closest(".box").find(".box-title").text();
-        $(this).closest(".dataTableDateFilter").find('input[id$="DateFrom"]').each(function () {
-            jsDate = ($(this).datepicker("getDate"))
-            dateFrom = convertDate(jsDate);
-        })
-        $(this).closest(".dataTableDateFilter").find('input[id$="DateTo"]').each(function () {
-            jsDate = ($(this).datepicker("getDate"))
-            dateTo = convertDate(jsDate);
-        })
-        if (dateFrom != null && dateTo != null) {
-            //groupBy = $(this).closest(".dataTableDateFilter").find('.groupDataByDate').val()
-            groupBy = $(this).attr('data-value')
-            dates = { dateFrom: dateFrom, dateTo: dateTo, groupBy: groupBy }
-            $.ajax({
-                url: url_str_datatable_ranges,
-                data: dates,
-                success: function (data) {
-
-                    data.forEach(function (item) {
-                        jsDate = new Date(item[0]['show_date']);
-                        item[0]['show_date'] = convertDateByGroup (jsDate, groupBy)
-                    })
-                    var options = {}
-                    options['idDataTable'] = dataTableToUpdate.attr("id").replace("Container","")
-                    options['title'] = boxTitle +' for period ' + dateFrom + ' to ' + dateTo + ' in ' + groupBy + ' basis';
-                    createDataTable(dataTableToUpdate, data, "registered", options)
-                    $(".overlay").hide();
-                }
-            })
-        }
-        else {
-            $(".overlay").hide();
-            noty({
-                text: 'You must fill both Dates From and To',
-                type: 'alert',
-                dismissQueue: true,
-                layout: 'topCenter',
-                theme: 'comanage',
-            })
-        }
-    })
+    
 }
 
 function getDataForUsersTiles() {
