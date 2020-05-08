@@ -53,23 +53,16 @@
                     <div class="dataTableDateFilter bg-box-silver">
                         From: &nbsp;<input type="text" id="<?php print $prefix ?>DateFrom" name="<?php print $prefix ?>DateFrom" data-provide="datepicker" />
                         &nbsp;&nbsp;&nbsp;To: &nbsp;<input type="text" id="<?php print $prefix ?>DateTo" name="<?php print $prefix ?>DateTo" data-provide="datepicker" />
-                        &nbsp;<!-- &nbsp;<select name="groupDataByDate" class="groupDataByDate">
-                            <option value="daily">Daily</option>
-                            <option value="weekly">Weekly</option>
-                            <option value="monthly" selected="selected">Monthly</option>
-                            <option value="yearly">Yearly</option>
-                        </select>
-                        &nbsp;<button class="searchDateFilter">Filter</button> -->
-                        <!-- Single button -->
+                        &nbsp;
                         <div class="btn-group">
-                        &nbsp;<button type="button" class="btn btn-default dropdown-toggle filter-button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        &nbsp;<button type="button" class="btn btn-default dropdown-toggle filter-button" data-toggle="dropdown" >
                             Filter <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu">
-                            <li><a class="groupDataByDate" href="#" data-value="daily" onclick="return false;">Daily Basis</a></li>
-                            <li><a class="groupDataByDate" href="#" data-value="weekly" onclick="return false;">Weekly Basis</a></li>
-                            <li><a class="groupDataByDate" href="#" data-value="monthly" onclick="return false;">Monthly Basis</a></li>
-                            <li><a class="groupDataByDate" href="#" data-value="yearly" onclick="return false;">Yearly Basis</a></li>
+                            <li><a class="groupDataByDate" data-value="daily">Daily Basis</a></li>
+                            <li><a class="groupDataByDate" data-value="weekly">Weekly Basis</a></li>
+                            <li><a class="groupDataByDate" data-value="monthly">Monthly Basis</a></li>
+                            <li><a class="groupDataByDate" data-value="yearly">Yearly Basis</a></li>
                         </ul>
                         </div>
                     </div>
