@@ -64,10 +64,19 @@
         width: 87%;
         padding-top: 30px;
     }
-
+    .dataTableWithFilter {
+         padding: 0px 0px;    
+    }
     .dataTableDateFilter {
-        margin: 20px 0px;
-        
+        padding: 20px 10px;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #fefe;
+    }
+    .filter-button{
+        height: 29px;
+        padding-top: 3px;
+        position: relative;
+        top: -1px;
     }
     .bg-box-silver {
         background-color: #fafafa;
