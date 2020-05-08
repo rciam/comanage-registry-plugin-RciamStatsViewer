@@ -11,6 +11,7 @@ class RciamStatsViewerServicesController extends StandardController
   public $uses = array(
     'RciamStatsViewer.RciamStatsViewer',
     'Co',
+    'CoPerson',
     'RciamStatsViewer.RciamStatsViewerUtils'
   );
   private $utils;
@@ -84,34 +85,73 @@ class RciamStatsViewerServicesController extends StandardController
     }
   }
 
-  public function getdataforuserstiles() {
+    
+  /**
+   * getdataforuserstiles
+   *
+   * @return void
+   */
+  public function getdataforuserstiles()
+  {
     $this->log(__METHOD__ . '::@', LOG_DEBUG);
     $this->autoRender = false; // We don't render a view
     $this->request->onlyAllow('ajax'); // No direct access via browser URL
     $this->layout = null;
 
-    $data=[];
+    $data = [];
     //today
-    $sql = "select count(*) from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=2 AND status='A' AND date_trunc ('day', created) = CURRENT_DATE";
-    $data[] = $this->RciamStatsViewer->query($sql);
+    $data[] = $this->CoPerson->find('count', array(
+      'conditions' => array(
+        'CoPerson.co_person_id' => NULL,
+        'CoPerson.deleted' => false,
+        'CoPerson.co_id' => $this->request->params['named']['co'],
+        'CoPerson.status' => 'A',
+        'date_trunc(\'day\', CoPerson.created) = CURRENT_DATE',
+      ),
+    ));
     //last 7 days 
-    $sql = "select count(*) from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=2 AND status='A' AND created >
-      CURRENT_DATE - INTERVAL '7 days'";
-    $data[] = $this->RciamStatsViewer->query($sql);      
+    $data[] = $this->CoPerson->find('count', array(
+      'conditions' => array(
+        'CoPerson.co_person_id' => NULL,
+        'CoPerson.deleted' => false,
+        'CoPerson.co_id' => intVal($this->request->params['named']['co']),
+        'CoPerson.status' => 'A',
+        'CoPerson.created > CURRENT_DATE - INTERVAL \'7 days\'',
+      ),
+    ));
     //last 30 days
-    $sql = "select count(*) from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=2 AND status='A' AND created > CURRENT_DATE - INTERVAL '1 month'";
-    $data[] = $this->RciamStatsViewer->query($sql);      
+    $data[] = $this->CoPerson->find('count', array(
+      'conditions' => array(
+        'CoPerson.co_person_id' => NULL,
+        'CoPerson.deleted' => false,
+        'CoPerson.co_id' => intVal($this->request->params['named']['co']),
+        'CoPerson.status' => 'A',
+        'CoPerson.created > CURRENT_DATE - INTERVAL \'30 days\'',
+      ),
+    ));
     //last year
-    $sql = "select count(*) from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=2 AND status='A' AND created > CURRENT_DATE - INTERVAL '1 year'";
-    $data[] = $this->RciamStatsViewer->query($sql);
-    
+    $data[] = $this->CoPerson->find('count', array(
+      'conditions' => array(
+        'CoPerson.co_person_id' => NULL,
+        'CoPerson.deleted' => false,
+        'CoPerson.co_id' => intVal($this->request->params['named']['co']),
+        'CoPerson.status' => 'A',
+        'CoPerson.created > CURRENT_DATE - INTERVAL \'1 year\'',
+      ),
+    ));
     $this->response->type('json');
     $this->response->statusCode(201);
     $this->response->body(json_encode($data));
     return $this->response;
   }
-
-  public function getdataforuserschart(){
+  
+  /**
+   * getdataforuserschart
+   *
+   * @return void
+   */
+  public function getdataforuserschart()
+  {
     $this->log(__METHOD__ . '::@', LOG_DEBUG);
     $this->autoRender = false; // We don't render a view
     $this->request->onlyAllow('ajax'); // No direct access via browser URL
@@ -122,18 +162,25 @@ class RciamStatsViewerServicesController extends StandardController
       $sql = "select count(*), date_trunc( 'month', created ) as range_date from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=2 AND status='A' AND created >
       date_trunc('month', CURRENT_DATE) - INTERVAL '1 year' group by date_trunc( 'month', created ) ORDER BY date_trunc( 'month', created ) DESC";
     else if ($range == 'yearly')
-      $sql = "select count(*), date_trunc( 'year', created ) as range_date from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=2 AND status='A' group by date_trunc( 'year', created ) ORDER BY date_trunc( 'year', created ) DESC";  
+      $sql = "select count(*), date_trunc( 'year', created ) as range_date from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=2 AND status='A' group by date_trunc( 'year', created ) ORDER BY date_trunc( 'year', created ) DESC";
     else if ($range == 'weekly')
       $sql = "select count(*), date_trunc( 'week', created ) as range_date from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=2 AND status='A' AND created >
-      date_trunc('month', CURRENT_DATE) - INTERVAL '6 months' group by date_trunc( 'week', created ) ORDER BY date_trunc( 'week', created ) DESC";  
-    
+      date_trunc('month', CURRENT_DATE) - INTERVAL '6 months' group by date_trunc( 'week', created ) ORDER BY date_trunc( 'week', created ) DESC";
+
     $data = $this->RciamStatsViewer->query($sql);
-    
+
     $this->response->type('json');
     $this->response->statusCode(201);
     $this->response->body(json_encode($data));
     return $this->response;
   }
+
+    
+  /**
+   * getdatafordatatable
+   *
+   * @return void
+   */
 
   function getdatafordatatable()
   {
@@ -144,9 +191,8 @@ class RciamStatsViewerServicesController extends StandardController
     $dateFrom = $this->request->query['dateFrom'];
     $dateTo = $this->request->query['dateTo'];
     $groupBy = $this->request->query['groupBy'];
-    if ($dateFrom != null && $dateTo != null)
-    {
-      if($groupBy === 'daily')
+    if ($dateFrom != null && $dateTo != null) {
+      if ($groupBy === 'daily')
         $trunc_by = 'day';
       else if ($groupBy === 'weekly')
         $trunc_by = 'week';
@@ -154,9 +200,9 @@ class RciamStatsViewerServicesController extends StandardController
         $trunc_by = 'month';
       else if ($groupBy === 'yearly')
         $trunc_by = 'year';
-      else 
+      else
         $trunc_by = 'month';
-      $sql = "select count(*), date_trunc('". $trunc_by ."', created) as range_date, date_trunc('". $trunc_by ."', created) as show_date from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=2 AND status='A' AND  created BETWEEN '".$dateFrom ."' AND '". $dateTo ."' group by date_trunc('". $trunc_by ."',created)";    
+      $sql = "select count(*), date_trunc('" . $trunc_by . "', created) as range_date, date_trunc('" . $trunc_by . "', created) as show_date from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=2 AND status='A' AND  created BETWEEN '" . $dateFrom . "' AND '" . $dateTo . "' group by date_trunc('" . $trunc_by . "',created)";
       $data = $this->RciamStatsViewer->query($sql);
     }
     $this->response->type('json');

@@ -124,9 +124,11 @@ print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker
             createTile($("#" + item + " .row .col-lg-3").eq(3), "bg-red", <?php print !empty($vv_totalloginscount[3]) ? $vv_totalloginscount[3] : '0'; ?>, "Last Year Logins", 365, item)
             }
         });
-        
-        createDataTable($("#idpDatatableContainer"), <?php print json_encode($vv_logincount_per_idp); ?>, "idp", "idpDatatable")
-        createDataTable($("#spDatatableContainer"), <?php print json_encode($vv_logincount_per_sp); ?>, "sp", "spDatatable")
+        var options = {}
+        options['idDataTable'] = 'idpDatatable'
+        createDataTable($("#idpDatatableContainer"), <?php print json_encode($vv_logincount_per_idp); ?>, "idp", options)
+        options['idDataTable'] = 'spDatatable'
+        createDataTable($("#spDatatableContainer"), <?php print json_encode($vv_logincount_per_sp); ?>, "sp", options)
 
         // when clear filter is clicked
         $(document).on("click", ".back-to-overall", function() {
