@@ -59,10 +59,10 @@
                             Filter <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu">
-                            <li><a class="groupDataByDate" data-value="daily">Daily Basis</a></li>
-                            <li><a class="groupDataByDate" data-value="weekly">Weekly Basis</a></li>
-                            <li><a class="groupDataByDate" data-value="monthly">Monthly Basis</a></li>
-                            <li><a class="groupDataByDate" data-value="yearly">Yearly Basis</a></li>
+                            <li><a href="#" onclick="return false;" class="groupDataByDate" data-value="daily">Daily Basis</a></li>
+                            <li><a href="#" onclick="return false;" class="groupDataByDate" data-value="weekly">Weekly Basis</a></li>
+                            <li><a href="#" onclick="return false;" class="groupDataByDate" data-value="monthly">Monthly Basis</a></li>
+                            <li><a href="#" onclick="return false;" class="groupDataByDate" data-value="yearly">Yearly Basis</a></li>
                         </ul>
                         </div>
                     </div>

@@ -13,7 +13,6 @@ $(document).on("click", "a.groupDataByDate", function () {
     })
     
     if (dateFrom != null && dateTo != null && dateTo >= dateFrom) {
-        //groupBy = $(this).closest(".dataTableDateFilter").find('.groupDataByDate').val()
         groupBy = $(this).attr('data-value')
         dates = { dateFrom: dateFrom, dateTo: dateTo, groupBy: groupBy }
         $.ajax({
@@ -27,9 +26,14 @@ $(document).on("click", "a.groupDataByDate", function () {
                 })
                 var options = {}
                 options['idDataTable'] = dataTableToUpdate.attr("id").replace("Container","")
-                options['title'] = boxTitle +' for period ' + dateFrom + ' to ' + dateTo + ' in ' + groupBy + ' basis';
+                options['title'] = boxTitle +' for period ' + convertDateByGroup(new Date(dateFrom), 'daily') + ' to ' + convertDateByGroup(new Date(dateTo), 'daily') + ' in ' + groupBy + ' basis';
                 createDataTable(dataTableToUpdate, data, "registered", options)
                 $(".overlay").hide();
+            },
+            error: function (x, status, error) {
+                if (x.status == 403) {
+                    generateSessionExpiredNotification("Sorry, your session has expired. Please click here to renew your session.", "error"); 
+                }
             }
         })
     }
@@ -45,8 +49,7 @@ $(document).on("click", "a.groupDataByDate", function () {
         })
     }
     else {
-        $(".overlay").hide();
-        
+        $(".overlay").hide();       
         noty({
             text: 'You must fill both Dates From and To',
             type: 'alert',
@@ -311,37 +314,27 @@ function drawColumnChart(elementId, data, type, hticks = null) {
     if (type == 'monthly') {
         format = 'MM/YY'
         title = 'Dates in Month/Year Format' 
-    //    formatter = new google.visualization.DateFormat({ pattern: 'MM/YY' })
-      //  formatter.format(data, 0)
     }
     else if (type == 'yearly') {
         format = 'Y'
         title = 'Dates in Year Format' 
-       // formatter = new google.visualization.DateFormat({ pattern: 'yyyy' })
-        //formatter.format(data, 0)
     }
     else if (type == 'weekly') {
         format = ''
         title = 'Dates in No. of Week (Year) Format' 
-        //console.log(hticks)
-        //formatter = new google.visualization.DateFormat({ pattern: 'dd/M/YY' })
-        //formatter.format(data, 0)
     }
-   // console.log(data)
-   // console.log(data.getDistinctValues(0))
+
     data.sort([{
         column: 1,
         desc: false
     }]);
-    //var view = new google.visualization.DataView(data);
-    //view.setColumns([0, 2]);
+
     var options = {
         vAxis: {
             title: 'Number of Registered Users'
         },
         hAxis: {
             format: format,
-            //slantedText: true,
             maxTextLines: 2,
             title: title,
             textStyle: {fontSize: 15},
@@ -413,6 +406,11 @@ function updateColumnChart(elementId, range = null, init = false) {
 
             }
             $(".overlay").hide();
+        },
+        error: function (x, status, error) {
+            if (x.status == 403) {
+                generateSessionExpiredNotification("Sorry, your session has expired. Please click here to renew your session.", "error");
+            }
         }
     })
 }
@@ -523,8 +521,7 @@ function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
 
 // Modal Functionality
 function goToSpecificProvider(identifier, legend, type) {
-    $("#myModal").modal();
-    
+    $("#myModal").modal()   
     $(".modal .overlay").show();
      $('#myModal').animate({
        scrollTop: 0
@@ -537,8 +534,7 @@ function goToSpecificProvider(identifier, legend, type) {
     createTile($("#" + item + " .row .col-lg-3").eq(1), "bg-green", "0", "Last 7 days Logins", 7, type+"SpecificData")
     createTile($("#" + item + " .row .col-lg-3").eq(2), "bg-yellow", "0", "Last 30 days Logins", 30, type+"SpecificData")
     createTile($("#" + item + " .row .col-lg-3").eq(3), "bg-red", "0", "Last Year Logins", 365, type+"SpecificData")
-
-    
+  
     $("#specificData .more-info").each(function () {
         $(this).attr("identifier", identifier);
         $(this).parent().removeClass("inactive");
@@ -632,7 +628,7 @@ function goToSpecificProvider(identifier, legend, type) {
     });
 }
 
-
+// Convert Date in Format compatible with query
 function convertDate(jsDate){
     date = null;
     if (jsDate != null && jsDate instanceof Date) {
@@ -642,7 +638,9 @@ function convertDate(jsDate){
         day = jsDate.getDate().toString()
         if (day.length < 2)
             day = '0' + day;
-        date = jsDate.getFullYear() + '-' + month + '-' + day;
+        
+       date = jsDate.getFullYear() + '-' + month + '-' + day;
+        
     }
     return date;
 }
@@ -674,7 +672,7 @@ function convertDateByGroup(jsDate, groupBy) {
     else if (groupBy == 'yearly')
         showDate = jsDate.getFullYear();
 
-        return showDate
+    return showDate;
 }
 // From - To Functionality 
 function from_to_range(element) {
@@ -682,15 +680,15 @@ function from_to_range(element) {
     $('input[id$="DateFrom"],input[id$="DateTo"]').each(function () {
         $(this).datepicker({ changeMonth: true, changeYear: true, format: "dd/mm/yyyy", autoclose: true });
     })
-
-    
+   
 }
 
+// Initialize Tiles for Registered Users
 function getDataForUsersTiles() {
     $.ajax({
         url: url_str_userstiles,
             success: function (dataTiles) {
-            createTile($("#registeredsTotalInfo .row .col-lg-3").eq(0), "bg-aqua", (dataTiles[0] ? dataTiles[0] : '0'),  "Todays Registered Users", 1, 'registerdTotalInfo')
+            createTile($("#registeredsTotalInfo .row .col-lg-3").eq(0), "bg-aqua", (dataTiles[0] ? dataTiles[0] : '0'),  "Total Registered Users", 1, 'registerdTotalInfo')
             createTile($("#registeredsTotalInfo .row .col-lg-3").eq(1), "bg-aqua", (dataTiles[1] ? dataTiles[1] : '0'), "Last 7 days Registered Users", 7, 'registerdTotalInfo')
             createTile($("#registeredsTotalInfo .row .col-lg-3").eq(2), "bg-aqua", (dataTiles[2] ? dataTiles[2] : '0'), "Last 30 days Registered Users", 30, 'registerdTotalInfo')
             createTile($("#registeredsTotalInfo .row .col-lg-3").eq(3), "bg-aqua", (dataTiles[3] ? dataTiles[3] : '0'), "Last Year Registered Users", 365, 'registerdTotalInfo')       
@@ -736,8 +734,7 @@ function createDataTable(element, data, type, options = null) {
     }
     dataAppend = '';
 
-    data.forEach(function (item) {
-        
+    data.forEach(function (item) {       
         if(type != 'registered')
             dataAppend += '<tr><td><a class="datatable-link" href="#" onclick="return false;" data-type="' + type + '" data-identifier="' + item[0][data_param] + '">' + item[0][column1] + '</a></td><td>' + item[0][data_param] + '</td><td>' + item[0][column2] + '</td></tr>';
         else if (type == 'registered')
@@ -786,8 +783,7 @@ function createDataTable(element, data, type, options = null) {
                         {
                             extend: 'print',
                             title: title
-                        }
-                        
+                        }                       
                     ]
                 }
             ]
