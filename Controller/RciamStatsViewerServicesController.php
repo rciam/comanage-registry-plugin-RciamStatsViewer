@@ -15,7 +15,7 @@ class RciamStatsViewerServicesController extends StandardController
     'RciamStatsViewer.RciamStatsViewerUtils'
   );
   private $utils;
-  
+
   /**
    * __construct
    *
@@ -23,7 +23,7 @@ class RciamStatsViewerServicesController extends StandardController
    * @param  mixed $response
    * @return void
    */
-  
+
   public function __construct($request, $response)
   {
     parent::__construct($request, $response);
@@ -31,13 +31,13 @@ class RciamStatsViewerServicesController extends StandardController
     $configData = $this->RciamStatsViewer->getConfiguration($request->params['named']['co']);
     $this->utils = new RciamStatsViewerUtils($configData);
   }
-  
+
   /**
    * index page
    *
    * @return void
    */
-  
+
   public function index()
   {
     $fail = false;
@@ -46,7 +46,7 @@ class RciamStatsViewerServicesController extends StandardController
       $conn = $this->RciamStatsViewer->connect($this->cur_co['Co']['id']);
 
       // Fetch the data
-      $vv_logincount_per_day = ($this->utils->getLoginCountPerDay($conn, 0)) ?: array();
+      $vv_logincount_per_day = ($this->utils->getLoginCountPerDayForProvider($conn, 0)) ?: array();
 
       $vv_totalloginscount = array(
         $this->utils->getTotalLoginCounts($conn, 1),
@@ -63,7 +63,6 @@ class RciamStatsViewerServicesController extends StandardController
       $this->set('vv_logincount_per_sp', $vv_logincount_per_sp);
       $this->set('vv_logincount_per_idp', $vv_logincount_per_idp);
       $this->set('vv_logincount_per_day', $vv_logincount_per_day);
-      
     } catch (MissingConnectionException $e) {
       $this->log(__METHOD__ . ':: Database Connection failed. Error Message::' . $e->getMessage(), LOG_DEBUG);
       $this->Flash->set(_txt('er.rciam_stats_viewer.db.connect', array($e->getMessage())), array('key' => 'error'));
@@ -75,7 +74,7 @@ class RciamStatsViewerServicesController extends StandardController
       $this->Flash->set(_txt('er.rciam_stats_viewer.db.action', array($e->getMessage())), array('key' => 'error'));
       $fail = true;
     } finally {
-      if($fail) {
+      if ($fail) {
         // Initialize frontend placeholders
         $this->set('vv_totalloginscount', array());
         $this->set('vv_logincount_per_sp', array());
@@ -85,7 +84,7 @@ class RciamStatsViewerServicesController extends StandardController
     }
   }
 
-    
+
   /**
    * getdataforuserstiles
    *
@@ -106,7 +105,6 @@ class RciamStatsViewerServicesController extends StandardController
         'CoPerson.deleted' => false,
         'CoPerson.co_id' => $this->request->params['named']['co'],
         'CoPerson.status' => 'A',
-        //'date_trunc(\'day\', CoPerson.created) = CURRENT_DATE',
       ),
     ));
     //last 7 days 
@@ -144,7 +142,7 @@ class RciamStatsViewerServicesController extends StandardController
     $this->response->body(json_encode($data));
     return $this->response;
   }
-  
+
   /**
    * getdataforuserschart
    *
@@ -158,11 +156,10 @@ class RciamStatsViewerServicesController extends StandardController
     $this->layout = null;
 
     $range = $this->request->query['range'];
-    if ($range == null || $range == 'monthly'){
+    if ($range == null || $range == 'monthly') {
       $sql = "select count(*), date_trunc( 'month', created ) as range_date from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=2 AND status='A' AND created >
       date_trunc('month', CURRENT_DATE) - INTERVAL '1 year' group by date_trunc( 'month', created ) ORDER BY date_trunc( 'month', created ) DESC";
-    }
-    else if ($range == 'yearly')
+    } else if ($range == 'yearly')
       $sql = "select count(*), date_trunc( 'year', created ) as range_date from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=2 AND status='A' group by date_trunc( 'year', created ) ORDER BY date_trunc( 'year', created ) DESC";
     else if ($range == 'weekly')
       $sql = "select count(*), date_trunc( 'week', created ) as range_date from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=2 AND status='A' AND created >
@@ -176,7 +173,7 @@ class RciamStatsViewerServicesController extends StandardController
     return $this->response;
   }
 
-    
+
   /**
    * getdatafordatatable
    *
@@ -192,38 +189,35 @@ class RciamStatsViewerServicesController extends StandardController
     $dateFrom = $this->request->query['dateFrom'];
     $dateTo = $this->request->query['dateTo'];
     $type = $this->request->query['type'];
-    $identifier = (isset($this->request->query['identifier']) && $this->request->query['identifier']!="") ? $this->request->query['identifier'] : null;
+    $identifier = (isset($this->request->query['identifier']) && $this->request->query['identifier'] != "") ? $this->request->query['identifier'] : null;
     $co_id = $this->request->params['named']['co'];
     $groupBy = $this->request->query['groupBy'];
 
     $data = [];
     if ($dateFrom != null && $dateTo != null && $dateTo > $dateFrom) {
-      if ($groupBy === 'daily')
-        $trunc_by = 'day';
-      else if ($groupBy === 'weekly')
-        $trunc_by = 'week';
-      else if ($groupBy === 'monthly')
-        $trunc_by = 'month';
-      else if ($groupBy === 'yearly')
-        $trunc_by = 'year';
-      else
-        $trunc_by = 'month';
-      if($type === null || $type === 'registered')
-        {
-          $sql = "select count(*), date_trunc('" . $trunc_by . "', created) as range_date, date_trunc('" . $trunc_by . "', created) as show_date from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=".$co_id." AND status='A' AND  created BETWEEN '" . $dateFrom . "' AND '" . $dateTo . "' group by date_trunc('" . $trunc_by . "',created)";
-          $data = $this->RciamStatsViewer->query($sql);
+
+      if ($type === null || $type === 'registered') {
+        if ($groupBy === 'daily')
+          $trunc_by = 'day';
+        else if ($groupBy === 'weekly')
+          $trunc_by = 'week';
+        else if ($groupBy === 'monthly')
+          $trunc_by = 'month';
+        else if ($groupBy === 'yearly')
+          $trunc_by = 'year';
+        else
+          $trunc_by = 'month';
+        $sql = "select count(*), date_trunc('" . $trunc_by . "', created) as range_date, date_trunc('" . $trunc_by . "', created) as show_date from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=" . $co_id . " AND status='A' AND  created BETWEEN '" . $dateFrom . "' AND '" . $dateTo . "' group by date_trunc('" . $trunc_by . "',created)";
+        $data = $this->RciamStatsViewer->query($sql);
+      } else {
+        // Try to connect to the database
+        $conn = $this->RciamStatsViewer->connect($co_id);
+        if ($type === 'idp' || $type === 'spSpecific') {
+          $data["idps"] = $this->utils->getLoginCountPerIdp($conn, 0, $identifier, $dateFrom, $dateTo);
+        } else if ($type === 'sp' || $type === 'idpSpecific') {
+          $data["sps"] = $this->utils->getLoginCountPerSp($conn, 0, $identifier, $dateFrom, $dateTo);
         }
-      else 
-        {
-          // Try to connect to the database
-          $conn = $this->RciamStatsViewer->connect($co_id);
-          if($type === 'idp' || $type === 'spSpecific'){
-            $data["idps"] = $this->utils->getLoginCountPerIdp($conn, 0, $identifier, $dateFrom, $dateTo, $trunc_by);
-          }
-          else if($type === 'sp' || $type === 'idpSpecific'){
-            $data["sps"] = $this->utils->getLoginCountPerSp($conn, 0, $identifier, $dateFrom, $dateTo, $trunc_by);
-          }
-        }
+      }
     }
     $this->response->type('json');
     $this->response->statusCode(201);
@@ -231,7 +225,7 @@ class RciamStatsViewerServicesController extends StandardController
     return $this->response;
   }
 
-    
+
   /**
    * Get data for summary tab or Idp/Sp Details Tabs depending
    * on days user selected.
@@ -251,20 +245,15 @@ class RciamStatsViewerServicesController extends StandardController
     $conn = $this->RciamStatsViewer->connect($this->request->params['named']['co']);
 
     if ($type === null) {
-      $vv_logincount_per_day_range = $this->utils->getLoginCountPerDay($conn, $days);
-      $vv_logincount_idp_per_day = $this->utils->getLoginCountPerIdp($conn, $days);
-      $vv_logincount_sp_per_day = $this->utils->getLoginCountPerSp($conn, $days);
-      $vv_logincount_per_day['range'] = $vv_logincount_per_day_range;
-      $vv_logincount_per_day['idps'] = $vv_logincount_idp_per_day;
-      $vv_logincount_per_day['sps'] = $vv_logincount_sp_per_day;
+      $vv_logincount_per_day['range'] = $this->utils->getLoginCountPerDayForProvider($conn, $days);
+      $vv_logincount_per_day['idps'] = $this->utils->getLoginCountPerIdp($conn, $days);
+      $vv_logincount_per_day['sps'] = $this->utils->getLoginCountPerSp($conn, $days);
     } else if ($type === "idp") {
-      $vv_logincount_per_day_range = $this->utils->getLoginCountPerDayForProvider($conn, $days, $identifier, $type);
+      $vv_logincount_per_day['range'] = $this->utils->getLoginCountPerDayForProvider($conn, $days, $identifier, $type);
       $vv_logincount_per_day['sps'] = $this->utils->getLoginCountPerSp($conn, $days, $identifier);
-      $vv_logincount_per_day['range'] = $vv_logincount_per_day_range;
     } else if ($type === "sp") {
-      $vv_logincount_per_day_range = $this->utils->getLoginCountPerDayForProvider($conn, $days, $identifier, $type);
+      $vv_logincount_per_day['range'] = $this->utils->getLoginCountPerDayForProvider($conn, $days, $identifier, $type);
       $vv_logincount_per_day['idps'] = $this->utils->getLoginCountPerIdp($conn, $days, $identifier);
-      $vv_logincount_per_day['range'] = $vv_logincount_per_day_range;
     }
 
     $this->response->type('json');
@@ -272,7 +261,7 @@ class RciamStatsViewerServicesController extends StandardController
     $this->response->body(json_encode($vv_logincount_per_day));
     return $this->response;
   }
-  
+
   /**
    *  Get data for specific service provider
    *
@@ -303,7 +292,7 @@ class RciamStatsViewerServicesController extends StandardController
     $this->response->body(json_encode($vv_logincounts));
     return $this->response;
   }
-  
+
   /**
    * Get data for specific identity provider
    *
@@ -335,31 +324,31 @@ class RciamStatsViewerServicesController extends StandardController
     $this->response->body(json_encode($vv_logincounts));
     return $this->response;
   }
-  
+
   /**
    * beforeRender
    *
    * @return void
    */
-  
+
   public function beforeRender()
   {
     parent::beforeRender();
     $tab_settings["idps"] = array(
       'prefix' => 'idp',
-      'ctpName' => 'tab',      
+      'ctpName' => 'tab',
     );
     $tab_settings["sps"] = array(
       'prefix' => 'sp',
-      'ctpName' => 'tab',      
+      'ctpName' => 'tab',
     );
     $tab_settings["registered"] = array(
       'prefix' => 'registered',
-      'ctpName' => 'tab',      
+      'ctpName' => 'tab',
     );
     $this->set('vv_tab_settings', $tab_settings);
   }
-    
+
   /**
    * beforeFilter
    *
@@ -395,10 +384,10 @@ class RciamStatsViewerServicesController extends StandardController
     $p = array();
 
     // Determine what operations this user can perform
-    $p['index'] = ($roles['comember']);
-    $p['getdataforsp'] = ($roles['comember']);
-    $p['getdataforidp'] = ($roles['comember']);
-    $p['getlogincountperday'] = ($roles['comember']);
+    $p['index'] = ($roles['comember'] || $roles['cmadmin'] || $roles['coadmin'] || $roles['couadmin']);
+    $p['getdataforsp'] = ($roles['comember'] || $roles['cmadmin'] || $roles['coadmin'] || $roles['couadmin']);
+    $p['getdataforidp'] = ($roles['comember'] || $roles['cmadmin'] || $roles['coadmin'] || $roles['couadmin']);
+    $p['getlogincountperday'] = ($roles['comember'] || $roles['cmadmin'] || $roles['coadmin'] || $roles['couadmin']);
 
     // Tab Permissions
     $p['idp'] = ($roles['cmadmin'] || $roles['coadmin'] || $roles['couadmin']);

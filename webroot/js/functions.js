@@ -8,13 +8,11 @@ $(document).on("click", ".groupDataByDate", function () {
     type = $(this).closest(".box").attr("data-type")
     $(this).closest(".dataTableDateFilter").find('input[id$="DateFrom"]').each(function () {
         jsDate = ($(this).datepicker("getDate"))
-       dateFrom = convertDate(jsDate);
-       
+        dateFrom = convertDate(jsDate);
     })
     $(this).closest(".dataTableDateFilter").find('input[id$="DateTo"]').each(function () {
         jsDate = ($(this).datepicker("getDate"))
-         dateTo = convertDate(jsDate);
-        
+        dateTo = convertDate(jsDate);
     })
     
     if (dateFrom != null && dateTo != null && dateTo >= dateFrom) {
@@ -34,6 +32,7 @@ $(document).on("click", ".groupDataByDate", function () {
                         item[0]['show_date'] = convertDateByGroup (jsDate, groupBy)
                     })
                     typeDataTable = type;
+                    basis = ' in ' + groupBy + ' basis'
                 }
                 else if (type == 'idp' || type == 'spSpecific') {
                     data = data["idps"]
@@ -45,9 +44,7 @@ $(document).on("click", ".groupDataByDate", function () {
                     typeDataTable = 'sp'
                     basis = ''
                 }
-                else if(type == 'registered'){
-                    basis = ' in ' + groupBy + ' basis'
-                }
+                
                 var options = {}
                 options['idDataTable'] = dataTableToUpdate.attr("id").replace("Container","")
                 options['title'] = boxTitle +' for period ' + dateFrom + ' to ' + dateTo + basis;
@@ -76,7 +73,7 @@ $(document).on("click", ".groupDataByDate", function () {
         $(".overlay").hide();       
         noty({
             text: 'You must fill both Dates From and To',
-            type: 'alert',
+            type: 'erro',
             timeout: 1200,
             dismissQueue: true,
             layout: 'topCenter',
@@ -105,7 +102,7 @@ function createTile(row, bgClass, value, text, days, type = null) {
     else if (type == 'spsTotalInfo')
         data_type = 'data-tab="sp" data-spec="total"';
 
-    if (type != 'registerdTotalInfo') {
+    if (type != 'registeredTotalInfo') {
         row.html('<div class="small-box ' + bgClass + '">' +
             '<div class="inner">' +
             '<h3>' + (value != 0 ? value : 0) + '</h3>' +
@@ -506,6 +503,11 @@ function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
                     pieId = $(element + " .pieChart").attr("id");
                 }
                 drawPieChart(document.getElementById(pieId), dataIdp, "idp");
+
+                //Initialize DataTable Date Range
+                $(element + " .dataTableContainer").closest(".box").find('input[id$="DateFrom"],input[id$="DateTo"]').each(function(){
+                    $(this).val("")
+                })
                 if (tabId == 'sp' && specific == 'specific')
                     createDataTable($(element + " .dataTableContainer"), data['idps'], "idp")
                 else if (tabId == 'idp' && specific == 'total'){ //for Identity Providers Details Tab
@@ -537,6 +539,10 @@ function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
                 }
 
                 drawPieChart(document.getElementById(pieId), dataSp, "sp");
+                //Initialize DataTable Date Range
+                $(element + " .dataTableContainer").closest(".box").find('input[id$="DateFrom"],input[id$="DateTo"]').each(function(){
+                    $(this).val("")
+                })
                 if (tabId == 'idp' && specific == 'specific')
                     createDataTable($(element + " .dataTableContainer"), data['sps'], "sp")
                 else if (tabId == 'sp' && specific == 'total') { //for Service Providers Details Tab
@@ -742,10 +748,10 @@ function getDataForUsersTiles() {
     $.ajax({
         url: url_str_userstiles,
             success: function (dataTiles) {
-            createTile($("#registeredsTotalInfo .row .col-lg-3").eq(0), "bg-blue", (dataTiles[0] ? dataTiles[0] : '0'),  "Total Registered Users", 1, 'registerdTotalInfo')
-            createTile($("#registeredsTotalInfo .row .col-lg-3").eq(1), "bg-aqua", (dataTiles[1] ? dataTiles[1] : '0'), "Last 7 days Registered Users", 7, 'registerdTotalInfo')
-            createTile($("#registeredsTotalInfo .row .col-lg-3").eq(2), "bg-aqua", (dataTiles[2] ? dataTiles[2] : '0'), "Last 30 days Registered Users", 30, 'registerdTotalInfo')
-            createTile($("#registeredsTotalInfo .row .col-lg-3").eq(3), "bg-aqua", (dataTiles[3] ? dataTiles[3] : '0'), "Last Year Registered Users", 365, 'registerdTotalInfo')       
+            createTile($("#registeredsTotalInfo .row .col-lg-3").eq(0), "bg-blue", (dataTiles[0] ? dataTiles[0] : '0'),  "Total Registered Users", 1, 'registeredTotalInfo')
+            createTile($("#registeredsTotalInfo .row .col-lg-3").eq(1), "bg-aqua", (dataTiles[1] ? dataTiles[1] : '0'), "Last 7 days Registered Users", 7, 'registeredTotalInfo')
+            createTile($("#registeredsTotalInfo .row .col-lg-3").eq(2), "bg-aqua", (dataTiles[2] ? dataTiles[2] : '0'), "Last 30 days Registered Users", 30, 'registeredTotalInfo')
+            createTile($("#registeredsTotalInfo .row .col-lg-3").eq(3), "bg-aqua", (dataTiles[3] ? dataTiles[3] : '0'), "Last Year Registered Users", 365, 'registeredTotalInfo')       
         }
     })
     
@@ -762,7 +768,7 @@ function createDataTable(element, data, type, options = null) {
         ths = '<th>' + th + ' Name</th>' +
         '<th>' + th + ' Identifier</th>' +
         '<th>Number of Logins</th>'
-        sort_order = 1
+        sort_order = 2
         
     }
     else if (type == "sp") {
@@ -773,7 +779,7 @@ function createDataTable(element, data, type, options = null) {
         ths = '<th>' + th + ' Name</th>' +
         '<th>' + th + ' Identifier</th>' +
         '<th>Number of Logins</th>'
-        sort_order = 1
+        sort_order = 2
         
     }
     else if (type == "registered") {
