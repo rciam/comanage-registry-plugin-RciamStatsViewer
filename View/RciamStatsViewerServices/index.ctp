@@ -65,18 +65,22 @@ print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker
     var datatableExport = <?php print (($permissions['idp']) ? 1 : 0) ?>;
     var overallText = [];
     var specificText = [];
+    var registeredUsersBy = [];
+    var urlByType = [];
     overallText['idp'] = '<?php print _txt('pl.rciamstatsviewer.idp.overall'); ?>'
     overallText['sp'] = '<?php print _txt('pl.rciamstatsviewer.sp.overall'); ?>'
     specificText['idp'] = '<?php print _txt('pl.rciamstatsviewer.idp.specific'); ?>'
     specificText['sp'] = '<?php print _txt('pl.rciamstatsviewer.sp.specific'); ?>'
-
-    var url_str_idp = '<?php print $this->Html->url(array(
+    registeredUsersBy['weekly'] = '<?php print _txt('pl.rciamstatsviewer.registered.users.weekly'); ?>'
+    registeredUsersBy['monthly'] = '<?php print _txt('pl.rciamstatsviewer.registered.users.monthly'); ?>'
+    registeredUsersBy['yearly'] = '<?php print _txt('pl.rciamstatsviewer.registered.users.yearly'); ?>'
+    urlByType['idp'] = '<?php print $this->Html->url(array(
                             'plugin' => Inflector::singularize(Inflector::tableize($this->plugin)),
                             'controller' => 'rciam_stats_viewer_services',
                             'action' => 'getdataforidp',
                             'co'  => $cur_co['Co']['id']
                         )); ?>';
-    var url_str_sp = '<?php print $this->Html->url(array(
+    urlByType['sp'] = '<?php print $this->Html->url(array(
                             'plugin' => Inflector::singularize(Inflector::tableize($this->plugin)),
                             'controller' => 'rciam_stats_viewer_services',
                             'action' => 'getdataforsp',
@@ -124,6 +128,10 @@ print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker
             createTile($("#" + item + " .row .col-lg-3").eq(3), "bg-red", <?php print !empty($vv_totalloginscount[3]) ? $vv_totalloginscount[3] : '0'; ?>, "Last Year Logins", 365, item)
             }
         });
+
+        // Initialize Date Range Format (DataTable)
+        from_to_range()
+
         var options = {}
         options['idDataTable'] = 'idpDatatable'
         createDataTable($("#idpDatatableContainer"), <?php print json_encode($vv_logincount_per_idp); ?>, "idp", options)
@@ -234,7 +242,6 @@ print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker
             else if ($(this).attr("data-draw") == "drawUsersChart"){ //Initialize whole tab
                 dataTiles = getDataForUsersTiles();
                 updateColumnChart(document.getElementById("registeredsChartDetail"), 'monthly', true);
-
                 $(this).attr("data-draw", "")
             }
         })
@@ -293,8 +300,7 @@ print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker
                 <?php } ?>
             </ul>
             <?php
-            print $this->element('dashboard');
-            
+            print $this->element('dashboard');          
                 foreach ($vv_tab_settings as $key => $value) {
                     if($permissions[$value['prefix']]){
                         print $this->element($value['ctpName'], $value);

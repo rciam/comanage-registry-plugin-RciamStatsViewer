@@ -1,33 +1,57 @@
-$(document).on("click", "a.groupDataByDate", function () {
+
+
+$(document).on("click", ".groupDataByDate", function () {
     
     $(".overlay").show();
     dataTableToUpdate = $(this).closest(".dataTableWithFilter").find(".dataTableContainer")
     boxTitle = $(this).closest(".box").find(".box-title").text();
+    type = $(this).closest(".box").attr("data-type")
     $(this).closest(".dataTableDateFilter").find('input[id$="DateFrom"]').each(function () {
         jsDate = ($(this).datepicker("getDate"))
-        dateFrom = convertDate(jsDate);
+       dateFrom = convertDate(jsDate);
+       
     })
     $(this).closest(".dataTableDateFilter").find('input[id$="DateTo"]').each(function () {
         jsDate = ($(this).datepicker("getDate"))
-        dateTo = convertDate(jsDate);
+         dateTo = convertDate(jsDate);
+        
     })
     
     if (dateFrom != null && dateTo != null && dateTo >= dateFrom) {
         groupBy = $(this).attr('data-value')
-        dates = { dateFrom: dateFrom, dateTo: dateTo, groupBy: groupBy }
+        if(type.includes("Specific"))
+            identifier =  $(this).closest(".box").attr("data-identifier")
+        else
+            identifier = null;
+        dates = { dateFrom: dateFrom, dateTo: dateTo, groupBy: groupBy, type: type, identifier: identifier }
         $.ajax({
             url: url_str_datatable_ranges,
             data: dates,
             success: function (data) {
-
-                data.forEach(function (item) {
-                    jsDate = new Date(item[0]['show_date']);
-                    item[0]['show_date'] = convertDateByGroup (jsDate, groupBy)
-                })
+                if(type == 'registered'){
+                    data.forEach(function (item) {
+                        jsDate = new Date(item[0]['show_date']);
+                        item[0]['show_date'] = convertDateByGroup (jsDate, groupBy)
+                    })
+                    typeDataTable = type;
+                }
+                else if (type == 'idp' || type == 'spSpecific') {
+                    data = data["idps"]
+                    typeDataTable = 'idp'
+                    basis = ''
+                }
+                else if (type == 'sp' || type == 'idpSpecific') {
+                    data = data["sps"]
+                    typeDataTable = 'sp'
+                    basis = ''
+                }
+                else if(type == 'registered'){
+                    basis = ' in ' + groupBy + ' basis'
+                }
                 var options = {}
                 options['idDataTable'] = dataTableToUpdate.attr("id").replace("Container","")
-                options['title'] = boxTitle +' for period ' + convertDateByGroup(new Date(dateFrom), 'daily') + ' to ' + convertDateByGroup(new Date(dateTo), 'daily') + ' in ' + groupBy + ' basis';
-                createDataTable(dataTableToUpdate, data, "registered", options)
+                options['title'] = boxTitle +' for period ' + dateFrom + ' to ' + dateTo + basis;
+                createDataTable(dataTableToUpdate, data, typeDataTable, options)
                 $(".overlay").hide();
             },
             error: function (x, status, error) {
@@ -152,7 +176,20 @@ function createModal(){
                                     '</div>'+
                                     '<div class="pieChart" id="specificChart"></div>'+
                                 '</div>'+
-                                '<div class="dataTableContainer" id="specificDataTableContainer"></div>'+
+                                '<div class="box" data-type="">'+
+                                    '<div class="box-header with-border">'+
+                                        '<h3 class="box-title">Datatable</h3>'+
+                                    '</div>'+
+                                    '<div class="box-body dataTableWithFilter">'+
+                                        '<div class="dataTableDateFilter bg-box-silver">'+
+                                            'From: &nbsp;<input type="text" id="specificDateFrom" name="specificDateFrom" data-provide="datepicker" />'+
+                                            '&nbsp;&nbsp;&nbsp;To: &nbsp;<input type="text" id="specificDateTo" name="specificDateTo" data-provide="datepicker" />'+
+                                            '&nbsp;&nbsp;'+
+                                                '<button type="button" class="btn btn-default groupDataByDate" data-value="daily">Filter</button>'+
+                                        '</div>'+
+                                        '<div class="dataTableContainer" id="specificDataTableContainer"></div>'+
+                                    '</div>'+
+                                '</div>'+
                             '</div>'+
                         '</div>'+
                         '<!-- ./col -->'+
@@ -312,16 +349,13 @@ function drawPieChart(elementId, data, type) {
 // Column Chart
 function drawColumnChart(elementId, data, type, hticks = null) {
     if (type == 'monthly') {
-        format = 'MM/YY'
-        title = 'Dates in Month/Year Format' 
+        format = 'YYYY-MM'       
     }
     else if (type == 'yearly') {
-        format = 'Y'
-        title = 'Dates in Year Format' 
+        format = 'Y'     
     }
     else if (type == 'weekly') {
         format = ''
-        title = 'Dates in No. of Week (Year) Format' 
     }
 
     data.sort([{
@@ -331,12 +365,13 @@ function drawColumnChart(elementId, data, type, hticks = null) {
 
     var options = {
         vAxis: {
-            title: 'Number of Registered Users'
+            title: 'Number of Registered Users',
+            format: '0'
         },
         hAxis: {
             format: format,
             maxTextLines: 2,
-            title: title,
+            title: registeredUsersBy[type], // globar variable found at index.ctp
             textStyle: {fontSize: 15},
             ticks: (type != 'weekly' ? data.getDistinctValues(0) : hticks)
         },
@@ -391,13 +426,16 @@ function updateColumnChart(elementId, range = null, init = false) {
             var dataRange = new google.visualization.arrayToDataTable(fValues);
             drawColumnChart(elementId, dataRange, range, hticks)
             if(init === true){
-                
+                //initialize from_to_range
+                from_to_range()
+
                 data.forEach(function (item){
                     newDate = new Date(item[0]['range_date']);
                     fDate = newDate.getMonth()+1
                     if (fDate < 10)
                         fDate = '0' + fDate
-                    item[0]['show_date'] = fDate + "/" + newDate.getFullYear();
+                    //item[0]['show_date'] = fDate + "/" + newDate.getFullYear();
+                    item[0]['show_date'] =  newDate.getFullYear() + '-' + fDate;
                 })
                 var options = {}
                 options['idDataTable'] = 'registeredDatatable'
@@ -521,7 +559,11 @@ function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
 
 // Modal Functionality
 function goToSpecificProvider(identifier, legend, type) {
-    $("#myModal").modal()   
+    $("#myModal").modal()  
+    // Bug Fix For DatePicker Position When scrolling on modal
+    $("#myModal").on("scroll", function() {
+        $('#myModal input[id$="DateFrom"],#myModal input[id$="DateTo"]').datepicker('place')
+    }); 
     $(".modal .overlay").show();
      $('#myModal').animate({
        scrollTop: 0
@@ -548,15 +590,15 @@ function goToSpecificProvider(identifier, legend, type) {
     })
 
     if (type == "idp") {
-        url_str = url_str_idp
+        
         obj = { idp: identifier };
     }
     else {
-        url_str = url_str_sp
+        
         obj = { sp: identifier };
     }
     $.ajax({
-        url: url_str,
+        url: urlByType[type],
         data: obj,
         success: function (data) {
         
@@ -594,6 +636,7 @@ function goToSpecificProvider(identifier, legend, type) {
             })
 
             var dataTable = new google.visualization.arrayToDataTable(fValues);
+
             $("#specificChart").closest(".box").find(".box-title").html(specificText[type])
             if (type == "idp")
                 drawPieChart(document.getElementById("specificChart"), dataTable, "sp");
@@ -614,7 +657,12 @@ function goToSpecificProvider(identifier, legend, type) {
             
             $("#loginLineChart").closest(".box").find(".box-title").html(overallText[type])
             drawLineChart(document.getElementById("loginLineChart"), dataTable, 'modal')
-
+            //Initialize DataTable Date Range
+            $("#specificDataTableContainer").closest(".box").find('input[id$="DateFrom"],input[id$="DateTo"]').each(function(){
+                $(this).val("")
+            })
+            $("#specificDataTableContainer").closest(".box").attr("data-type", type + 'Specific')
+            $("#specificDataTableContainer").closest(".box").attr("data-identifier", identifier) 
             createDataTable($("#specificDataTableContainer"), data[dataCol], dataCol)
             $(".modal .overlay").hide();
             
@@ -653,11 +701,13 @@ function convertDateByGroup(jsDate, groupBy) {
     day = jsDate.getDate().toString()
     if (day.length < 2)
         day = '0' + day;
-    if (groupBy == 'daily')
-        showDate = day + '/' + month + '/' + jsDate.getFullYear();
+    if (groupBy == 'daily'){
+     //   showDate = day + '/' + month + '/' + jsDate.getFullYear();
+     showDate = jsDate.getFullYear()+ '-' + month + '-' +  day;
+    }
     else if (groupBy == 'weekly') {
-        showDate = day + '/' + month + '/' + jsDate.getFullYear();
-        console.log(showDate + "WEEK DATE")
+        //showDate = day + '/' + month + '/' + jsDate.getFullYear();
+        showDate = jsDate.getFullYear() + '-' + month + '-' + day;
         var nextWeek = new Date(jsDate.setDate(jsDate.getDate() + 6));
         month = (nextWeek.getMonth() + 1).toString()
         if (month.length < 2)
@@ -665,20 +715,24 @@ function convertDateByGroup(jsDate, groupBy) {
         day = nextWeek.getDate().toString()
         if (day.length < 2)
             day = '0' + day;
-        showDate += " - " + day + '/' + month + '/' + nextWeek.getFullYear();
+        //showDate += " - " + day + '/' + month + '/' + nextWeek.getFullYear();
+        showDate += " to " + nextWeek.getFullYear() + '-' + month + '-' + day;
     }
-    else if (groupBy == 'monthly')
-        showDate = month + '/' + jsDate.getFullYear();
+    else if (groupBy == 'monthly'){
+     //   showDate = month + '/' + jsDate.getFullYear();
+        showDate = jsDate.getFullYear() + '-' +  month;
+    }
     else if (groupBy == 'yearly')
         showDate = jsDate.getFullYear();
 
     return showDate;
 }
 // From - To Functionality 
-function from_to_range(element) {
-
+function from_to_range() {
+    
     $('input[id$="DateFrom"],input[id$="DateTo"]').each(function () {
-        $(this).datepicker({ changeMonth: true, changeYear: true, format: "dd/mm/yyyy", autoclose: true });
+        $(this).datepicker({ changeMonth: true, changeYear: true, 
+            format: "yyyy-mm-dd", autoclose: true });
     })
    
 }
@@ -688,7 +742,7 @@ function getDataForUsersTiles() {
     $.ajax({
         url: url_str_userstiles,
             success: function (dataTiles) {
-            createTile($("#registeredsTotalInfo .row .col-lg-3").eq(0), "bg-aqua", (dataTiles[0] ? dataTiles[0] : '0'),  "Total Registered Users", 1, 'registerdTotalInfo')
+            createTile($("#registeredsTotalInfo .row .col-lg-3").eq(0), "bg-blue", (dataTiles[0] ? dataTiles[0] : '0'),  "Total Registered Users", 1, 'registerdTotalInfo')
             createTile($("#registeredsTotalInfo .row .col-lg-3").eq(1), "bg-aqua", (dataTiles[1] ? dataTiles[1] : '0'), "Last 7 days Registered Users", 7, 'registerdTotalInfo')
             createTile($("#registeredsTotalInfo .row .col-lg-3").eq(2), "bg-aqua", (dataTiles[2] ? dataTiles[2] : '0'), "Last 30 days Registered Users", 30, 'registerdTotalInfo')
             createTile($("#registeredsTotalInfo .row .col-lg-3").eq(3), "bg-aqua", (dataTiles[3] ? dataTiles[3] : '0'), "Last Year Registered Users", 365, 'registerdTotalInfo')       
@@ -709,7 +763,7 @@ function createDataTable(element, data, type, options = null) {
         '<th>' + th + ' Identifier</th>' +
         '<th>Number of Logins</th>'
         sort_order = 1
-        from_to = false
+        
     }
     else if (type == "sp") {
         column1 = 'spname'
@@ -720,7 +774,7 @@ function createDataTable(element, data, type, options = null) {
         '<th>' + th + ' Identifier</th>' +
         '<th>Number of Logins</th>'
         sort_order = 1
-        from_to = false
+        
     }
     else if (type == "registered") {
         column1 = 'show_date'
@@ -730,7 +784,7 @@ function createDataTable(element, data, type, options = null) {
         ths = '<th> Date </th>' +
         '<th> Number of Registered Users </th>' 
         sort_order = 0
-        from_to =true
+        
     }
     dataAppend = '';
 
@@ -754,10 +808,7 @@ function createDataTable(element, data, type, options = null) {
         dataAppend +
         '</tbody>' +
         '</table>');
-    if (from_to === true)
-    {
-        from_to_range(element)
-    }
+    
     if(datatableExport){
         $("#" + id).DataTable({
             dom: 'Bfrtip',

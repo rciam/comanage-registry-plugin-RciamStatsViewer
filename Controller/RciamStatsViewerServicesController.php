@@ -191,8 +191,12 @@ class RciamStatsViewerServicesController extends StandardController
     $this->layout = null;
     $dateFrom = $this->request->query['dateFrom'];
     $dateTo = $this->request->query['dateTo'];
-    $data = [];
+    $type = $this->request->query['type'];
+    $identifier = (isset($this->request->query['identifier']) && $this->request->query['identifier']!="") ? $this->request->query['identifier'] : null;
+    $co_id = $this->request->params['named']['co'];
     $groupBy = $this->request->query['groupBy'];
+
+    $data = [];
     if ($dateFrom != null && $dateTo != null && $dateTo > $dateFrom) {
       if ($groupBy === 'daily')
         $trunc_by = 'day';
@@ -204,8 +208,22 @@ class RciamStatsViewerServicesController extends StandardController
         $trunc_by = 'year';
       else
         $trunc_by = 'month';
-      $sql = "select count(*), date_trunc('" . $trunc_by . "', created) as range_date, date_trunc('" . $trunc_by . "', created) as show_date from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=2 AND status='A' AND  created BETWEEN '" . $dateFrom . "' AND '" . $dateTo . "' group by date_trunc('" . $trunc_by . "',created)";
-      $data = $this->RciamStatsViewer->query($sql);
+      if($type === null || $type === 'registered')
+        {
+          $sql = "select count(*), date_trunc('" . $trunc_by . "', created) as range_date, date_trunc('" . $trunc_by . "', created) as show_date from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=".$co_id." AND status='A' AND  created BETWEEN '" . $dateFrom . "' AND '" . $dateTo . "' group by date_trunc('" . $trunc_by . "',created)";
+          $data = $this->RciamStatsViewer->query($sql);
+        }
+      else 
+        {
+          // Try to connect to the database
+          $conn = $this->RciamStatsViewer->connect($co_id);
+          if($type === 'idp' || $type === 'spSpecific'){
+            $data["idps"] = $this->utils->getLoginCountPerIdp($conn, 0, $identifier, $dateFrom, $dateTo, $trunc_by);
+          }
+          else if($type === 'sp' || $type === 'idpSpecific'){
+            $data["sps"] = $this->utils->getLoginCountPerSp($conn, 0, $identifier, $dateFrom, $dateTo, $trunc_by);
+          }
+        }
     }
     $this->response->type('json');
     $this->response->statusCode(201);

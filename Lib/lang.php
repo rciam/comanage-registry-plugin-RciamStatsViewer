@@ -48,6 +48,7 @@ $cm_rciam_stats_viewer_texts['en_US'] = array(
   'pl.rciamstatsviewer.sp.pl'           => 'Service Providers',
   'pl.rciamstatsviewer.idp_details.pl'  => 'Identity Providers Details',
   'pl.rciamstatsviewer.sp_details.pl'   => 'Service Providers Details',
+  'pl.rciamstatsviewer.registered.pl'   => 'Registered Users',
 
   'pl.rciamstatsviewer.registered_details.pl'                => 'Registered Users Details',
   'pl.rciamstatsviewer.statisticsTableName'                  => 'Statistics Table Name',
@@ -68,8 +69,14 @@ $cm_rciam_stats_viewer_texts['en_US'] = array(
   'pl.rciamstatsviewer.sp.numberoflogins.desc'  => 'Click a specific service provider to view detailed statistics.',
   'pl.rciamstatsviewer.idp.specific'            => 'Service Providers that have been accessed by this Identity Provider',
   'pl.rciamstatsviewer.sp.specific'             => 'Identity Providers that have been accessed by this Service Provider',
-  'pl.rciamstatsviewer.registered.users'        => 'Registered Users per Period',
+  'pl.rciamstatsviewer.registered.users.period' => 'Registered Users per Period',
 
+  'pl.rciamstatsviewer.registered.users.weekly'  => 'Week Number (Year)',
+  'pl.rciamstatsviewer.registered.users.monthly' => 'Year-Month',
+  'pl.rciamstatsviewer.registered.users.yearly'  => 'Year',
+
+
+  
   // TODO: We should remove this as soon as we upgrading to CM v3.3 or newer
   'fd.server'                          => 'Server',
   'fd.server.url'                      => 'Server URL',
