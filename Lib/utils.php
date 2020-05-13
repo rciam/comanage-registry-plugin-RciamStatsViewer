@@ -58,36 +58,6 @@ class RciamStatsViewerUtils
     /**
      * @param $conn
      * @param $days
-     * @return mixed
-     */
-    public function getLoginCountPerDay($conn, $days)
-    {
-        assert($conn !== NULL);
-        $queryParams = array();  // Initialize
-        $dbDriver = $this->configData['RciamStatsViewer']['type'];
-        $table_name = $this->configData['RciamStatsViewer']['statisticsTableName'];
-
-        if ($days === 0) {    // 0 = all time
-            if ($dbDriver == 'PG') {
-                $sql = "SELECT year, month, day, SUM(count) AS count FROM $table_name WHERE service != '' GROUP BY year, month, day ORDER BY year DESC,month DESC,day DESC";
-            } else {
-                $sql = "SELECT year, month, day, SUM(count) AS count FROM $table_name WHERE service != '' GROUP BY year DESC,month DESC,day DESC";
-            }
-        } else {
-            if ($dbDriver === 'PG') {
-                $sql = "SELECT year, month, day, SUM(count) AS count FROM $table_name WHERE service != '' AND CAST(CONCAT(year,'-',LPAD(CAST(month AS varchar),2,'0'),'-',LPAD(CAST(day AS varchar),2,'0')) AS date) > current_date - INTERVAL '1 days' * ? GROUP BY year, month, day ORDER BY year DESC,month DESC,day DESC";
-            } else {
-                $sql = "SELECT year, month, day, SUM(count) AS count FROM $table_name WHERE service != '' AND CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE() GROUP BY year DESC,month DESC,day DESC";
-            }
-            $queryParams = array($days);
-        }
-
-        return $this->execQuery($conn, $sql, $queryParams);
-    }
-
-    /**
-     * @param $conn
-     * @param $days
      * @param null $sp
      * @return mixed
      */
@@ -114,7 +84,7 @@ class RciamStatsViewerUtils
                 } else {
                     $sql = "SELECT sourceidp, COALESCE(name,sourceIdp) AS idpname, SUM(count) AS count FROM $tableName LEFT OUTER JOIN $identityProvidersMapTableName ON sourceidp = entityId WHERE service = '" . $sp . "' $subQuery GROUP BY sourceidp, name HAVING sourceidp != '' ORDER BY count DESC";
                 }
-            } else {
+            } else { // MYSQL
                 if ($sp === null) {
                     $sql = "SELECT sourceidp, IFNULL(name,sourceIdp) AS idpname, SUM(count) AS count FROM $tableName LEFT OUTER JOIN $identityProvidersMapTableName ON sourceidp = entityId GROUP BY sourceidp, name HAVING sourceidp != '' ORDER BY count DESC";
                 } else {
@@ -128,7 +98,7 @@ class RciamStatsViewerUtils
                 } else {
                     $sql = "SELECT sourceidp, COALESCE(name,sourceIdp) AS idpname, SUM(count) AS count FROM $tableName LEFT OUTER JOIN $identityProvidersMapTableName ON sourceidp = entityId WHERE service='" . $sp . "' AND CAST(CONCAT(year,'-',LPAD(CAST(month AS varchar),2,'0'),'-',LPAD(CAST(day AS varchar),2,'0')) AS date) > current_date - INTERVAL '1 days' * ? GROUP BY sourceidp, idpname HAVING sourceidp != '' ORDER BY count DESC";
                 }
-            } else {
+            } else { // MYSQL
                 if ($sp === null) {
                     $sql = "SELECT sourceidp, IFNULL(name,sourceIdp) AS idpname, SUM(count) AS count FROM $tableName LEFT OUTER JOIN $identityProvidersMapTableName ON sourceidp = entityId WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE() GROUP BY sourceidp, idpname HAVING sourceidp != '' ORDER BY count DESC";
                 } else {
@@ -148,7 +118,7 @@ class RciamStatsViewerUtils
      * @param null $idp
      * @return mixed
      */
-    public function getLoginCountPerSp($conn, $days, $idp = null, $dateFrom = null, $dateTo = null, $trunc_by = null )
+    public function getLoginCountPerSp($conn, $days, $idp = null, $dateFrom = null, $dateTo = null)
     {
         assert($conn !== NULL);
         $queryParams = array();  // Initialize
@@ -207,32 +177,36 @@ class RciamStatsViewerUtils
      * @param $type
      * @return mixed
      */
-    public function getLoginCountPerDayForProvider($conn, $days, $identifier, $providerType)
+    public function getLoginCountPerDayForProvider($conn, $days, $identifier = NULL, $providerType = NULL)
     {
         $dbDriver = $this->configData['RciamStatsViewer']['type'];
         $queryParams = array();  // Initialize
         assert($conn !== NULL);
         $table_name =  $this->configData['RciamStatsViewer']['statisticsTableName'];
-        if($providerType == "idp"){
-            $column = "sourceidp";
+        if($providerType == 'idp'){
+            $column = 'sourceidp = ?';
         }
-        else if($providerType == "sp"){
-            $column = "service";
+        else if($providerType == 'sp'){
+            $column = 'service = ?';
+        }
+        else if ($providerType == null){
+            $column = 'service != ?';
+            $identifier = '';
         }
         if ($days === 0) {    // 0 = all time
             if ($dbDriver === 'PG') {
-                $sql = "SELECT year, month, day, SUM(count) AS count FROM $table_name WHERE $column=? GROUP BY year, month,day ORDER BY year DESC,month DESC,day DESC";
+                $sql = "SELECT year, month, day, SUM(count) AS count FROM $table_name WHERE $column GROUP BY year, month,day ORDER BY year DESC,month DESC,day DESC";
             } else {
-                $sql = "SELECT year, month, day, SUM(count) AS count FROM $table_name WHERE $column=? GROUP BY year DESC,month DESC,day DESC";
+                $sql = "SELECT year, month, day, SUM(count) AS count FROM $table_name WHERE $column GROUP BY year DESC,month DESC,day DESC";
             }
             $queryParams = array(
                 $identifier
             );
-        } else {
+        } else { // MYSQL
             if ($dbDriver === 'PG') {
-                $sql = "SELECT year, month, day, SUM(count) AS count FROM $table_name WHERE $column=? AND CAST(CONCAT(year,'-',LPAD(CAST(month AS varchar),2,'0'),'-',LPAD(CAST(day AS varchar),2,'0')) AS date) > current_date - INTERVAL '1 days' * ? GROUP BY year, month, day ORDER BY year DESC,month DESC,day DESC";
+                $sql = "SELECT year, month, day, SUM(count) AS count FROM $table_name WHERE $column AND CAST(CONCAT(year,'-',LPAD(CAST(month AS varchar),2,'0'),'-',LPAD(CAST(day AS varchar),2,'0')) AS date) > current_date - INTERVAL '1 days' * ? GROUP BY year, month, day ORDER BY year DESC,month DESC,day DESC";
             } else {
-                $sql = "SELECT year, month, day, SUM(count) AS count FROM $table_name WHERE $column=? AND CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE() GROUP BY year DESC,month DESC,day DESC";
+                $sql = "SELECT year, month, day, SUM(count) AS count FROM $table_name WHERE $column AND CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE() GROUP BY year DESC,month DESC,day DESC";
             }
             $queryParams = array(
                 $identifier,
@@ -260,7 +234,7 @@ class RciamStatsViewerUtils
         if ($days === 0) {    // 0 = all time
             if ($dbDriver === 'PG') {
                 $query = "SELECT sourceIdp, service, COALESCE(name,sourceIdp) AS idpname, SUM(count) AS count FROM $table_name LEFT OUTER JOIN $identityProvidersMapTableName ON sourceIdp = entityId GROUP BY sourceIdp, service, idpname HAVING sourceIdp != '' AND service = ? ORDER BY count DESC";
-            } else {
+            } else { // MYSQL
                 $query = "SELECT sourceIdp, service, IFNULL(name,sourceIdp) AS idpname, SUM(count) AS count FROM $table_name LEFT OUTER JOIN $identityProvidersMapTableName ON sourceIdp = entityId GROUP BY sourceIdp, service HAVING sourceIdp != '' AND service = ?  ORDER BY count DESC";
             }
             $queryParams = array(
@@ -269,7 +243,7 @@ class RciamStatsViewerUtils
         } else {
             if ($dbDriver === 'PG') {
                 $query = "SELECT year, month, day, sourceIdp, service, COALESCE(name,sourceIdp) AS idpname, SUM(count) AS count FROM $table_name LEFT OUTER JOIN $identityProvidersMapTableName ON sourceIdp = entityId WHERE CAST(CONCAT(year,'-',LPAD(CAST(month AS varchar),2,'0'),'-',LPAD(CAST(day AS varchar),2,'0')) AS date) > current_date - INTERVAL '1 days' * ? GROUP BY sourceIdp, service, idpname, year, month, day HAVING sourceIdp != '' AND service = ? ORDER BY count DESC";
-            } else {
+            } else { // MYSQL
                 $query = "SELECT year, month, day, sourceIdp, service, IFNULL(name,sourceIdp) AS idpname, SUM(count) AS count FROM $table_name LEFT OUTER JOIN $identityProvidersMapTableName ON sourceIdp = entityId WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE() GROUP BY sourceIdp, service HAVING sourceIdp != '' AND service = ? ORDER BY count DESC";
             }
             $queryParams = array(
@@ -297,7 +271,7 @@ class RciamStatsViewerUtils
         if ($days === 0) {    // 0 = all time
             if ($dbDriver === 'PG') {
                 $query = "SELECT sourceIdp, service, COALESCE(name,service) AS spname, SUM(count) AS count FROM $table_name LEFT OUTER JOIN $serviceProvidersMapTableName ON service = identifier GROUP BY sourceIdp, service, name HAVING service != '' AND sourceIdp = ? ORDER BY count DESC";
-            } else {
+            } else { // MYSQL
                 $query = "SELECT sourceIdp, service, IFNULL(name,service) AS spname, SUM(count) AS count FROM $table_name LEFT OUTER JOIN $serviceProvidersMapTableName ON service = identifier GROUP BY sourceIdp, service HAVING service != '' AND sourceIdp = ? ORDER BY count DESC";
             }
             $queryParams = array(
@@ -306,7 +280,7 @@ class RciamStatsViewerUtils
         } else {
             if ($dbDriver === 'PG') {
                 $query = "SELECT year, month, day, sourceIdp, service, COALESCE(name,service) AS spname, SUM(count) AS count FROM $table_name LEFT OUTER JOIN $serviceProvidersMapTableName ON service = identifier WHERE CAST(CONCAT(year,'-',LPAD(CAST(month AS varchar),2,'0'),'-',LPAD(CAST(day AS varchar),2,'0')) AS date) > current_date - INTERVAL '1 days' * ? GROUP BY sourceIdp, service, name, year, month, day HAVING service != '' AND sourceIdp = :idpEntityId ORDER BY count DESC";
-            } else {
+            } else { // MYSQL
                 $query = "SELECT year, month, day, sourceIdp, service, IFNULL(name,service) AS spname, SUM(count) AS count FROM $table_name LEFT OUTER JOIN $serviceProvidersMapTableName ON service = identifier WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE() GROUP BY sourceIdp, service HAVING service != '' AND sourceIdp = ? ORDER BY count DESC";
             }
             $queryParams = array(
