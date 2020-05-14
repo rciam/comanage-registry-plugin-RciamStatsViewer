@@ -625,6 +625,7 @@ function goToSpecificProvider(identifier, legend, type) {
                 columnNames = ['service', 'serviceIdentifier', 'Count'];
                 dataCol = 'sp';
                 columns = ['spname', 'service', 'count'];
+                dataTableTitle = 'Service Providers Datatable'
             }
             else {
                 columnNames = ['sourceIdp', 'sourceIdPEntityId', 'Count'];
@@ -663,6 +664,8 @@ function goToSpecificProvider(identifier, legend, type) {
             
             $("#loginLineChart").closest(".box").find(".box-title").html(overallText[type])
             drawLineChart(document.getElementById("loginLineChart"), dataTable, 'modal')
+            //Set DataTable Title
+            $("#specificDataTableContainer").closest(".box").find('.box-title').text(specificTextDataTable[type]);//global variable initialized at index.ctp
             //Initialize DataTable Date Range
             $("#specificDataTableContainer").closest(".box").find('input[id$="DateFrom"],input[id$="DateTo"]').each(function(){
                 $(this).val("")

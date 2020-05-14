@@ -65,12 +65,15 @@ print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker
     var datatableExport = <?php print (($permissions['idp']) ? 1 : 0) ?>;
     var overallText = [];
     var specificText = [];
+    var specificTextDataTable = [];
     var registeredUsersBy = [];
     var urlByType = [];
     overallText['idp'] = '<?php print _txt('pl.rciamstatsviewer.idp.overall'); ?>'
     overallText['sp'] = '<?php print _txt('pl.rciamstatsviewer.sp.overall'); ?>'
     specificText['idp'] = '<?php print _txt('pl.rciamstatsviewer.idp.specific'); ?>'
     specificText['sp'] = '<?php print _txt('pl.rciamstatsviewer.sp.specific'); ?>'
+    specificTextDataTable['idp'] = '<?php print _txt('pl.rciamstatsviewer.idp.specific.datatable'); ?>'
+    specificTextDataTable['sp'] = '<?php print _txt('pl.rciamstatsviewer.sp.specific.datatable'); ?>'
     registeredUsersBy['weekly'] = '<?php print _txt('pl.rciamstatsviewer.registered.users.weekly'); ?>'
     registeredUsersBy['monthly'] = '<?php print _txt('pl.rciamstatsviewer.registered.users.monthly'); ?>'
     registeredUsersBy['yearly'] = '<?php print _txt('pl.rciamstatsviewer.registered.users.yearly'); ?>'
