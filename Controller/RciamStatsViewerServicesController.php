@@ -90,7 +90,7 @@ class RciamStatsViewerServicesController extends StandardController
    *
    * @return void
    */
-  
+
   public function getdataforuserstiles()
   {
     $this->log(__METHOD__ . '::@', LOG_DEBUG);
@@ -156,15 +156,15 @@ class RciamStatsViewerServicesController extends StandardController
     $this->autoRender = false; // We don't render a view
     $this->request->onlyAllow('ajax'); // No direct access via browser URL
     $this->layout = null;
-
+    $co_id = $this->request->params['named']['co'];
     $range = $this->request->query['range'];
     if ($range == null || $range == 'monthly') {
-      $sql = "select count(*), date_trunc( 'month', created ) as range_date from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=2 AND status='A' AND created >
+      $sql = "select count(*), date_trunc( 'month', created ) as range_date from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=$co_id AND status='A' AND created >
       date_trunc('month', CURRENT_DATE) - INTERVAL '1 year' group by date_trunc( 'month', created ) ORDER BY date_trunc( 'month', created ) DESC";
     } else if ($range == 'yearly')
-      $sql = "select count(*), date_trunc( 'year', created ) as range_date from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=2 AND status='A' group by date_trunc( 'year', created ) ORDER BY date_trunc( 'year', created ) DESC";
+      $sql = "select count(*), date_trunc( 'year', created ) as range_date from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=$co_id AND status='A' group by date_trunc( 'year', created ) ORDER BY date_trunc( 'year', created ) DESC";
     else if ($range == 'weekly')
-      $sql = "select count(*), date_trunc( 'week', created ) as range_date from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=2 AND status='A' AND created >
+      $sql = "select count(*), date_trunc( 'week', created ) as range_date from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=$co_id AND status='A' AND created >
       date_trunc('month', CURRENT_DATE) - INTERVAL '6 months' group by date_trunc( 'week', created ) ORDER BY date_trunc( 'week', created ) DESC";
 
     $data = $this->RciamStatsViewer->query($sql);
