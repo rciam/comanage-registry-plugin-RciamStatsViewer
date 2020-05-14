@@ -90,6 +90,7 @@ class RciamStatsViewerServicesController extends StandardController
    *
    * @return void
    */
+  
   public function getdataforuserstiles()
   {
     $this->log(__METHOD__ . '::@', LOG_DEBUG);
@@ -148,6 +149,7 @@ class RciamStatsViewerServicesController extends StandardController
    *
    * @return void
    */
+
   public function getdataforuserschart()
   {
     $this->log(__METHOD__ . '::@', LOG_DEBUG);
