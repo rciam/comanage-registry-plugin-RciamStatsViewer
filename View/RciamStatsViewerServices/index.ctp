@@ -218,7 +218,7 @@ print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker
             getLoginCountPerDay(url_str, days, identifier, type, tabId, specific);
         })
 
-        // Datable Links Functionality 
+        // DataTable Links Functionality 
         $(document).on("click", ".datatable-link", function() {
             identifier = $(this).attr("data-identifier")
             type = $(this).attr("data-type")
@@ -296,14 +296,14 @@ print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker
                     <li><a data-draw="drawIdpsChart" href='#idpTab'><?php print _txt('pl.rciamstatsviewer.idp_details.pl'); ?></a></li>
                 <?php } ?>
                 <?php if ($permissions["sp"]) {?>
-                <li><a data-draw="drawSpsChart" href='#spTab'><?php print _txt('pl.rciamstatsviewer.sp_details.pl'); ?></a></li>
+                    <li><a data-draw="drawSpsChart" href='#spTab'><?php print _txt('pl.rciamstatsviewer.sp_details.pl'); ?></a></li>
                 <?php } ?>
                 <?php if ($permissions["registered"]) {?>
-                <li><a data-draw="drawUsersChart" href='#registeredTab'><?php print _txt('pl.rciamstatsviewer.registered_details.pl'); ?></a></li>
+                    <li><a data-draw="drawUsersChart" href='#registeredTab'><?php print _txt('pl.rciamstatsviewer.registered_details.pl'); ?></a></li>
                 <?php } ?>
             </ul>
             <?php
-            print $this->element('dashboard');          
+                print $this->element('dashboard');          
                 foreach ($vv_tab_settings as $key => $value) {
                     if($permissions[$value['prefix']]){
                         print $this->element($value['ctpName'], $value);
@@ -315,5 +315,4 @@ print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker
     <div class="overlay">
         <div id="coSpinner"></div>
     </div>
-
 </div>
