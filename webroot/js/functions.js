@@ -419,7 +419,7 @@ function updateColumnChart(elementId, range = null, init = false) {
                     hticks.push({v: valueRange, f: getWeekNumber(valueRange)})
                     fValues.push(temp);
                 })
-            //console.log(fValues)
+            
             var dataRange = new google.visualization.arrayToDataTable(fValues);
             drawColumnChart(elementId, dataRange, range, hticks)
             if(init === true){

@@ -211,13 +211,34 @@ class RciamStatsViewerServicesController extends StandardController
           $trunc_by = 'month';
         $sql = "select count(*), date_trunc('" . $trunc_by . "', created) as range_date, date_trunc('" . $trunc_by . "', created) as show_date from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=" . $co_id . " AND status='A' AND  created BETWEEN '" . $dateFrom . "' AND '" . $dateTo . "' group by date_trunc('" . $trunc_by . "',created)";
         $data = $this->RciamStatsViewer->query($sql);
-      } else {
-        // Try to connect to the database
-        $conn = $this->RciamStatsViewer->connect($co_id);
-        if ($type === 'idp' || $type === 'spSpecific') {
-          $data["idps"] = $this->utils->getLoginCountPerIdp($conn, 0, $identifier, $dateFrom, $dateTo);
-        } else if ($type === 'sp' || $type === 'idpSpecific') {
-          $data["sps"] = $this->utils->getLoginCountPerSp($conn, 0, $identifier, $dateFrom, $dateTo);
+      } 
+      else 
+      {
+        $fail = false;
+        try {
+          // Try to connect to the database
+          $conn = $this->RciamStatsViewer->connect($co_id);
+          if ($type === 'idp' || $type === 'spSpecific') {
+            $data["idps"] = $this->utils->getLoginCountPerIdp($conn, 0, $identifier, $dateFrom, $dateTo);
+          } else if ($type === 'sp' || $type === 'idpSpecific') {
+            $data["sps"] = $this->utils->getLoginCountPerSp($conn, 0, $identifier, $dateFrom, $dateTo);
+          }
+        } catch (MissingConnectionException $e) {
+          $this->log(__METHOD__ . ':: Database Connection failed. Error Message::' . $e->getMessage(), LOG_DEBUG);
+          $this->Flash->set(_txt('er.rciam_stats_viewer.db.connect', array($e->getMessage())), array('key' => 'error'));
+          $fail = true;
+        } catch (InvalidArgumentException $e) {
+          $this->Flash->set(_txt('er.rciam_stats_viewer.db.action', array($e->getMessage())), array('key' => 'error'));
+          $fail = true;
+        } catch (RuntimeException $e) {
+          $this->Flash->set(_txt('er.rciam_stats_viewer.db.action', array($e->getMessage())), array('key' => 'error'));
+          $fail = true;
+        } finally {
+          if ($fail) {
+            // Initialize frontend placeholders
+            $data["sps"] = [];
+            $data["idps"] = [];
+          }
         }
       }
     }
@@ -241,23 +262,44 @@ class RciamStatsViewerServicesController extends StandardController
     $this->autoRender = false; // We don't render a view
     $this->request->onlyAllow('ajax'); // No direct access via browser URL
     $this->layout = null;
-    $days = intVal($this->request->query['days']);
-    $identifier = (isset($this->request->query['identifier']) ? $this->request->query['identifier'] : null);
-    $type = (isset($this->request->query['type']) && $this->request->query['type'] != '' ? $this->request->query['type'] : null);
-    $conn = $this->RciamStatsViewer->connect($this->request->params['named']['co']);
+    $co_id = $this->request->params['named']['co'];
+    try {
+      $fail = false;
+      $conn = $this->RciamStatsViewer->connect($co_id);
 
-    if ($type === null) {
-      $vv_logincount_per_day['range'] = $this->utils->getLoginCountPerDayForProvider($conn, $days);
-      $vv_logincount_per_day['idps'] = $this->utils->getLoginCountPerIdp($conn, $days);
-      $vv_logincount_per_day['sps'] = $this->utils->getLoginCountPerSp($conn, $days);
-    } else if ($type === "idp") {
-      $vv_logincount_per_day['range'] = $this->utils->getLoginCountPerDayForProvider($conn, $days, $identifier, $type);
-      $vv_logincount_per_day['sps'] = $this->utils->getLoginCountPerSp($conn, $days, $identifier);
-    } else if ($type === "sp") {
-      $vv_logincount_per_day['range'] = $this->utils->getLoginCountPerDayForProvider($conn, $days, $identifier, $type);
-      $vv_logincount_per_day['idps'] = $this->utils->getLoginCountPerIdp($conn, $days, $identifier);
+      $days = intVal($this->request->query['days']);
+      $identifier = (isset($this->request->query['identifier']) ? $this->request->query['identifier'] : null);
+      $type = (isset($this->request->query['type']) && $this->request->query['type'] != '' ? $this->request->query['type'] : null);
+
+      if ($type === null) {
+        $vv_logincount_per_day['range'] = $this->utils->getLoginCountPerDayForProvider($conn, $days);
+        $vv_logincount_per_day['idps'] = $this->utils->getLoginCountPerIdp($conn, $days);
+        $vv_logincount_per_day['sps'] = $this->utils->getLoginCountPerSp($conn, $days);
+      } else if ($type === "idp") {
+        $vv_logincount_per_day['range'] = $this->utils->getLoginCountPerDayForProvider($conn, $days, $identifier, $type);
+        $vv_logincount_per_day['sps'] = $this->utils->getLoginCountPerSp($conn, $days, $identifier);
+      } else if ($type === "sp") {
+        $vv_logincount_per_day['range'] = $this->utils->getLoginCountPerDayForProvider($conn, $days, $identifier, $type);
+        $vv_logincount_per_day['idps'] = $this->utils->getLoginCountPerIdp($conn, $days, $identifier);
+      }
+    } catch (MissingConnectionException $e) {
+      $this->log(__METHOD__ . ':: Database Connection failed. Error Message::' . $e->getMessage(), LOG_DEBUG);
+      $this->Flash->set(_txt('er.rciam_stats_viewer.db.connect', array($e->getMessage())), array('key' => 'error'));
+      $fail = true;
+    } catch (InvalidArgumentException $e) {
+      $this->Flash->set(_txt('er.rciam_stats_viewer.db.action', array($e->getMessage())), array('key' => 'error'));
+      $fail = true;
+    } catch (RuntimeException $e) {
+      $this->Flash->set(_txt('er.rciam_stats_viewer.db.action', array($e->getMessage())), array('key' => 'error'));
+      $fail = true;
+    } finally {
+      if ($fail) {
+        // Initialize frontend placeholders
+        $vv_logincount_per_day['range'] = [];
+        $vv_logincount_per_day['idps'] = [];
+        $vv_logincount_per_day['sps'] = [];
+      }
     }
-
     $this->response->type('json');
     $this->response->statusCode(201);
     $this->response->body(json_encode($vv_logincount_per_day));
