@@ -124,7 +124,7 @@ function createTile(row, bgClass, value, text, days, type = null) {
 
 // Create Modal
 function createModal(){
-    $("body").append('<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">'+
+    modalContent = '<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">'+
         '<div class="modal-dialog modal-xl" role="document">'+
             '<div class="modal-content  overlay-wrapper">'+
             '<div class="modal-header">'+
@@ -177,14 +177,16 @@ function createModal(){
                                     '<div class="box-header with-border">'+
                                         '<h3 class="box-title">Datatable</h3>'+
                                     '</div>'+
-                                    '<div class="box-body dataTableWithFilter">'+
-                                        '<div class="dataTableDateFilter bg-box-silver">'+
-                                            'From: &nbsp;<input type="text" id="specificDateFrom" name="specificDateFrom" data-provide="datepicker" />'+
-                                            '&nbsp;&nbsp;&nbsp;To: &nbsp;<input type="text" id="specificDateTo" name="specificDateTo" data-provide="datepicker" />'+
-                                            '&nbsp;&nbsp;'+
-                                                '<button type="button" class="btn btn-default groupDataByDate" data-value="daily">Filter</button>'+
-                                        '</div>'+
-                                        '<div class="dataTableContainer" id="specificDataTableContainer"></div>'+
+                                    '<div class="box-body dataTableWithFilter">'
+    if(datatableExport){
+        modalContent += '<div class="dataTableDateFilter bg-box-silver">'+
+            'From: &nbsp;<input type="text" id="specificDateFrom" name="specificDateFrom" data-provide="datepicker" />'+
+            '&nbsp;&nbsp;&nbsp;To: &nbsp;<input type="text" id="specificDateTo" name="specificDateTo" data-provide="datepicker" />'+
+            '&nbsp;&nbsp;'+
+                '<button type="button" class="btn btn-default groupDataByDate" data-value="daily">Filter</button>'+
+        '</div>'
+    }
+    modalContent += '<div class="dataTableContainer" id="specificDataTableContainer"></div>'+
                                     '</div>'+
                                 '</div>'+
                             '</div>'+
@@ -200,7 +202,8 @@ function createModal(){
             '</div>'+
         '</div>'+
     '</div>'+
-'</div>');
+'</div>'
+$("body").append(modalContent);
 }
 
 // This is for Dates with no logins, we have to set 0 for these dates
@@ -625,7 +628,7 @@ function goToSpecificProvider(identifier, legend, type) {
                 columnNames = ['service', 'serviceIdentifier', 'Count'];
                 dataCol = 'sp';
                 columns = ['spname', 'service', 'count'];
-                dataTableTitle = 'Service Providers Datatable'
+                
             }
             else {
                 columnNames = ['sourceIdp', 'sourceIdPEntityId', 'Count'];
@@ -825,7 +828,7 @@ function createDataTable(element, data, type, options = null) {
             buttons: [
                 {
                     extend: 'collection',
-                    text: 'Export DataTable',
+                    text: dataTableExportButtonText,
                     buttons: [
                         'copy',
                         {

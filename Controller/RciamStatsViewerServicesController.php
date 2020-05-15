@@ -436,7 +436,7 @@ class RciamStatsViewerServicesController extends StandardController
     // Tab Permissions
     $p['idp'] = ($roles['cmadmin'] || $roles['coadmin'] || $roles['couadmin']);
     $p['sp'] = ($roles['cmadmin'] || $roles['coadmin'] || $roles['couadmin']);
-    $p['registered'] = ($roles['cmadmin'] || $roles['coadmin'] || $roles['couadmin']);
+    $p['registered'] = ($roles['cmadmin'] || $roles['coadmin']);
     $this->set('permissions', $p);
 
     return ($p[$this->action]);
