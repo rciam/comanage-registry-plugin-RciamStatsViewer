@@ -124,7 +124,7 @@ class RciamStatsViewersController extends StandardController
   /**
    * Edit Rciam Stats Viewer Settings
    *
-   * @param  $id
+   * @param integer $id
    * @return void
    */
   public function edit($id=null) {
@@ -175,7 +175,7 @@ class RciamStatsViewersController extends StandardController
       $this->set('vv_dbdriver_type_list', RciamStatsViewerDBDriverTypeEnum::type);
 
       // Return the existing data if any
-      $this->set('rciam_stats_viewers', $configData);
+      $this->set('vv_rciam_stats_viewers', $configData);
     }
   }
 
@@ -183,7 +183,7 @@ class RciamStatsViewersController extends StandardController
    * For Models that accept a CO ID, find the provided CO ID.
    * - precondition: A coid must be provided in $this->request (params or data)
    *
-   * @since  COmanage Registry v2.0.0
+   * @since  COmanage Registry v3.1.x
    * @return Integer The CO ID if found, or -1 if not
    */
 
@@ -203,7 +203,7 @@ class RciamStatsViewersController extends StandardController
    * - precondition: Session.Auth holds data used for auth decisions
    * - postcondition: $permissions set with calculated permissions
    *
-   * @since  COmanage Registry v2.0.0
+   * @since  COmanage Registry v3.1.x
    * @return Array Permissions
    */
 
@@ -217,7 +217,7 @@ class RciamStatsViewersController extends StandardController
     // Determine what operations this user can perform
     $p['edit'] = ($roles['cmadmin'] || $roles['coadmin']);
     $p['testconnection'] = true;
-    $this->set('permissions', $p);
+    $this->set('vv_permissions', $p);
     
     return($p[$this->action]);
   }

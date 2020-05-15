@@ -21,7 +21,7 @@
  * 
  * @link          http://www.internet2.edu/comanage COmanage Project
  * @package       registry-plugin
- * @since         COmanage Registry v2.0.0
+ * @since         COmanage Registry v3.1.x
  * @license       Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
  */
 -->
@@ -29,11 +29,11 @@
   // Determine if fields are editable
   $e = false;
   
-  if($this->action == "edit" && $permissions['edit'])
+  if($this->action == "edit" && $vv_permissions['edit'])
     $e = true;
     
   // We shouldn't get here if we don't have at least read permission, but check just in case
-  if(!$e && !$permissions['view'])
+  if(!$e && !$vv_permissions['view'])
     return false;
   
   // Add breadcrumbs
@@ -75,8 +75,8 @@
                 </div>
                 <div class="field-info">
                   <?php
-                  $value = empty($rciam_stats_viewers['RciamStatsViewer']['hostname']) ? ''
-                          : filter_var($rciam_stats_viewers['RciamStatsViewer']['hostname'],FILTER_SANITIZE_SPECIAL_CHARS);
+                  $value = empty($vv_rciam_stats_viewers['RciamStatsViewer']['hostname']) ? ''
+                          : filter_var($vv_rciam_stats_viewers['RciamStatsViewer']['hostname'],FILTER_SANITIZE_SPECIAL_CHARS);
                   print $this->Form->input('hostname', array('size' => 50,'value' => $value));
                   ?>
                 </div>
@@ -89,8 +89,8 @@
                   </div>
                 <div class="field-info">
                   <?php
-                    $value = empty($rciam_stats_viewers['RciamStatsViewer']['port']) ? ''
-                             : filter_var($rciam_stats_viewers['RciamStatsViewer']['port'],FILTER_SANITIZE_SPECIAL_CHARS);
+                    $value = empty($vv_rciam_stats_viewers['RciamStatsViewer']['port']) ? ''
+                             : filter_var($vv_rciam_stats_viewers['RciamStatsViewer']['port'],FILTER_SANITIZE_SPECIAL_CHARS);
                     $options = array(
                       'value' => $value,
                       'type'  => 'number',
@@ -110,7 +110,7 @@
                   <?php
                     global $cm_lang, $cm_texts;
                     $attrs = array();
-                    $attrs['value'] = (isset($rciam_stats_viewers) ? $rciam_stats_viewers['RciamStatsViewer']['type'] : '');
+                    $attrs['value'] = (isset($vv_rciam_stats_viewers) ? $vv_rciam_stats_viewers['RciamStatsViewer']['type'] : '');
                     $attrs['empty'] = false;
 
                     if($e) {
@@ -122,7 +122,7 @@
                         print $this->Form->error('type');
                       }
                     } else {
-                      print _txt('en.server.sql', null, $rciam_stats_viewers['RciamStatsViewer']['type']);
+                      print _txt('en.server.sql', null, $vv_rciam_stats_viewers['RciamStatsViewer']['type']);
                     }
                   ?>
                 </div>
@@ -136,8 +136,8 @@
                 </div>
                 <div class="field-info">
                   <?php
-                    $value = empty($rciam_stats_viewers['RciamStatsViewer']['username']) ? ''
-                    : filter_var($rciam_stats_viewers['RciamStatsViewer']['username'],FILTER_SANITIZE_SPECIAL_CHARS);
+                    $value = empty($vv_rciam_stats_viewers['RciamStatsViewer']['username']) ? ''
+                    : filter_var($vv_rciam_stats_viewers['RciamStatsViewer']['username'],FILTER_SANITIZE_SPECIAL_CHARS);
                     print $this->Form->input('username', array('size' => 50,'value' => $value));
                   ?>
                 </div>
@@ -151,8 +151,8 @@
                 </div>
                 <div class="field-info">
                   <?php
-                    $value = empty($rciam_stats_viewers['RciamStatsViewer']['password']) ? ''
-                    : filter_var($rciam_stats_viewers['RciamStatsViewer']['password'],FILTER_SANITIZE_SPECIAL_CHARS);
+                    $value = empty($vv_rciam_stats_viewers['RciamStatsViewer']['password']) ? ''
+                    : filter_var($vv_rciam_stats_viewers['RciamStatsViewer']['password'],FILTER_SANITIZE_SPECIAL_CHARS);
                     print $this->Form->input('password', array('size' => 50,'value' => $value));
                   ?>
                 </div>
@@ -166,8 +166,8 @@
                 </div>
                 <div class="field-info">
                   <?php
-                    $value = empty($rciam_stats_viewers['RciamStatsViewer']['databas']) ? ''
-                    : filter_var($rciam_stats_viewers['RciamStatsViewer']['databas'],FILTER_SANITIZE_SPECIAL_CHARS);
+                    $value = empty($vv_rciam_stats_viewers['RciamStatsViewer']['databas']) ? ''
+                    : filter_var($vv_rciam_stats_viewers['RciamStatsViewer']['databas'],FILTER_SANITIZE_SPECIAL_CHARS);
                     print $this->Form->input('databas', array('size' => 50,'value' => $value));
                   ?>
                 </div>
@@ -182,7 +182,7 @@
                 <div class="field-info">
                   <?php
                     $attrs = array();
-                    $attrs['value'] = (isset($rciam_stats_viewers) ? $rciam_stats_viewers['RciamStatsViewer']['persistent'] : '');
+                    $attrs['value'] = (isset($vv_rciam_stats_viewers) ? $vv_rciam_stats_viewers['RciamStatsViewer']['persistent'] : '');
                     $attrs['empty'] = false;
 
                     if($e) {
@@ -194,7 +194,7 @@
                         print $this->Form->error('persistent');
                       }
                     } else {
-                      print _txt('en.server.sql', null, $rciam_stats_viewers['RciamStatsViewer']['persistent']);
+                      print _txt('en.server.sql', null, $vv_rciam_stats_viewers['RciamStatsViewer']['persistent']);
                     }
 
                   ?>
@@ -210,7 +210,7 @@
                 <div class="field-info">
                   <?php
                     $attrs = array();
-                    $attrs['value'] = (isset($rciam_stats_viewers) ? $rciam_stats_viewers['RciamStatsViewer']['encoding'] : '');
+                    $attrs['value'] = (isset($vv_rciam_stats_viewers) ? $vv_rciam_stats_viewers['RciamStatsViewer']['encoding'] : '');
                     $attrs['empty'] = false;
 
                     if($e) {
@@ -222,7 +222,7 @@
                         print $this->Form->error('encoding');
                       }
                     } else {
-                      print _txt('en.server.sql', null, $rciam_stats_viewers['RciamStatsViewer']['encoding']);
+                      print _txt('en.server.sql', null, $vv_rciam_stats_viewers['RciamStatsViewer']['encoding']);
                     }
 
                   ?>
@@ -258,8 +258,8 @@
                     </div>
                     <div class="field-info">
                       <?php
-                        $value = empty($rciam_stats_viewers['RciamStatsViewer']['statisticsTableName']) ? ''
-                        : filter_var($rciam_stats_viewers['RciamStatsViewer']['statisticsTableName'],FILTER_SANITIZE_SPECIAL_CHARS);
+                        $value = empty($vv_rciam_stats_viewers['RciamStatsViewer']['statisticsTableName']) ? ''
+                        : filter_var($vv_rciam_stats_viewers['RciamStatsViewer']['statisticsTableName'],FILTER_SANITIZE_SPECIAL_CHARS);
                         print $this->Form->input('statisticsTableName', array('size' => 50,'value' => $value));
                       ?>
                     </div>
@@ -274,8 +274,8 @@
                     </div>
                     <div class="field-info">
                       <?php
-                        $value = empty($rciam_stats_viewers['RciamStatsViewer']['identityProvidersMapTableName']) ? ''
-                        : filter_var($rciam_stats_viewers['RciamStatsViewer']['identityProvidersMapTableName'],FILTER_SANITIZE_SPECIAL_CHARS);
+                        $value = empty($vv_rciam_stats_viewers['RciamStatsViewer']['identityProvidersMapTableName']) ? ''
+                        : filter_var($vv_rciam_stats_viewers['RciamStatsViewer']['identityProvidersMapTableName'],FILTER_SANITIZE_SPECIAL_CHARS);
                         print $this->Form->input('identityProvidersMapTableName', array('size' => 50,'value' => $value));
                       ?>
                     </div>
@@ -290,8 +290,8 @@
                     </div>
                     <div class="field-info">
                       <?php
-                        $value = empty($rciam_stats_viewers['RciamStatsViewer']['serviceProvidersMapTableName']) ? ''
-                        : filter_var($rciam_stats_viewers['RciamStatsViewer']['serviceProvidersMapTableName'],FILTER_SANITIZE_SPECIAL_CHARS);
+                        $value = empty($vv_rciam_stats_viewers['RciamStatsViewer']['serviceProvidersMapTableName']) ? ''
+                        : filter_var($vv_rciam_stats_viewers['RciamStatsViewer']['serviceProvidersMapTableName'],FILTER_SANITIZE_SPECIAL_CHARS);
                         print $this->Form->input('serviceProvidersMapTableName', array('size' => 50,'value' => $value));
                       ?>
                     </div>
