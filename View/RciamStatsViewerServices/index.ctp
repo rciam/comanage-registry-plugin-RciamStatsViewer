@@ -77,6 +77,8 @@ print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker
     registeredUsersBy['weekly'] = '<?php print _txt('pl.rciamstatsviewer.registered.users.weekly'); ?>'
     registeredUsersBy['monthly'] = '<?php print _txt('pl.rciamstatsviewer.registered.users.monthly'); ?>'
     registeredUsersBy['yearly'] = '<?php print _txt('pl.rciamstatsviewer.registered.users.yearly'); ?>'
+    var dataTableExportButtonText ='<?php print _txt('pl.rciamstatsviewer.datatable.export');?>'
+
     urlByType['idp'] = '<?php print $this->Html->url(array(
                             'plugin' => Inflector::singularize(Inflector::tableize($this->plugin)),
                             'controller' => 'rciam_stats_viewer_services',
