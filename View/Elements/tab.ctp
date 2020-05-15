@@ -19,7 +19,7 @@
             </div>
             <!-- ./col -->
         </div>
-        <?php if ($prefix != 'registered') { ?>
+        <?php if ($prefix != 'registered'): ?>
             <div class="box">
                 <div class="box-header with-border">
                     <h3 class="box-title"><?php print _txt('pl.rciamstatsviewer.' . $prefix . '.numberoflogins'); ?></h3>
@@ -27,7 +27,7 @@
                 </div>
                 <div class="pieChart" id="<?php print Inflector::pluralize($prefix); ?>ChartDetail"></div>
             </div>
-        <?php } else { ?>
+        <?php else: ?>
             <div class="box">
                 <div class="box-header with-border">
                     <h3 class="box-title"><?php print _txt('pl.rciamstatsviewer.registered.users'); ?></h3>
@@ -42,19 +42,19 @@
                 </div>
                 <div class="columnChart" id="<?php print Inflector::pluralize($prefix); ?>ChartDetail"></div>
             </div>
-        <?php } ?>
+        <?php endif; ?>
         <div class="box" data-type="<?php print $prefix ?>">
             <div class="box-header with-border">
                 <h3 class="box-title"><?php print _txt('pl.rciamstatsviewer.' . $prefix . '.pl'); ?> </h3>
             </div>
             <!-- /.box-header -->
             <div class="box-body dataTableWithFilter">
-                <?php if ($permissions['registered']) { ?>
+                <?php if ($vv_permissions['registered']): ?>
                     <div class="dataTableDateFilter bg-box-silver">
                         From: &nbsp;<input type="text" id="<?php print $prefix ?>DateFrom" name="<?php print $prefix ?>DateFrom" data-provide="datepicker" />
                         &nbsp;&nbsp;&nbsp;To: &nbsp;<input type="text" id="<?php print $prefix ?>DateTo" name="<?php print $prefix ?>DateTo" data-provide="datepicker" />
                         &nbsp;
-                        <?php if ($prefix == 'registered') { ?>
+                        <?php if ($prefix == 'registered'): ?>
                             <div class="btn-group">
                                 &nbsp;<button type="button" class="btn btn-default dropdown-toggle filter-button" data-toggle="dropdown">
                                     Filter <span class="caret"></span>
@@ -66,11 +66,11 @@
                                     <li><a href="#" onclick="return false;" class="groupDataByDate" data-value="yearly">Yearly Basis</a></li>
                                 </ul>
                             </div>
-                        <?php } else { ?>
+                        <?php else: ?>
                             <button type="button" class="btn btn-default groupDataByDate" data-value="daily">Filter</button>
-                        <?php } ?>
+                        <?php endif; ?>
                     </div>
-                <?php } ?>
+                <?php endif; ?>
                 <div class="dataTableContainer" id="<?php print $prefix; ?>DatatableContainer"></div>
             </div>
             <!-- /.box-body -->

@@ -415,7 +415,7 @@ class RciamStatsViewerServicesController extends StandardController
    * - precondition: Session.Auth holds data used for auth decisions
    * - postcondition: $permissions set with calculated permissions
    *
-   * @since  COmanage Registry v2.0.0
+   * @since  COmanage Registry v3.1.x
    * @return Array Permissions
    */
 
@@ -437,7 +437,7 @@ class RciamStatsViewerServicesController extends StandardController
     $p['idp'] = ($roles['cmadmin'] || $roles['coadmin'] || $roles['couadmin']);
     $p['sp'] = ($roles['cmadmin'] || $roles['coadmin'] || $roles['couadmin']);
     $p['registered'] = ($roles['cmadmin'] || $roles['coadmin']);
-    $this->set('permissions', $p);
+    $this->set('vv_permissions', $p);
 
     return ($p[$this->action]);
   }
