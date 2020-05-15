@@ -44,7 +44,7 @@ print $this->Html->css('/RciamStatsViewer/css/ionicons.min');
 print $this->Html->css('/RciamStatsViewer/css/font-awesome.min');
 print $this->Html->css('/RciamStatsViewer/css/style');
 print $this->Html->css('//cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css');
-print $this->Html->css('https://cdn.datatables.net/buttons/1.6.1/css/buttons.dataTables.min.css');
+print $this->Html->css('//cdn.datatables.net/buttons/1.6.1/css/buttons.dataTables.min.css');
 print $this->Html->script('//cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js');
 print $this->Html->script('//cdn.datatables.net/buttons/1.6.1/js/dataTables.buttons.min.js');
 print $this->Html->script('//cdn.datatables.net/buttons/1.6.1/js/buttons.flash.min.js');
