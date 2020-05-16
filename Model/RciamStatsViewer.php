@@ -19,7 +19,7 @@ class RciamStatsViewer extends AppModel
     /**
      * Expose menu items.
      *
-     * @ since COmanage Registry v2.0.0
+     * @ since COmanage Registry v3.1.x
      * @ return Array with menu location type as key and array of labels, controllers, actions as values.
      */
 
@@ -158,7 +158,7 @@ class RciamStatsViewer extends AppModel
 
     /**
      * Establish a connection (via Cake's ConnectionManager) to the specified SQL server.
-     * @param $coId
+     * @param integer $coId
      * @param array $dbconfig
      * @return DataSource|null
      * @throws InvalidArgumentException   Plugins Configuration is not valid
