@@ -22,7 +22,7 @@
  *
  * @link          http://www.internet2.edu/comanage COmanage Project
  * @package       registry
- * @since         COmanage Registry v2.0.0
+ * @since         COmanage Registry v3.1.x
  * @license       Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
  */
 
@@ -62,7 +62,7 @@ print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker
 <script type="text/javascript">
     //Global Variables
     var defaultdataIdp, defaultdataSp;
-    var datatableExport = <?php print (($permissions['idp']) ? 1 : 0) ?>;
+    var datatableExport = <?php print (($vv_permissions['idp']) ? 1 : 0) ?>;
     var overallText = [];
     var specificText = [];
     var specificTextDataTable = [];
@@ -294,20 +294,20 @@ print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker
         <div id="tabs">
             <ul class="tabset_tabs" width="100px">
                 <li><a href='#dashboardTab'><?php print _txt('pl.rciamstatsviewer.summary'); ?></a></li>
-                <?php if ($permissions["idp"]) {?>
+                <?php if ($vv_permissions["idp"]): ?>
                     <li><a data-draw="drawIdpsChart" href='#idpTab'><?php print _txt('pl.rciamstatsviewer.idp_details.pl'); ?></a></li>
-                <?php } ?>
-                <?php if ($permissions["sp"]) {?>
+                <?php endif; ?>
+                <?php if ($vv_permissions["sp"]): ?>
                     <li><a data-draw="drawSpsChart" href='#spTab'><?php print _txt('pl.rciamstatsviewer.sp_details.pl'); ?></a></li>
-                <?php } ?>
-                <?php if ($permissions["registered"]) {?>
+                <?php endif; ?>
+                <?php if ($vv_permissions["registered"]): ?>
                     <li><a data-draw="drawUsersChart" href='#registeredTab'><?php print _txt('pl.rciamstatsviewer.registered_details.pl'); ?></a></li>
-                <?php } ?>
+                <?php endif; ?>
             </ul>
             <?php
                 print $this->element('dashboard');          
                 foreach ($vv_tab_settings as $key => $value) {
-                    if($permissions[$value['prefix']]){
+                    if($vv_permissions[$value['prefix']]){
                         print $this->element($value['ctpName'], $value);
                     }
                 }
