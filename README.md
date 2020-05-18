@@ -1,26 +1,28 @@
 # RciamStatsViewer
-Rciam Statistics Viewer Plugin for generating Statistics per CO.
+Rciam Statistics Viewer Plugin is used for presenting Statistics per **CO**llaboration in COmanage.
+The plugin requires the [proxystatistics-simplesamlphp-module](https://github.com/CESNET/proxystatistics-simplesamlphp-module) by CESNET to be installed and active in the Proxy, since some of the presented statistics utilize its data Model. 
 
 Specifically this plugin presents:
-1. Number of registered users (monthly), 
-2. Number of connected SPs (monthly),
-3. Number of connected IdPs (monthly), 
-4. Number of Communities - internal VOs, i.e. managed in Check-in COmanage (monthly)
-5. Number of Communities - connected Community AAI services (IdPs) (monthly)
-6. Number of Infrastructure Proxy services (SPs) (monthly)
-7. Number of IdP/SP logins (daily,  daily average per month)
+1. Summary of IdP/SP logins
+   - Accessible by all Registered Users
+2. Identiy Providers details
+   - Accessible by CO(U) administrators
+3. Identiy Providers details
+   - Accessible by CO(U) administrators
+4. Registered users   
+   - Accessible by CO administrators
 
-The information will be accessible to the ops team (CO admins). VO managers (COU admins) should be able to view stats specific to their VO
 
 ## Installation
 
-1. Run `git clone <url>` to the folder <path_to_comanage>/local/Plugins
-2. Run `Console/cake schema create --file schema.php --path <path_to_comanage>/local/Plugin/RciamStatsViewer/Config/Schema` inside folder <path_to_comanage>/local/Plugins/RciamStatsViewer
-3. Run `psql -h host -U username -d databaseName -a -f <path_to_comanage>/local/Plugin/RciamStatsViewer/Config/Schema/constraints.sql`
+1. Run `git clone <url>` to the folder /path/to/comanage/local/Plugin
+2. Run `cd /path/to/comanage/app`
+3. Run `Console/cake schema create --file schema.php --path /path/to/comanage/local/Plugin/RciamStatsViewer/Config/Schema`
+4. Run `psql -h _host_ -U _username_ -d _databaseName_ -a -f /path/to/comanage/local/Plugin/RciamStatsViewer/Config/Schema/constraints.sql`
 
 ## Configuration
 
-After installation, you have to configure the plugin before using it. 
+After the installation, you have to configure the plugin before using it. 
 1. Navigate to Configuration > Statistics Viewer
 2. Specify the required information for the database configuration
 3. Specify the required information for the statistics configuration. Table names must have the exact names as of yours in simpleSAMLphp module database.
