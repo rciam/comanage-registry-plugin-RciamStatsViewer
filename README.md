@@ -15,10 +15,11 @@ Specifically this plugin presents:
 
 ## Installation
 
-1. Run `git clone <url>` to the folder /path/to/comanage/local/Plugin
+1. Run `git clone https://github.com/rciam/comanage-registry-plugin-RciamStatsViewer.git /path/to/comanage/local/Plugin/RciamStatsViewer`
 2. Run `cd /path/to/comanage/app`
 3. Run `Console/cake schema create --file schema.php --path /path/to/comanage/local/Plugin/RciamStatsViewer/Config/Schema`
 4. Run `psql -h _host_ -U _username_ -d _databaseName_ -a -f /path/to/comanage/local/Plugin/RciamStatsViewer/Config/Schema/constraints.sql`
+5. 🍺
 
 ## Configuration
 
