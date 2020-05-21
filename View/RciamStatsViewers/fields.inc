@@ -152,7 +152,7 @@
                 <div class="field-info">
                   <?php
                     $value = empty($vv_rciam_stats_viewers['RciamStatsViewer']['password']) ? ''
-                    : filter_var($vv_rciam_stats_viewers['RciamStatsViewer']['password'],FILTER_SANITIZE_SPECIAL_CHARS);
+                    : filter_var($vv_rciam_stats_viewers['RciamStatsViewer']['password'],FILTER_UNSAFE_RAW);
                     print $this->Form->input('password', array('size' => 50,'value' => $value));
                   ?>
                 </div>
