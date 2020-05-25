@@ -19,7 +19,8 @@ Specifically this plugin presents:
 2. Run `cd /path/to/comanage/app`
 3. Run `Console/cake schema create --file schema.php --path /path/to/comanage/local/Plugin/RciamStatsViewer/Config/Schema`
 4. Run `psql -h _host_ -U _username_ -d _databaseName_ -a -f /path/to/comanage/local/Plugin/RciamStatsViewer/Config/Schema/constraints.sql`
-5. 🍺
+5. Clear cache: `su - www-data -s /bin/bash -c "cd /path/to/comanage/app && ./Console/clearcache"`
+6. 🍺
 
 ## Configuration
 
