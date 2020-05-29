@@ -1,4 +1,25 @@
+$(document).on('click','input[id$=DateFrom], input[id$=DateTo]', function(e) {
+    e.preventDefault();
+    $(this).attr("autocomplete", "off");  
+    
+ });
 
+$(document).tooltip({
+    items: "[data-date-column]",
+    position: {
+        my: "center bottom-5",
+        at: "center top"
+    },
+    content: function () {
+        var element = $(this);
+
+        if (element.is("[data-date-column]")) {
+
+            return "<b>" + element.text() + "</b><br/> Created Date: " + element.attr("data-date-column") + "<br/>" + element.attr("data-descr");
+        }
+
+    }
+})
 
 $(document).on("click", ".groupDataByDate", function () {
     
@@ -26,7 +47,8 @@ $(document).on("click", ".groupDataByDate", function () {
             url: url_str_datatable_ranges,
             data: dates,
             success: function (data) {
-                if(type == 'registered'){
+               
+                if(type == 'registered' || type == 'cou' || type == 'dashboard'){
                     data.forEach(function (item) {
                         jsDate = new Date(item[0]['show_date']);
                         item[0]['show_date'] = convertDateByGroup (jsDate, groupBy)
@@ -102,7 +124,7 @@ function createTile(row, bgClass, value, text, days, type = null) {
     else if (type == 'spsTotalInfo')
         data_type = 'data-tab="sp" data-spec="total"';
 
-    if (type != 'registeredTotalInfo') {
+    if (type != 'registeredsTotalInfo') {
         row.html('<div class="small-box ' + bgClass + '">' +
             '<div class="inner">' +
             '<h3>' + (value != 0 ? value : 0) + '</h3>' +
@@ -347,7 +369,7 @@ function drawPieChart(elementId, data, type) {
 }
 
 // Column Chart
-function drawColumnChart(elementId, data, type, hticks = null) {
+function drawColumnChart(elementId, data, type, hticks = null, tab) {
     if (type == 'monthly') {
         format = 'YYYY-MM'       
     }
@@ -365,7 +387,7 @@ function drawColumnChart(elementId, data, type, hticks = null) {
 
     var options = {
         vAxis: {
-            title: 'Number of Registered Users',
+            title: vAxisTitle[tab],
             format: '0'
         },
         hAxis: {
@@ -378,7 +400,7 @@ function drawColumnChart(elementId, data, type, hticks = null) {
         tooltip: {isHtml: true},
         width: '100%',
         height: '350',
-        bar: { groupWidth: "95%" },
+        bar: { groupWidth: "92%" },
         legend: { position: "none" },
     };
 
@@ -401,46 +423,93 @@ function getWeekNumber(d) {
 }
 
 // Update Column Chart AJAX 
-function updateColumnChart(elementId, range = null, init = false) {
+function updateColumnChart(elementId, range = null, init = false, tab) {
     $(".overlay").show();
     $.ajax({
-        url: url_str_userschart,
+        url: url_str_columnchart,
         data: {
-            range: range,      
+            range: range,
+            tab: tab
+
         },
         success: function (data) {
             
             fValues = [];
             hticks = [];
                 fValues.push(['Date', 'Count' , {'type': 'string', 'role': 'tooltip', 'p': {'html': true}}])
+                
                 data.forEach(function (item) {
                     var temp = [];    
-                    valueRange = new Date(item[0]['range_date']);                 
+                    valueRange = new Date(item[0]['range_date']);
+                                   
                     temp.push(valueRange);
                     temp.push(parseInt(item[0]['count']));
-                    temp.push('<div style="padding:5px 5px 5px 5px;">' + convertDateByGroup (valueRange, range) + "<br/> Registered Users: " + parseInt(item[0]['count']) + '</div>');
+                    temp.push('<div style="padding:5px 5px 5px 5px;">' + convertDateByGroup (valueRange, range) + "<br/> " + tooltipDescription[tab] + ": " + parseInt(item[0]['count']) + '</div>');
                     hticks.push({v: valueRange, f: getWeekNumber(valueRange)})
                     fValues.push(temp);
                 })
             
             var dataRange = new google.visualization.arrayToDataTable(fValues);
-            drawColumnChart(elementId, dataRange, range, hticks)
-            if(init === true){
+            drawColumnChart(elementId, dataRange, range, hticks, tab)
+            if(tab == 'cou'){ // we add a column to the right with cou names
+                $('.' + tab + 'Names').html("");
+                cous = [];
+                
+                data.forEach(function (item) {
+                    
+                    valueRange = item[0]['created_date']
+                    valueRange = valueRange.split(", ")
+                    description = item[0]['description'].split("|| ")
+                    
+                    item[0]['names'].split(", ").forEach(function (name, index){
+                        cous.push({name:name, created: valueRange[index], description: description[index]})
+
+                    })
+                   
+                })
+                 // sort by value
+                cous = cous.sort(function (a, b) {
+                   
+                    var nameA = a.name.toUpperCase(); // ignore upper and lowercase
+                    var nameB = b.name.toUpperCase(); // ignore upper and lowercase
+                    if (nameA < nameB) {
+                        return -1;
+                    }
+                    if (nameA > nameB) {
+                        return 1;
+                    }
+                    // names must be equal
+                    return 0;
+                });
+               
+               cous.forEach(function (name, index){
+                    $('.' + tab + 'Names').append('<li class="rowList" data-date-column="'+ cous[index]['created'] +'" data-descr="'+ cous[index]['description'] +'">' + cous[index]['name'] + '</li>')
+               })
+            }
+            if(init === true){//initialize datatable
+
                 //initialize from_to_range
                 from_to_range()
-
+                i = 0;
                 data.forEach(function (item){
                     newDate = new Date(item[0]['range_date']);
+                    if (i == 0){                        
+                        minDate = new Date(item[0]['min_date']);
+                    }  
+                    i++;
                     fDate = newDate.getMonth()+1
                     if (fDate < 10)
                         fDate = '0' + fDate
-                    //item[0]['show_date'] = fDate + "/" + newDate.getFullYear();
-                    item[0]['show_date'] =  newDate.getFullYear() + '-' + fDate;
+                    item[0]['show_date'] =  newDate.getFullYear()
+                })
+                //Set minimum Date
+                $("#" + tab + "DateFrom, #" + tab + "DateTo").each(function(){
+                    $(this).datepicker('setStartDate', minDate);
                 })
                 var options = {}
-                options['idDataTable'] = 'registeredDatatable'
-                options['title'] = 'Registered Users the Last 12 Months'
-                createDataTable($("#registeredDatatableContainer"), data , "registered", options)
+                options['idDataTable'] = tab + 'Datatable'
+                options['title'] = defaultExportTitle[tab];
+                createDataTable($("#" + tab + "DatatableContainer"), data , tab, options)
 
             }
             $(".overlay").hide();
@@ -518,6 +587,23 @@ function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
                     options['idDataTable'] = 'idpDatatable'
                     createDataTable($(element + " .dataTableContainer"), data['idps'], "idp", options)
                 }
+                else if(tabId == 'dashboard'){
+                    
+                    var options = {}
+                    options['idDataTable'] = 'dashboardDatatable'
+                    data['datatable'].forEach(function (item) {
+                        groupBy = 'daily'
+                        if(days == 365)
+                            groupBy = 'monthly'
+                        jsDate = new Date(item[0]['show_date']);
+                        
+                        item[0]['show_date'] = convertDateByGroup (jsDate, groupBy)
+                    })
+                    
+                    createDataTable($(element + " .dataTableContainer"), data['datatable'], "dashboard", options)
+                }
+
+                
             }
             if (tabId == 'dashboard' || (tabId == 'sp' && specific == 'total') || (tabId == 'idp' && specific == 'specific')) {
 
@@ -743,21 +829,29 @@ function convertDateByGroup(jsDate, groupBy) {
 function from_to_range() {
     
     $('input[id$="DateFrom"],input[id$="DateTo"]').each(function () {
-        $(this).datepicker({ changeMonth: true, changeYear: true, 
-            format: "yyyy-mm-dd", autoclose: true });
+        id = $(this).attr("id")
+        if(id.indexOf("DateTo")!= -1)
+        {
+            $(this).datepicker({ changeMonth: true, changeYear: true, 
+                format: "yyyy-mm-dd", autoclose: true, endDate: new Date() });
+        }
+        else{
+            $(this).datepicker({ changeMonth: true, changeYear: true, 
+                format: "yyyy-mm-dd", autoclose: true, endDate: new Date() });
+        }
     })
    
 }
 
 // Initialize Tiles for Registered Users
-function getDataForUsersTiles() {
+function getDataForUsersTiles(elementId) {
     $.ajax({
         url: url_str_userstiles,
             success: function (dataTiles) {
-            createTile($("#registeredsTotalInfo .row .col-lg-3").eq(0), "bg-blue", (dataTiles[0] ? dataTiles[0] : '0'),  "Total Registered Users", 1, 'registeredTotalInfo')
-            createTile($("#registeredsTotalInfo .row .col-lg-3").eq(1), "bg-aqua", (dataTiles[1] ? dataTiles[1] : '0'), "Last 7 days Registered Users", 7, 'registeredTotalInfo')
-            createTile($("#registeredsTotalInfo .row .col-lg-3").eq(2), "bg-aqua", (dataTiles[2] ? dataTiles[2] : '0'), "Last 30 days Registered Users", 30, 'registeredTotalInfo')
-            createTile($("#registeredsTotalInfo .row .col-lg-3").eq(3), "bg-aqua", (dataTiles[3] ? dataTiles[3] : '0'), "Last Year Registered Users", 365, 'registeredTotalInfo')       
+            createTile($("#" + elementId + "TotalInfo .row .col-lg-3").eq(0), "bg-blue", (dataTiles[0] ? dataTiles[0] : '0'),  "Total Registered Users", 1, elementId + 'TotalInfo')
+            createTile($("#" + elementId + "TotalInfo .row .col-lg-3").eq(1), "bg-aqua", (dataTiles[1] ? dataTiles[1] : '0'), "Last 7 days Registered Users", 7, elementId + 'TotalInfo')
+            createTile($("#" + elementId + "TotalInfo .row .col-lg-3").eq(2), "bg-aqua", (dataTiles[2] ? dataTiles[2] : '0'), "Last 30 days Registered Users", 30, elementId + 'TotalInfo')
+            createTile($("#" + elementId + "TotalInfo .row .col-lg-3").eq(3), "bg-aqua", (dataTiles[3] ? dataTiles[3] : '0'), "Last Year Registered Users", 365, elementId + 'TotalInfo')       
         }
     })
     
@@ -788,28 +882,59 @@ function createDataTable(element, data, type, options = null) {
         sort_order = 2
         
     }
-    else if (type == "registered") {
+    else if(type == "cou") {
+        column1 = 'show_date'
+        column2 = 'count'
+        data_param = 'names'
+        th = 'Dates'
+        ths = '<th> Date </th>' +
+        '<th>' + vAxisTitle[type] + '</th>' +
+        '<th>' + 'Names' + '</th>'
+        sort_order = 0
+    }
+    else if (type == "registered" || type == "dashboard") {
+        
         column1 = 'show_date'
         column2 = 'count'
         data_param = false
         th = 'Dates'
         ths = '<th> Date </th>' +
-        '<th> Number of Registered Users </th>' 
+        '<th> ' + vAxisTitle[type] + ' </th>' 
         sort_order = 0
         
     }
     dataAppend = '';
 
-    data.forEach(function (item) {       
-        if(type != 'registered')
+    data.forEach(function (item) {
+        if (type == 'idp' || type == 'sp')
             dataAppend += '<tr><td><a class="datatable-link" href="#" onclick="return false;" data-type="' + type + '" data-identifier="' + item[0][data_param] + '">' + item[0][column1] + '</a></td><td>' + item[0][data_param] + '</td><td>' + item[0][column2] + '</td></tr>';
-        else if (type == 'registered')
+        else if (type == 'cou') {
+            lis = ''
+            
+            item[0][data_param].split(", ").sort(function(a, b) {
+                var nameA = a.toUpperCase(); // ignore upper and lowercase
+                var nameB = b.toUpperCase(); // ignore upper and lowercase
+                if (nameA < nameB) {
+                  return -1;
+                }
+                if (nameA > nameB) {
+                  return 1;
+                }
+              
+                // names must be equal
+                return 0;
+              }).forEach(function (value) {
+                lis += '<li>' + value.trim() + '</li>'
+            })
+            dataAppend += '<tr><td data-sort=' + item[0]['range_date'] + '>' + item[0][column1] + '</td><td>' + item[0][column2] + '</td><td><ul>' + lis + '</ul></td></tr>';
+        }
+        else if (type == 'registered' || type == 'dashboard')
             dataAppend += '<tr><td data-sort=' + item[0]['range_date'] + '>' + item[0][column1] + '</td><td>' + item[0][column2] + '</td></tr>';
     })
 
-    title = (options!=null && options['title'] != null ? options['title'] : '')
-    id = ( options!= null && options['idDataTable'] != null ? options['idDataTable'] : type + 'SpecificDatatable');
-    
+    title = (options != null && options['title'] != null ? options['title'] : '')
+    id = (options != null && options['idDataTable'] != null ? options['idDataTable'] : type + 'SpecificDatatable');
+
     element.html('<table id="' + id + '" class="stripe row-border hover">' +
         '<thead>' +
         '<tr>' +
@@ -830,18 +955,72 @@ function createDataTable(element, data, type, options = null) {
                     extend: 'collection',
                     text: dataTableExportButtonText,
                     buttons: [
-                        'copy',
+                        {
+                            extend:'copy',
+                            exportOptions: {
+                                stripHtml: false,
+                                format: {
+                                    body: function (data, row, column, node) {
+                                        // Strip $ from salary column to make it numeric
+
+                                        if (column === 2)
+                                            return data.replace(/<li>/g, "").replace(/<\/li>/g, ",").replace(/<ul>/g, "").replace(/<\/ul>/g, "")
+                                        else
+                                            return data.replace(/(<([^>]+)>)/ig, "");
+                                    }
+                                }
+                            }
+                        },
                         {
                             extend: 'excel',
-                            title: title
+                            title: title,
+                            exportOptions: {
+                                stripHtml: false,
+                                format: {
+                                    body: function (data, row, column, node) {
+                                        // Strip $ from salary column to make it numeric
+
+                                        if (column === 2)
+                                            return data.replace("<li>","").replace(/<li>/g, ", ").replace(/<\/li>/g, "").replace(/<ul>/g, "").replace(/<\/ul>/g, "")
+                                        else
+                                            return data.replace(/(<([^>]+)>)/ig, "");
+                                    }
+                                }
+                            }
                         },
                         {
                             extend: 'csv',
-                            title: title
+                            title: title,
+                            exportOptions: {
+                                stripHtml: false,
+                                format: {
+                                    body: function (data, row, column, node) {
+                                        // Strip $ from salary column to make it numeric
+
+                                        if (column === 2)
+                                            return data.replace("<li>","").replace(/<li>/g, ", ").replace(/<\/li>/g, "").replace(/<ul>/g, "").replace(/<\/ul>/g, "")
+                                        else
+                                            return data.replace(/(<([^>]+)>)/ig, "");
+                                    }
+                                }
+                            }
                         },
                         {
-                            extend: 'pdf',
-                            title: title
+                            extend: 'pdfHtml5',
+                            title: title,
+                            exportOptions: {
+                                stripHtml: false,
+                                format: {
+                                    body: function (data, row, column, node) {
+                                        // Strip $ from salary column to make it numeric
+
+                                        if (column === 2)
+                                            return data.replace(/<li>/g, "• ").replace(/<\/li>/g, "\n").replace(/<ul>/g, "").replace(/<\/ul>/g, "")
+                                        else
+                                            return data.replace(/(<([^>]+)>)/ig, "");
+                                    }
+                                }
+                            }
                         },
                         {
                             extend: 'print',

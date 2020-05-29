@@ -20,54 +20,50 @@
             <!-- ./col -->
         </div>
         <!-- Draw Pie Chart -->
-        <?php if ($prefix != 'registered' && $prefix != 'cou'): ?>
-            <div class="box">
-                <div class="box-header with-border">
-                    <h3 class="box-title"><?php print _txt('pl.rciamstatsviewer.' . $prefix . '.numberoflogins'); ?></h3>
-                    <div><?php print _txt('pl.rciamstatsviewer.' . $prefix . '.numberoflogins.desc'); ?></div>
-                </div>
-                <div class="pieChart" id="<?php print Inflector::pluralize($prefix); ?>ChartDetail"></div>
+        <div class="box" data-type="<?php print $prefix; ?>">
+            <div class="box-header with-border">
+                <h3 class="box-title"><?php print _txt('pl.rciamstatsviewer.' . $prefix . 'column.chart'); ?></h3>
+                <div><?php print _txt('pl.rciamstatsviewer.' . $prefix . '.numberoflogins.desc'); ?></div>
             </div>
-        <!-- Draw Column Chart -->
-        <?php else: ?>
-            <div class="box" data-type="<?php print $prefix; ?>">
-                <div class="box-header with-border">
-                    <h3 class="box-title"><?php print _txt('pl.rciamstatsviewer.'. $prefix . 'column.chart'); ?></h3>
-                    <div><?php print _txt('pl.rciamstatsviewer.' . $prefix . '.numberoflogins.desc'); ?></div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="selectPeriodContainer fullWidth">Select Period:&nbsp;
+                        <?php
+                            $attrs = array();
+                            $attrs['value'] = RciamStatsViewerDateEnum::yearly;
+                            $attrs['empty'] = false;
+
+                            print $this->Form->select(
+                                'date' . ucfirst($prefix) . 'Select',
+                                RciamStatsViewerDateEnum::type,
+                                $attrs
+                            );
+
+                            if ($this->Form->isFieldError('date' . ucfirst($prefix) . 'Select')) {
+                                print $this->Form->error('date' . ucfirst($prefix) . 'Select');
+                            }
+                    ?>
+                    </div>
                 </div>
-                <div class="selectPeriodContainer">Select Period:&nbsp;
-                    <?php
-                        $attrs = array();
-                        $attrs['value'] = RciamStatsViewerDateEnum::yearly;
-                        $attrs['empty'] = false;
-
-
-                        print $this->Form->select(
-                            'date' . ucfirst($prefix) . 'Select',
-                            RciamStatsViewerDateEnum::type,
-                            $attrs
-                        );
-
-                        if ($this->Form->isFieldError('date' . ucfirst($prefix) . 'Select')) {
-                            print $this->Form->error('date' . ucfirst($prefix) . 'Select');
-                        }
-                  ?>
+                <div class="col-lg-9">
+                    <div class="columnChart" id="<?php print Inflector::pluralize($prefix); ?>ChartDetail"></div>
                 </div>
-                <div class="columnChart" id="<?php print Inflector::pluralize($prefix); ?>ChartDetail"></div>
+                <ul class="col-lg-3"><div class="<?php print $prefix;?>Names columnList"></ul></div>
             </div>
-        <?php endif; ?>
+
+        </div>
         <div class="box" data-type="<?php print $prefix ?>">
             <div class="box-header with-border">
                 <h3 class="box-title"><?php print _txt('pl.rciamstatsviewer.' . $prefix . '.pl'); ?> </h3>
             </div>
             <!-- /.box-header -->
             <div class="box-body dataTableWithFilter">
-                <?php if ($vv_permissions['registered']): ?>
+                <?php if ($vv_permissions['registered']) : ?>
                     <div class="dataTableDateFilter bg-box-silver">
                         From: &nbsp;<input type="text" id="<?php print $prefix ?>DateFrom" name="<?php print $prefix ?>DateFrom" data-provide="datepicker" />
                         &nbsp;&nbsp;&nbsp;To: &nbsp;<input type="text" id="<?php print $prefix ?>DateTo" name="<?php print $prefix ?>DateTo" data-provide="datepicker" />
                         &nbsp;
-                        <?php if ($prefix == 'registered' || $prefix == 'cou'): ?>
+                        <?php if ($prefix == 'registered' || $prefix == 'cou') : ?>
                             <div class="btn-group">
                                 &nbsp;<button type="button" class="btn btn-default dropdown-toggle filter-button" data-toggle="dropdown">
                                     Filter <span class="caret"></span>
@@ -79,7 +75,7 @@
                                     <li><a href="#" onclick="return false;" class="groupDataByDate" data-value="yearly">Yearly Basis</a></li>
                                 </ul>
                             </div>
-                        <?php else: ?>
+                        <?php else : ?>
                             <button type="button" class="btn btn-default groupDataByDate" data-value="daily">Filter</button>
                         <?php endif; ?>
                     </div>

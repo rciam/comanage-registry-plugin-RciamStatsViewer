@@ -46,11 +46,13 @@ $cm_rciam_stats_viewer_texts['en_US'] = array(
   'pl.rciamstatsviewer.summary'         => 'Summary',
   'pl.rciamstatsviewer.idp.pl'          => 'Identity Providers',
   'pl.rciamstatsviewer.sp.pl'           => 'Service Providers',
-  'pl.rciamstatsviewer.idp_details.pl'  => 'Identity Providers Details',
-  'pl.rciamstatsviewer.sp_details.pl'   => 'Service Providers Details',
+  'pl.rciamstatsviewer.idp.tabname.pl'  => 'Identity Providers Details',
+  'pl.rciamstatsviewer.sp.tabname.pl'   => 'Service Providers Details',
   'pl.rciamstatsviewer.registered.pl'   => 'Registered Users',
+  'pl.rciamstatsviewer.cou.pl'          => 'Communities',
 
-  'pl.rciamstatsviewer.registered_details.pl'                => 'Registered Users Details',
+  'pl.rciamstatsviewer.registered.tabname.pl'                => 'Registered Users Details',
+  'pl.rciamstatsviewer.cou.tabname.pl'                       => 'Communities Details',
   'pl.rciamstatsviewer.statisticsTableName'                  => 'Statistics Table Name',
   'pl.rciamstatsviewer.statisticsTableName.desc'             => 'Name of the statistics table at the database',
   'pl.rciamstatsviewer.serviceProvidersMapTableName'         => 'Service Providers Map Table Name',
@@ -73,12 +75,20 @@ $cm_rciam_stats_viewer_texts['en_US'] = array(
   'pl.rciamstatsviewer.sp.specific.datatable'   => 'Identity Providers',
   'pl.rciamstatsviewer.registered.users.period' => 'Registered Users per Period',
   'pl.rciamstatsviewer.datatable.export'        => 'Export',
+  'pl.rciamstatsviewer.registered.column'       => 'Number of Registered Users',
+  'pl.rciamstatsviewer.registered.tooltip'      => 'Registered Users',        
+  'pl.rciamstatsviewer.cou.column'              => 'Number of Communities',
+  'pl.rciamstatsviewer.cou.tooltip'             => 'Communities',  
+  'pl.rciamstatsviewer.dashboard.column'        => 'Number of Logins',
+  'pl.rciamstatsviewer.dashboard.logins'        => 'Number of Logins',
+
+  'pl.rciamstatsviewer.registered.defaultexporttitle' => 'Registered Users per Year',
+  'pl.rciamstatsviewer.cou.defaultexporttitle'        => 'Communities Created per Year',
   
-  'pl.rciamstatsviewer.registered.users.weekly'  => 'Week Number (Year)',
-  'pl.rciamstatsviewer.registered.users.monthly' => 'Year-Month',
-  'pl.rciamstatsviewer.registered.users.yearly'  => 'Year',
 
-
+  'pl.rciamstatsviewer.registered.users.weekly'   => 'Week Number (Year)',
+  'pl.rciamstatsviewer.registered.users.monthly'  => 'Year-Month',
+  'pl.rciamstatsviewer.registered.users.yearly'   => 'Year',
   
   // TODO: We should remove this as soon as we upgrading to CM v3.3 or newer
   'fd.server'                          => 'Server',
