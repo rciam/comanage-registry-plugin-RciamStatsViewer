@@ -50,7 +50,8 @@ $(document).on("click", ".groupDataByDate", function () {
                
                 if(type == 'registered' || type == 'cou' || type == 'dashboard'){
                     data.forEach(function (item) {
-                        jsDate = new Date(item[0]['show_date']);
+                        jsDate = new Date(item[0]['show_date'].split(" ")[0]);
+                        
                         item[0]['show_date'] = convertDateByGroup (jsDate, groupBy)
                     })
                     typeDataTable = type;
@@ -792,7 +793,7 @@ function convertDate(jsDate){
 }
 
 function convertDateByGroup(jsDate, groupBy) {
-
+    
     month = (jsDate.getMonth() + 1).toString()
     if (month.length < 2)
         month = '0' + month;
@@ -822,7 +823,7 @@ function convertDateByGroup(jsDate, groupBy) {
     }
     else if (groupBy == 'yearly')
         showDate = jsDate.getFullYear();
-
+    
     return showDate;
 }
 // From - To Functionality 

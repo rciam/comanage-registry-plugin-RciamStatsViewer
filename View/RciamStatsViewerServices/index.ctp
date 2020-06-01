@@ -154,7 +154,7 @@ print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker
         options['title'] = 'Number of Logins per month'
         i = 0;
         data.forEach(function (item){
-                    newDate = new Date(item[0]['range_date']);
+                    newDate = new Date(item[0]['range_date'].split(" ")[0]);
                     if(i == 0)
                         minDate = new Date(item[0]['min_date']);
                     i++;
