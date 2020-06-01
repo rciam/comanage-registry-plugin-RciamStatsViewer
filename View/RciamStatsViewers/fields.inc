@@ -296,6 +296,39 @@
                       ?>
                     </div>
                   </li>
+                  <li>
+                    <div class="field-name">
+                      <div class="field-title">
+                        <?php print _txt('pl.rciamstatsviewer.privileged.group'); ?>
+                      </div>
+                      <div class="field-desc"><?php print _txt('pl.rciamstatsviewer.privileged.group.desc'); ?></div>
+                    </div>
+                    <div class="field-info">
+                      <?php
+                      $attrs = array();
+                      $attrs['value'] = (isset($vv_rciam_stats_viewers['RciamStatsViewer']['privileged_co_group_id'])
+                        ? $vv_rciam_stats_viewers['RciamStatsViewer']['privileged_co_group_id']
+                        : null);
+                      $attrs['empty'] = true;
+
+                      if($e) {
+                        print $this->Form->label('privileged_co_group_id', _txt('pl.rciamstatsviewer.privileged.pl') . ': ');
+                        print $this->Form->select('privileged_co_group_id',
+                          $vv_co_groups,
+                          $attrs);
+
+                        if($this->Form->isFieldError('privileged_co_group_id')) {
+                          print $this->Form->error('privileged_co_group_id');
+                        }
+
+                        print '<div class="field-desc">' . _txt('pl.rciamstatsviewer.privileged.gr') . '</div>';
+                      } else {
+                        print $vv_co_groups[ $vv_rciam_stats_viewers['RciamStatsViewer']['privileged_co_group_id'] ];
+                      }
+                      ?>
+                    </div>
+                  </li>
+
                 </ul>
             </div>
           </li>

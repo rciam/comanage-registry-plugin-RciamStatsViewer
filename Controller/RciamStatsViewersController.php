@@ -27,7 +27,23 @@ class RciamStatsViewersController extends StandardController
     'RciamStatsViewer.RciamStatsViewer',
     'Co',
   );
-  
+
+  /**
+   * Callback after controller methods are invoked but before views are rendered.
+   *
+   * @since  COmanage Registry v3.1.x
+   */
+  public function beforeRender()
+  {
+    $args = array();
+    $args['conditions']['CoGroup.co_id'] = $this->cur_co['Co']['id'];
+    $args['conditions']['CoGroup.status'] = SuspendableStatusEnum::Active;
+    $args['order'] = array('CoGroup.name ASC');
+
+    $this->set('vv_co_groups', $this->Co->CoGroup->find("list", $args));
+    parent::beforeRender();
+  }
+
   /**
    * Test DB connectivity
    *
