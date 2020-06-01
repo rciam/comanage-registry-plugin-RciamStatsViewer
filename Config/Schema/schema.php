@@ -15,6 +15,7 @@ class AppSchema extends CakeSchema
         'id'                            => array('type' => 'integer', 'autoIncrement' => true, 'null' => false, 'default' => null, 'length' => 10, 'key' => 'primary'),
         'co_id'                         => array('type' => 'integer', 'null' => true, 'length' => 10),
         'rciam_stats_viewer_id'         => array('type' => 'integer', 'null' => true, 'length' => 10),
+        'privileged_co_group_id'        => array('type' => 'integer', 'null' => true, 'length' => 10),
         'type'                          => array('type' => 'string', 'null' => false, 'length' => 2),
         'hostname'                      => array('type' => 'string', 'null' => false, 'length' => 128),
         'port'                          => array('type' => 'integer', 'null' => true, 'length' => 10 ),

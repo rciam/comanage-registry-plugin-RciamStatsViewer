@@ -13,3 +13,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Identiy Providers details
 - Identiy Providers details
 - Registered users
+- The administrator can define a group of privileged users

@@ -78,7 +78,7 @@ $cm_rciam_stats_viewer_texts['en_US'] = array(
   'pl.rciamstatsviewer.registered.column'       => 'Number of Registered Users',
   'pl.rciamstatsviewer.registered.tooltip'      => 'Registered Users',
   'pl.rciamstatsviewer.registeredcolumn.chart'  => 'Number of Registered Users created per Period',
-  'pl.rciamstatsviewer.coucolumn.chart'         => 'Number of Communities created per Period',        
+  'pl.rciamstatsviewer.coucolumn.chart'         => 'Number of Communities created per Period',
   'pl.rciamstatsviewer.cou.column'              => 'Number of Communities',
   'pl.rciamstatsviewer.cou.tooltip'             => 'Communities',
   'pl.rciamstatsviewer.dashboard.column'        => 'Number of Logins',
@@ -90,8 +90,14 @@ $cm_rciam_stats_viewer_texts['en_US'] = array(
   'pl.rciamstatsviewer.registered.users.weekly'   => 'Week Number (Year)',
   'pl.rciamstatsviewer.registered.users.monthly'  => 'Year-Month',
   'pl.rciamstatsviewer.registered.users.yearly'   => 'Year',
-  
-  // TODO: We should remove this as soon as we upgrading to CM v3.3 or newer
+
+  // Privileged User
+  'pl.rciamstatsviewer.privileged.group'         => 'Privileged Group',
+  'pl.rciamstatsviewer.privileged.group.desc'    => 'Users belonging in the group will have privileged access to Statistics Viewer',
+  'pl.rciamstatsviewer.privileged.gr'            => 'Members of this Group are privileged users (CO admins are by default)',
+  'pl.rciamstatsviewer.privileged.pl'            => 'Privileged',
+
+  // TODO: We should remove this as soon as we upgrade to CM v3.3 or newer
   'fd.server'                          => 'Server',
   'fd.server.url'                      => 'Server URL',
   'fd.server.username'                 => 'Username',
