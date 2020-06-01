@@ -57,7 +57,7 @@ class RciamStatsViewerServicesController extends StandardController
       
       $vv_logincount_per_idp = ($this->utils->getLoginCountPerIdp($conn, 0)) ?: array();
       $vv_logincount_per_sp = ($this->utils->getLoginCountPerSp($conn, 0)) ?: array();
-      $vv_logincount_per_month = ($this->utils->getLoginCountByRanges($conn, null, null, 'init')) ?: array();
+      $vv_logincount_per_month = ($this->utils->getLoginCountByRanges($conn)) ?: array();
       // Return the existing data if any
       $this->set('vv_totalloginscount', $vv_totalloginscount);
       $this->set('vv_logincount_per_sp', $vv_logincount_per_sp);
