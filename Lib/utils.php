@@ -71,7 +71,7 @@ class RciamStatsViewerUtils
         $dbDriver = $this->configData['RciamStatsViewer']['type'];
         $table_name = $this->configData['RciamStatsViewer']['statisticsTableName'];
         if ($dbDriver === 'PG') {
-            if (!empty(RciamStatsViewerDateTruncEnum::type[$groupBy]))
+            if (!empty($groupBy) && !empty(RciamStatsViewerDateTruncEnum::type[$groupBy]))
             {
                 $trunc_by = RciamStatsViewerDateTruncEnum::type[$groupBy];
                 $sql = "select count(*), date_trunc('" . $trunc_by . "', CAST(CONCAT(year,'-',LPAD(CAST(month AS varchar),2,'0'),'-',LPAD(CAST(day AS varchar),2,'0')) AS date)) as range_date, date_trunc('" . $trunc_by . "', CAST(CONCAT(year,'-',LPAD(CAST(month AS varchar),2,'0'),'-',LPAD(CAST(day AS varchar),2,'0')) AS date)) as show_date, min(CAST(CONCAT(year,'-',LPAD(CAST(month AS varchar),2,'0'),'-',LPAD(CAST(day AS varchar),2,'0')) AS date)) as min_date from $table_name where service != '' AND CAST(CONCAT(year,'-',LPAD(CAST(month AS varchar),2,'0'),'-',LPAD(CAST(day AS varchar),2,'0')) AS date)  BETWEEN '" . $dateFrom . "' AND '" . $dateTo . "' group by date_trunc('" . $trunc_by . "',CAST(CONCAT(year,'-',LPAD(CAST(month AS varchar),2,'0'),'-',LPAD(CAST(day AS varchar),2,'0')) AS date)) ORDER BY range_date ASC";
