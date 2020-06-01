@@ -9,8 +9,9 @@ Specifically this plugin presents:
    - Accessible by CO(U) administrators
 3. Identiy Providers details
    - Accessible by CO(U) administrators
-4. Registered users   
-   - Accessible by CO administrators
+4. Registered users. Accessible by:
+   - CO administrators
+   - Members of the privileged Group defined by the CO Administrator
 
 
 ## Installation
@@ -18,10 +19,12 @@ Specifically this plugin presents:
 1. Run `git clone https://github.com/rciam/comanage-registry-plugin-RciamStatsViewer.git /path/to/comanage/local/Plugin/RciamStatsViewer`
 2. Run `cd /path/to/comanage/app`
 3. Run `Console/cake schema create --file schema.php --path /path/to/comanage/local/Plugin/RciamStatsViewer/Config/Schema`
-4. Run `psql -h _host_ -U _username_ -d _databaseName_ -a -f /path/to/comanage/local/Plugin/RciamStatsViewer/Config/Schema/constraints.sql`
-5. Clear cache: `su - www-data -s /bin/bash -c "cd /path/to/comanage/app && ./Console/clearcache"`
-6. 🍺
+4. 🍺
 
+## Schema update
+1. Run `Console/cake schema update --file schema.php --path /path/to/comanage/local/Plugin/RciamStatsViewer/Config/Schema`
+   - During updates database alternations, which refer to constraints, have to be deployed manually 
+ 
 ## Configuration
 
 After the installation, you have to configure the plugin before using it. 
@@ -31,4 +34,4 @@ After the installation, you have to configure the plugin before using it.
 
 ## License
 
-Licensed under the Apache 2.0 license, for details see `LICENSE`.
+Licensed under the Apache 2.0 license, for details see [LICENSE](https://github.com/rciam/comanage-registry-plugin-RciamStatsViewer/blob/master/LICENSE).
