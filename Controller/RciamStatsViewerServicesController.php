@@ -149,7 +149,8 @@ class RciamStatsViewerServicesController extends StandardController
 
   /**
    * getdataforcolumnschart
-   *
+   * Is used at cou and registered users tab
+   * 
    * @return void
    */
 

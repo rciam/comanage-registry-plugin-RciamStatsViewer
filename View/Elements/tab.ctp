@@ -33,7 +33,6 @@
             <div class="box" data-type="<?php print $prefix; ?>">
                 <div class="box-header with-border">
                     <h3 class="box-title"><?php print _txt('pl.rciamstatsviewer.'. $prefix . 'column.chart'); ?></h3>
-                    <div><?php print _txt('pl.rciamstatsviewer.' . $prefix . '.numberoflogins.desc'); ?></div>
                 </div>
                 <div class="selectPeriodContainer">Select Period:&nbsp;
                     <?php

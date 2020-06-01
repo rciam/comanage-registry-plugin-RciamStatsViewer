@@ -76,15 +76,16 @@ $cm_rciam_stats_viewer_texts['en_US'] = array(
   'pl.rciamstatsviewer.registered.users.period' => 'Registered Users per Period',
   'pl.rciamstatsviewer.datatable.export'        => 'Export',
   'pl.rciamstatsviewer.registered.column'       => 'Number of Registered Users',
-  'pl.rciamstatsviewer.registered.tooltip'      => 'Registered Users',        
+  'pl.rciamstatsviewer.registered.tooltip'      => 'Registered Users',
+  'pl.rciamstatsviewer.registeredcolumn.chart'  => 'Number of Registered Users created per Period',
+  'pl.rciamstatsviewer.coucolumn.chart'         => 'Number of Communities created per Period',        
   'pl.rciamstatsviewer.cou.column'              => 'Number of Communities',
-  'pl.rciamstatsviewer.cou.tooltip'             => 'Communities',  
+  'pl.rciamstatsviewer.cou.tooltip'             => 'Communities',
   'pl.rciamstatsviewer.dashboard.column'        => 'Number of Logins',
   'pl.rciamstatsviewer.dashboard.logins'        => 'Number of Logins',
 
   'pl.rciamstatsviewer.registered.defaultexporttitle' => 'Registered Users per Year',
   'pl.rciamstatsviewer.cou.defaultexporttitle'        => 'Communities Created per Year',
-  
 
   'pl.rciamstatsviewer.registered.users.weekly'   => 'Week Number (Year)',
   'pl.rciamstatsviewer.registered.users.monthly'  => 'Year-Month',
