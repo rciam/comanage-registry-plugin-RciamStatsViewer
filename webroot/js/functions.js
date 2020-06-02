@@ -823,11 +823,10 @@ function convertDateByGroup(jsDate, groupBy) {
         day = nextWeek.getDate().toString()
         if (day.length < 2)
             day = '0' + day;
-        //showDate += " - " + day + '/' + month + '/' + nextWeek.getFullYear();
+    
         showDate += " to " + nextWeek.getFullYear() + '-' + month + '-' + day;
     }
     else if (groupBy == 'monthly'){
-     //   showDate = month + '/' + jsDate.getFullYear();
         showDate = jsDate.getFullYear() + '-' +  month;
     }
     else if (groupBy == 'yearly')
@@ -879,7 +878,6 @@ function createDataTable(element, data, type, options = null) {
         '<th>' + th + ' Identifier</th>' +
         '<th>Number of Logins</th>'
         sort_order = 2
-        
     }
     else if (type == "sp") {
         column1 = 'spname'
@@ -890,7 +888,6 @@ function createDataTable(element, data, type, options = null) {
         '<th>' + th + ' Identifier</th>' +
         '<th>Number of Logins</th>'
         sort_order = 2
-        
     }
     else if(type == "cou") {
         column1 = 'show_date'
@@ -920,20 +917,19 @@ function createDataTable(element, data, type, options = null) {
             dataAppend += '<tr><td><a class="datatable-link" href="#" onclick="return false;" data-type="' + type + '" data-identifier="' + item[0][data_param] + '">' + item[0][column1] + '</a></td><td>' + item[0][data_param] + '</td><td>' + item[0][column2] + '</td></tr>';
         else if (type == 'cou') {
             lis = ''
-            
-            item[0][data_param].split(", ").sort(function(a, b) {
+
+            item[0][data_param].split(", ").sort(function (a, b) {
                 var nameA = a.toUpperCase(); // ignore upper and lowercase
                 var nameB = b.toUpperCase(); // ignore upper and lowercase
                 if (nameA < nameB) {
-                  return -1;
+                    return -1;
                 }
                 if (nameA > nameB) {
-                  return 1;
+                    return 1;
                 }
-              
                 // names must be equal
                 return 0;
-              }).forEach(function (value) {
+            }).forEach(function (value) {
                 lis += '<li>' + value.trim() + '</li>'
             })
             dataAppend += '<tr><td data-sort=' + item[0]['range_date'] + '>' + item[0][column1] + '</td><td>' + item[0][column2] + '</td><td><ul>' + lis + '</ul></td></tr>';
