@@ -314,19 +314,19 @@ class RciamStatsViewerServicesController extends StandardController
         $dateTo = date("Y-m-d");
         if($days === 365){
           $dateFrom = date('Y-m-d', strtotime('-364 days'));
-          $groupBy = 'monthly';
+          $groupBy = RciamStatsViewerDateEnum::monthly;
         }
         else if($days === 30){
           $dateFrom = date('Y-m-d', strtotime('-29 days'));
-          $groupBy = 'daily';
+          $groupBy = RciamStatsViewerDateEnum::daily;
         }
         else if($days === 7) {
           $dateFrom = date('Y-m-d', strtotime('-6 days'));
-          $groupBy = 'daily';
+          $groupBy = RciamStatsViewerDateEnum::daily;
         }
         else if($days === 1){
           $dateFrom = date('Y-m-d', strtotime('-0 days'));
-          $groupBy = 'daily';
+          $groupBy = RciamStatsViewerDateEnum::daily;
         }
         $vv_logincount_per_day['datatable'] = $this->utils->getLoginCountByRanges($conn, $dateFrom, $dateTo, $groupBy);
       } 

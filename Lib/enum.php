@@ -66,6 +66,7 @@ class RciamStatsViewerDateTruncEnum
 
 class RciamStatsViewerDateEnum
 {
+    const daily     = 'daily';
     const weekly    = 'weekly';
     const monthly   = 'monthly';
     const yearly    = 'yearly';

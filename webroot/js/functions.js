@@ -71,6 +71,7 @@ $(document).on("click", ".groupDataByDate", function () {
                 var options = {}
                 options['idDataTable'] = dataTableToUpdate.attr("id").replace("Container","")
                 options['title'] = boxTitle +' for period ' + dateFrom + ' to ' + dateTo + basis;
+                
                 createDataTable(dataTableToUpdate, data, typeDataTable, options)
                 $(".overlay").hide();
             },
@@ -581,11 +582,15 @@ function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
                 $(element + " .dataTableContainer").closest(".box").find('input[id$="DateFrom"],input[id$="DateTo"]').each(function(){
                     $(this).val("")
                 })
-                if (tabId == 'sp' && specific == 'specific')
-                    createDataTable($(element + " .dataTableContainer"), data['idps'], "idp")
+                if (tabId == 'sp' && specific == 'specific'){
+                    var options = {}
+                    options['title'] = 'Number of logins the last ' + days + ' days per Identity Provider'
+                    createDataTable($(element + " .dataTableContainer"), data['idps'], "idp", options)
+                }
                 else if (tabId == 'idp' && specific == 'total'){ //for Identity Providers Details Tab
                     var options = {}
                     options['idDataTable'] = 'idpDatatable'
+                    options['title'] = 'Number of logins the last ' + days + ' days per Identity Provider'
                     createDataTable($(element + " .dataTableContainer"), data['idps'], "idp", options)
                 }
                 else if(tabId == 'dashboard'){
@@ -600,7 +605,7 @@ function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
                         
                         item[0]['show_date'] = convertDateByGroup (jsDate, groupBy)
                     })
-                    
+                    options['title'] = 'Number of logins the last ' + days + ' days'
                     createDataTable($(element + " .dataTableContainer"), data['datatable'], "dashboard", options)
                 }
 
@@ -633,11 +638,15 @@ function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
                 $(element + " .dataTableContainer").closest(".box").find('input[id$="DateFrom"],input[id$="DateTo"]').each(function(){
                     $(this).val("")
                 })
-                if (tabId == 'idp' && specific == 'specific')
-                    createDataTable($(element + " .dataTableContainer"), data['sps'], "sp")
+                if (tabId == 'idp' && specific == 'specific'){
+                    var options = {}
+                    options['title'] = 'Number of logins the last ' + days + ' days per Service Provider'
+                    createDataTable($(element + " .dataTableContainer"), data['sps'], "sp", options)
+                }
                 else if (tabId == 'sp' && specific == 'total') { //for Service Providers Details Tab
                     var options = {}
                     options['idDataTable'] = 'spDatatable'
+                    options['title'] = 'Number of logins the last ' + days + ' days per Service Provider'
                     createDataTable($(element + " .dataTableContainer"), data['sps'], "sp", options)
                 }
             }
