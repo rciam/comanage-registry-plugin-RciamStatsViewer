@@ -217,7 +217,7 @@ class RciamStatsViewerServicesController extends StandardController
     $groupBy = $this->request->query['groupBy'];
 
     $data = [];
-    if ($dateFrom != null && $dateTo != null && $dateTo > $dateFrom) {
+    if ($dateFrom != null && $dateTo != null && $dateTo >= $dateFrom) {
 
       if ($type === null || $type === 'registered' || $type === 'cou') {
         if (RciamStatsViewerDateTruncEnum::type[$groupBy] !== null)
