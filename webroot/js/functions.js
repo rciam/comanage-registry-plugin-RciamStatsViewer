@@ -910,6 +910,7 @@ function createDataTable(element, data, type, options = null) {
         sort_order = 0
         
     }
+    
     dataAppend = '';
 
     data.forEach(function (item) {
@@ -955,7 +956,7 @@ function createDataTable(element, data, type, options = null) {
     if(datatableExport){
         $("#" + id).DataTable({
             dom: 'Bfrtip',
-            order: [sort_order, 'desc'],
+            order: [[sort_order, 'desc']],
             buttons: [
                 {
                     extend: 'collection',
@@ -1039,7 +1040,7 @@ function createDataTable(element, data, type, options = null) {
     }
     else
         $("#" + id).DataTable({
-            order: [1, 'desc']
+            order: [0, 'desc']
         });
 }
 

@@ -62,7 +62,7 @@ print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker
 <script type="text/javascript">
     //Global Variables
     var defaultdataIdp, defaultdataSp;
-    var datatableExport = <?php print (($vv_permissions['cou']) ? 1 : 0) ?>;
+    var datatableExport = <?php print (($vv_permissions['registered']) ? 1 : 0) ?>;
     var overallText = [];
     var specificText = [];
     var specificTextDataTable = [];
