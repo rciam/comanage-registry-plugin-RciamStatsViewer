@@ -445,10 +445,10 @@ class RciamStatsViewerServicesController extends StandardController
       'prefix' => 'registered',
       'ctpName' => 'tab',
     );
-    $tab_settings["cou"] = array(
+    /*$tab_settings["cou"] = array(
       'prefix' => 'cou',
       'ctpName' => 'cou',
-    );
+    );*/
     $this->set('vv_tab_settings', $tab_settings);
   }
 
@@ -512,7 +512,7 @@ class RciamStatsViewerServicesController extends StandardController
     $p['idp'] = ($roles['cmadmin'] || $roles['coadmin'] || $roles['couadmin'] || $roles['privileged']);
     $p['sp'] = ($roles['cmadmin'] || $roles['coadmin'] || $roles['couadmin'] || $roles['privileged']);
     $p['registered'] = ($roles['cmadmin'] || $roles['coadmin'] || $roles['privileged']);
-    $p['cou'] = ($roles['cmadmin'] || $roles['coadmin'] || $roles['privileged']);
+    //$p['cou'] = ($roles['cmadmin'] || $roles['coadmin'] || $roles['privileged']);
     $this->set('vv_permissions', $p);
 
     return ($p[$this->action]);
