@@ -63,6 +63,7 @@ print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker
     //Global Variables
     var defaultdataIdp, defaultdataSp;
     var datatableExport = <?php print (($vv_permissions['registered']) ? 1 : 0) ?>;
+    var cou_general_stats = <?php print (($vv_permissions['general_cous_stats']) ? 1 : 0) ?>; 
     var overallText = [];
     var specificText = [];
     var specificTextDataTable = [];
@@ -88,7 +89,7 @@ print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker
     defaultExportTitle['registered'] = '<?php print _txt('pl.rciamstatsviewer.registered.defaultexporttitle'); ?>';
     defaultExportTitle['cou'] = '<?php print _txt('pl.rciamstatsviewer.cou.defaultexporttitle'); ?>';
     var dataTableExportButtonText ='<?php print _txt('pl.rciamstatsviewer.datatable.export');?>'
-
+    var statusEnum = <?php print json_encode($vv_status_enum); ?>;
     urlByType['idp'] = '<?php print $this->Html->url(array(
                             'plugin' => Inflector::singularize(Inflector::tableize($this->plugin)),
                             'controller' => 'rciam_stats_viewer_services',
@@ -107,6 +108,18 @@ print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker
                             'action' => 'getdataforcolumnchart',
                             'co'  => $cur_co['Co']['id']
                         )); ?>';
+    var url_str_userscousowner = '<?php print $this->Html->url(array(
+                            'plugin' => Inflector::singularize(Inflector::tableize($this->plugin)),
+                            'controller' => 'rciam_stats_viewer_services',
+                            'action' => 'getuserscousowner',
+                            'co'  => $cur_co['Co']['id']
+                        )); ?>';
+    var url_str_statspercou = '<?php print $this->Html->url(array(
+                            'plugin' => Inflector::singularize(Inflector::tableize($this->plugin)),
+                            'controller' => 'rciam_stats_viewer_services',
+                            'action' => 'getstatspercou',
+                            'co'  => $cur_co['Co']['id']
+                        )); ?>';
     var url_str_userstiles = '<?php print $this->Html->url(array(
                             'plugin' => Inflector::singularize(Inflector::tableize($this->plugin)),
                             'controller' => 'rciam_stats_viewer_services',
@@ -119,7 +132,7 @@ print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker
                             'action' => 'getdatafordatatable',
                             'co'  => $cur_co['Co']['id']
                         )); ?>';
-
+    
     $(function() {
 
         // Initialize Tabs
@@ -146,7 +159,6 @@ print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker
 
         // Initialize Date Range Format (DataTable)
         from_to_range()
-
         
         var options = {}
         options['idDataTable'] = 'dashboardDatatable'
@@ -163,7 +175,6 @@ print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker
                         fDate = '0' + fDate
                     //item[0]['show_date'] = fDate + "/" + newDate.getFullYear();
                     item[0]['show_date'] =  newDate.getFullYear() + '-' + fDate;
-
                 })
         
         // Initialize Date Ranges startDate and endDate for idp, sp, summary and modal
@@ -289,7 +300,20 @@ print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker
                 $(this).attr("data-draw", "")
             }
             else if ($(this).attr("data-draw") == "drawCousChart"){ //Initialize whole cous tab
-                updateColumnChart(document.getElementById("cousChartDetail"), 'yearly', true, 'cou');
+                if (cou_general_stats) // permission to see general stats for cous
+                    updateColumnChart(document.getElementById("cousChartDetail"), 'yearly', true, 'cou');
+                
+                $.ajax({
+                    url: url_str_userscousowner,
+                    success: function (data) {
+                        //console.log(data)
+                        options = '<option></option>';
+                        data.forEach(function(name,index){                    
+                            options += "<option data-created='" + data[index]["Cou"]["created"] + "' data-title='" + data[index]["Cou"]["name"] + "' data-description='" + data[index]["Cou"]["description"] + "' value='" + data[index]["CoGroup"]["cou_id"] + "'>" + data[index]["Cou"]["name"] + "</option>"
+                        })
+                        $(".perCouStatsSelect").append('Select Community: <select class="couStatsSelect">' + options + '</select>')
+                    }
+                })                
                 $(this).attr("data-draw", "")
             }
         })
@@ -345,6 +369,9 @@ print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker
                 <?php endif; ?>
                 <?php if ($vv_permissions["registered"]): ?>
                     <li><a data-draw="drawUsersChart" href='#registeredTab'><?php print _txt('pl.rciamstatsviewer.registered.tabname.pl'); ?></a></li>
+                <?php endif; ?>
+                <?php if ($vv_permissions["cou"]): ?>
+                    <li><a data-draw="drawCousChart" href='#couTab'><?php print _txt('pl.rciamstatsviewer.cou.tabname.pl'); ?></a></li>
                 <?php endif; ?>
             </ul>
             <?php
