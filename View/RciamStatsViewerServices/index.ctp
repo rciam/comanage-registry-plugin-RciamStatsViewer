@@ -346,9 +346,6 @@ print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker
                 <?php if ($vv_permissions["registered"]): ?>
                     <li><a data-draw="drawUsersChart" href='#registeredTab'><?php print _txt('pl.rciamstatsviewer.registered.tabname.pl'); ?></a></li>
                 <?php endif; ?>
-                <?php if ($vv_permissions["cou"]): ?>
-                    <li><a data-draw="drawCousChart" href='#couTab'><?php print _txt('pl.rciamstatsviewer.cou.tabname.pl'); ?></a></li>
-                <?php endif; ?>
             </ul>
             <?php
                 print $this->element('dashboard');          
