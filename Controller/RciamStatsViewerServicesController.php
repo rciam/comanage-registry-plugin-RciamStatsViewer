@@ -60,19 +60,8 @@ class RciamStatsViewerServicesController extends StandardController
       $vv_logincount_per_sp = ($this->utils->getLoginCountPerSp($conn, 0)) ?: array();
       $vv_logincount_per_month = ($this->utils->getLoginCountByRanges($conn)) ?: array();
 
+      // Get Status Enum for Users
       $vv_status_enum[StatusEnum::Active] = 'Active';
-      /*$data['StatusEnum']['Approved'] = StatusEnum::Approved;
-      $data['StatusEnum']['Confirmed'] = StatusEnum::Confirmed;
-      $data['StatusEnum']['Deleted'] = StatusEnum::Deleted;
-      $data['StatusEnum']['Declined'] = StatusEnum::Declined;
-      $data['StatusEnum']['Denied'] = StatusEnum::Denied;
-      $data['StatusEnum']['Duplicate'] = StatusEnum::Duplicate;
-      $data['StatusEnum']['Expired'] = StatusEnum::Expired;
-      $data['StatusEnum']['GracePeriod'] = StatusEnum::GracePeriod;
-      $data['StatusEnum']['Invited'] = StatusEnum::Invited;
-      $data['StatusEnum']['Pending'] = StatusEnum::Pending;
-      $data['StatusEnum']['PendingApproval'] = StatusEnum::PendingApproval;
-      $data['StatusEnum']['PendingConfirmation'] = StatusEnum::PendingApproval;*/
       $vv_status_enum[StatusEnum::Suspended] = 'Suspended';
   
       // Return the existing data if any
@@ -93,7 +82,7 @@ class RciamStatsViewerServicesController extends StandardController
       $this->Flash->set(_txt('er.rciam_stats_viewer.db.action', array($e->getMessage())), array('key' => 'error'));
       $fail = true;
     } finally {
-      if ($fail) {
+      if($fail) {
         // Initialize frontend placeholders
         $this->set('vv_totalloginscount', array());
         $this->set('vv_logincount_per_sp', array());
@@ -116,7 +105,7 @@ class RciamStatsViewerServicesController extends StandardController
   {
     $this->log(__METHOD__ . '::@', LOG_DEBUG);
     // We accept only Ajax Requests
-    if (!$this->request->is('Ajax')) {
+    if(!$this->request->is('Ajax')) {
       return;
     }
     $this->autoRender = false; // We don't render a view
@@ -178,7 +167,7 @@ class RciamStatsViewerServicesController extends StandardController
   {
     $this->log(__METHOD__ . '::@', LOG_DEBUG);
     // We accept only Ajax Requests
-    if (!$this->request->is('Ajax')) {
+    if(!$this->request->is('Ajax')) {
       return;
     }
     $this->autoRender = false; // We don't render a view
@@ -199,9 +188,6 @@ class RciamStatsViewerServicesController extends StandardController
     $args['group'] = array('CoPersonRole.status');
     $args['contain'] = false;
     $data=$this->CoPersonRole->find('all', $args);
-
-    //$sql = "SELECT count(*),status FROM cm_co_person_roles JOIN cm_cous ON cm_co_person_roles.cou_id = cm_cous.id WHERE cm_cous.id = $cou_id AND cm_cous.deleted = false AND cm_co_person_roles.deleted = false AND co_person_role_id IS NULL GROUP BY status;";
-    //$data = $this->RciamStatsViewer->query($sql);
    
     $this->response->type('json');
     $this->response->statusCode(201);
@@ -214,12 +200,12 @@ class RciamStatsViewerServicesController extends StandardController
    *
    * @return void
    */
-  
+
   public function getuserscousowner()
   {
     $this->log(__METHOD__ . '::@', LOG_DEBUG);
     // We accept only Ajax Requests
-    if (!$this->request->is('Ajax')) {
+    if(!$this->request->is('Ajax')) {
       return;
     }
     $this->autoRender = false; // We don't render a view
@@ -231,21 +217,21 @@ class RciamStatsViewerServicesController extends StandardController
     // Have we configured a privileged Group
     $roles['privileged'] = false;
     $cfg = $this->RciamStatsViewer->getConfiguration($this->cur_co['Co']['id']);
-    if (!empty($cfg['RciamStatsViewer']['privileged_co_group_id'])) {
+    if(!empty($cfg['RciamStatsViewer']['privileged_co_group_id'])) {
       // Find if my user is a member in this group
       $args = array();
       $args['conditions']['CoGroupMember.co_group_id'] = $cfg['RciamStatsViewer']['privileged_co_group_id'];
       $args['conditions']['CoGroupMember.co_person_id'] = $this->Session->read('Auth.User.co_person_id');
       $args['contain'] = false;
       $co_person_membership = $this->Co->CoGroup->CoGroupMember->find('all', $args);
-      if (!empty($co_person_membership)) {
+      if(!empty($co_person_membership)) {
         $roles['privileged'] = true;
       }
     }   
 
     $args = array();
     // Check if user can see all cous or only theirs that is admin
-    if ($roles['coadmin'] === false && $roles['cmadmin'] === false && $roles['privileged'] === false){
+    if($roles['coadmin'] === false && $roles['cmadmin'] === false && $roles['privileged'] === false){
       $curlRoles = $this->CoGroup->CoGroupMember->findCoPersonGroupRoles($roles['copersonid']);
       $args['conditions']['CoGroup.id'] = $curlRoles["owner"];
     }
@@ -286,7 +272,7 @@ class RciamStatsViewerServicesController extends StandardController
     $co_id = $this->request->params['named']['co'];
     $range = $this->request->query['range'];
     $tab = $this->request->query['tab'];
-    if ($tab === null || $tab === 'registered') {
+    if($tab === null || $tab === 'registered') {
       $table = 'cm_co_people';
       $tableColumn = 'co_person_id';
       $status = 'AND status=\'A\'';
@@ -299,12 +285,12 @@ class RciamStatsViewerServicesController extends StandardController
       $selectExtra = ", string_agg(name,', ') as names, string_agg(to_char(created, 'YYYY-MM-DD'),', ') as created_date, string_agg(description,'|| ') as description";
       $whereExtra = " AND parent_id IS NULL ";
     }
-    if (RciamStatsViewerDateTruncEnum::type[$range] === RciamStatsViewerDateTruncEnum::monthly) {
+    if(RciamStatsViewerDateTruncEnum::type[$range] === RciamStatsViewerDateTruncEnum::monthly) {
       $sql = "select count(*), date_trunc( 'month', created ) as range_date, min(created) as min_date $selectExtra from $table where $tableColumn IS NULL AND NOT DELETED AND co_id=$co_id $status $whereExtra AND created >
       date_trunc('month', CURRENT_DATE) - INTERVAL '1 year' group by date_trunc( 'month', created ) ORDER BY date_trunc( 'month', created ) ASC";
-    } else if (RciamStatsViewerDateTruncEnum::type[$range] === null || RciamStatsViewerDateTruncEnum::type[$range]  == RciamStatsViewerDateTruncEnum::yearly)
+    } else if(RciamStatsViewerDateTruncEnum::type[$range] === null || RciamStatsViewerDateTruncEnum::type[$range]  == RciamStatsViewerDateTruncEnum::yearly)
       $sql = "select count(*), date_trunc( 'year', created ) as range_date, min(created) as min_date $selectExtra from $table where $tableColumn IS NULL AND NOT DELETED AND co_id=$co_id $status $whereExtra group by date_trunc( 'year', created ) ORDER BY date_trunc( 'year', created ) ASC";
-    else if (RciamStatsViewerDateTruncEnum::type[$range] == RciamStatsViewerDateTruncEnum::weekly)
+    else if(RciamStatsViewerDateTruncEnum::type[$range] == RciamStatsViewerDateTruncEnum::weekly)
       $sql = "select count(*), date_trunc( 'week', created ) as range_date, min(created) as min_date $selectExtra from $table where $tableColumn IS NULL AND NOT DELETED AND co_id=$co_id $status $whereExtra AND created >
       date_trunc('month', CURRENT_DATE) - INTERVAL '6 months' group by date_trunc( 'week', created ) ORDER BY date_trunc( 'week', created ) ASC";
 
@@ -337,15 +323,15 @@ class RciamStatsViewerServicesController extends StandardController
     $groupBy = $this->request->query['groupBy'];
 
     $data = [];
-    if ($dateFrom != null && $dateTo != null && $dateTo >= $dateFrom) {
+    if($dateFrom != null && $dateTo != null && $dateTo >= $dateFrom) {
 
-      if ($type === null || $type === 'registered' || $type === 'cou') {
-        if (RciamStatsViewerDateTruncEnum::type[$groupBy] !== null)
+      if($type === null || $type === 'registered' || $type === 'cou') {
+        if(RciamStatsViewerDateTruncEnum::type[$groupBy] !== null)
           $trunc_by = RciamStatsViewerDateTruncEnum::type[$groupBy];
         else
           $trunc_by = RciamStatsViewerDateTruncEnum::monthly;
 
-        if ($type == null || $type == 'registered') {
+        if($type == null || $type == 'registered') {
           $table = 'cm_co_people';
           $tableColumn = 'co_person_id';
           $status = 'AND status=\'A\'';
@@ -365,11 +351,11 @@ class RciamStatsViewerServicesController extends StandardController
         try {
           // Try to connect to the database
           $conn = $this->RciamStatsViewer->connect($co_id);
-          if ($type === 'idp' || $type === 'spSpecific') {
+          if($type === 'idp' || $type === 'spSpecific') {
             $data["idps"] = $this->utils->getLoginCountPerIdp($conn, 0, $identifier, $dateFrom, $dateTo);
-          } else if ($type === 'sp' || $type === 'idpSpecific') {
+          } else if($type === 'sp' || $type === 'idpSpecific') {
             $data["sps"] = $this->utils->getLoginCountPerSp($conn, 0, $identifier, $dateFrom, $dateTo);
-          } else if ($type === 'dashboard') {
+          } else if($type === 'dashboard') {
             $data = $this->utils->getLoginCountByRanges($conn, $dateFrom, $dateTo, $groupBy);
           }
         } catch (MissingConnectionException $e) {
@@ -383,7 +369,7 @@ class RciamStatsViewerServicesController extends StandardController
           $this->Flash->set(_txt('er.rciam_stats_viewer.db.action', array($e->getMessage())), array('key' => 'error'));
           $fail = true;
         } finally {
-          if ($fail) {
+          if($fail) {
             // Initialize frontend placeholders
             $data["sps"] = [];
             $data["idps"] = [];
@@ -421,30 +407,30 @@ class RciamStatsViewerServicesController extends StandardController
       $identifier = (isset($this->request->query['identifier']) ? $this->request->query['identifier'] : null);
       $type = (isset($this->request->query['type']) && $this->request->query['type'] != '' ? $this->request->query['type'] : null);
 
-      if ($type === null) { //Dashboard Summary
+      if($type === null) { //Dashboard Summary
         $vv_logincount_per_day['range'] = $this->utils->getLoginCountPerDayForProvider($conn, $days);
         $vv_logincount_per_day['idps'] = $this->utils->getLoginCountPerIdp($conn, $days);
         $vv_logincount_per_day['sps'] = $this->utils->getLoginCountPerSp($conn, $days);
 
         $dateTo = date("Y-m-d");
-        if ($days === 365) {
+        if($days === 365) {
           $dateFrom = date('Y-m-d', strtotime('-364 days'));
           $groupBy = RciamStatsViewerDateEnum::monthly;
-        } else if ($days === 30) {
+        } else if($days === 30) {
           $dateFrom = date('Y-m-d', strtotime('-29 days'));
           $groupBy = RciamStatsViewerDateEnum::daily;
-        } else if ($days === 7) {
+        } else if($days === 7) {
           $dateFrom = date('Y-m-d', strtotime('-6 days'));
           $groupBy = RciamStatsViewerDateEnum::daily;
-        } else if ($days === 1) {
+        } else if($days === 1) {
           $dateFrom = date('Y-m-d', strtotime('-0 days'));
           $groupBy = RciamStatsViewerDateEnum::daily;
         }
         $vv_logincount_per_day['datatable'] = $this->utils->getLoginCountByRanges($conn, $dateFrom, $dateTo, $groupBy);
-      } else if ($type === "idp") {
+      } else if($type === "idp") {
         $vv_logincount_per_day['range'] = $this->utils->getLoginCountPerDayForProvider($conn, $days, $identifier, $type);
         $vv_logincount_per_day['sps'] = $this->utils->getLoginCountPerSp($conn, $days, $identifier);
-      } else if ($type === "sp") {
+      } else if($type === "sp") {
         $vv_logincount_per_day['range'] = $this->utils->getLoginCountPerDayForProvider($conn, $days, $identifier, $type);
         $vv_logincount_per_day['idps'] = $this->utils->getLoginCountPerIdp($conn, $days, $identifier);
       }
@@ -459,7 +445,7 @@ class RciamStatsViewerServicesController extends StandardController
       $this->Flash->set(_txt('er.rciam_stats_viewer.db.action', array($e->getMessage())), array('key' => 'error'));
       $fail = true;
     } finally {
-      if ($fail) {
+      if($fail) {
         // Initialize frontend placeholders
         $vv_logincount_per_day['range'] = [];
         $vv_logincount_per_day['idps'] = [];
@@ -571,7 +557,7 @@ class RciamStatsViewerServicesController extends StandardController
   public function beforeFilter()
   {
     // For ajax i accept only json format
-    if ($this->request->is('ajax')) {
+    if($this->request->is('ajax')) {
       $this->RequestHandler->addInputType('json', array('json_decode', true));
       $this->Security->validatePost = false;
       $this->Security->enabled = true;
@@ -597,14 +583,14 @@ class RciamStatsViewerServicesController extends StandardController
     // Have we configured a privileged Group
     $roles['privileged'] = false;
     $cfg = $this->RciamStatsViewer->getConfiguration($this->cur_co['Co']['id']);
-    if (!empty($cfg['RciamStatsViewer']['privileged_co_group_id'])) {
+    if(!empty($cfg['RciamStatsViewer']['privileged_co_group_id'])) {
       // Find if my user is a member in this group
       $args = array();
       $args['conditions']['CoGroupMember.co_group_id'] = $cfg['RciamStatsViewer']['privileged_co_group_id'];
       $args['conditions']['CoGroupMember.co_person_id'] = $this->Session->read('Auth.User.co_person_id');
       $args['contain'] = false;
       $co_person_membership = $this->Co->CoGroup->CoGroupMember->find('all', $args);
-      if (!empty($co_person_membership)) {
+      if(!empty($co_person_membership)) {
         $roles['privileged'] = true;
       }
     }
