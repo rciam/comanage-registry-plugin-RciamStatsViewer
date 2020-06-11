@@ -4,6 +4,34 @@ $(document).on('click','input[id$=DateFrom], input[id$=DateTo]', function(e) {
     
  });
 
+$(document).on('change', 'select[class=couStatsSelect]', function (e) {
+    description = $(this).children('option:selected').data("description")
+    title = $(this).children('option:selected').data("title")
+    created = $(this).children('option:selected').data("created")
+    if ($(this).val()) {
+        $.ajax({
+            url: url_str_statspercou,
+            data: {
+                cou_id: $(this).val(),
+            },
+            success: function (data) {
+                content = "<h3>" + title + "</h3><hr/><p>Created: " + created + "</p><p>" + description + "</p>";
+                if (data[0] != undefined) {
+                    for (let [key, value] of Object.entries(data)) {
+                        if (statusEnum[data[key]['CoPersonRole']["status"]] != undefined) {
+                            content += "<div> " + statusEnum[data[key]['CoPersonRole']["status"]] + " Users: " +
+                                data[key][0]["count"] + "</div>"
+                        }
+                    }
+                }
+                $(".perCouStatsContent").html(content)
+            }
+        })
+    }
+    else {
+        $(".perCouStatsContent").html("")
+    }
+})
 $(document).tooltip({
     items: "[data-date-column]",
     position: {
@@ -512,7 +540,7 @@ function updateColumnChart(elementId, range = null, init = false, tab) {
                 options['idDataTable'] = tab + 'Datatable'
                 options['title'] = defaultExportTitle[tab];
                 createDataTable($("#" + tab + "DatatableContainer"), data , tab, options)
-
+           
             }
             $(".overlay").hide();
         },
