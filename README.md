@@ -5,10 +5,12 @@ The plugin requires the [proxystatistics-simplesamlphp-module](https://github.co
 Specifically this plugin presents:
 1. Summary of IdP/SP logins
    - Accessible by all Registered Users
-2. Identiy Providers details
-   - Accessible by CO(U) administrators
-3. Identiy Providers details
-   - Accessible by CO(U) administrators
+2. Identity Providers details. Accessible by:
+   - CO(U) administrators
+   - Members of the privileged Group defined by the CO Administrator 
+3. Service Providers details. Accessible by:
+   - CO(U) administrators
+   - Members of the privileged Group defined by the CO Administrator
 4. Registered users. Accessible by:
    - CO administrators
    - Members of the privileged Group defined by the CO Administrator
@@ -31,6 +33,7 @@ After the installation, you have to configure the plugin before using it.
 1. Navigate to Configuration > Statistics Viewer
 2. Specify the required information for the database configuration
 3. Specify the required information for the statistics configuration. Table names must have the exact names as of yours in simpleSAMLphp module database.
+4. (Optional) Specify a group where members of this group will have privileged access to the statistics (can see statistics like they were CO Administrator). 
 
 ## License
 
