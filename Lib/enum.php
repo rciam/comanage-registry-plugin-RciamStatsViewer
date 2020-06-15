@@ -48,3 +48,32 @@ class RciamStatsViewerDBEncodingTypeEnum
         'latin4'     => 'latin4'
     );
 }
+
+class RciamStatsViewerDateTruncEnum
+{
+    const daily     = 'day';
+    const weekly    = 'week';
+    const monthly   = 'month';
+    const yearly    = 'year';
+
+    const type      = array(
+        'daily'     => 'day',
+        'weekly'    => 'week',
+        'monthly'   => 'month',
+        'yearly'    => 'year',
+    );
+}
+
+class RciamStatsViewerDateEnum
+{
+    const daily     = 'daily';
+    const weekly    = 'weekly';
+    const monthly   = 'monthly';
+    const yearly    = 'yearly';
+
+    const type      = array(
+        'weekly'    => 'weekly',
+        'monthly'   => 'monthly',
+        'yearly'    => 'yearly',
+    );
+}

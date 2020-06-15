@@ -51,10 +51,14 @@
     div.google-visualization-tooltip { pointer-events: none }
     .google-visualization-tooltip { white-space:nowrap; word-break: break-all;  }
     
-    #selectPeriodContainer {
+    .selectPeriodContainer {
         text-align: right;
         width: 87%;
         padding-top: 30px;
+    }
+    .fullWidth{
+        width:100%;
+        padding-right: 30px;
     }
     .dataTableWithFilter {
          padding: 0px 0px;    
@@ -85,6 +89,31 @@
     .btn.groupDataByDate{
         padding-top: 5px;
         height: 30px;
+    }
+    .columnList {
+        margin: 64px 26px 0px 0px;
+        padding-left: 20px;
+        height: 224px;
+        overflow: auto;
+        text-align: left;
+        padding-right: 30px;
+        
+    }
+    .columnList li {  
+        list-style-type: none;
+        
+      }
+      
+    .columnList li:before {
+        content: '\2022';
+        font-size: 46px;
+        position: relative;
+        top: 10px;
+        color: #3242fe;
+      }
+
+    .rowList {
+        padding-bottom: 5px; 
     }
     #myModal .dataTableDateFilter input{
         height: 31px;

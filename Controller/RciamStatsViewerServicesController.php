@@ -27,9 +27,7 @@ class RciamStatsViewerServicesController extends StandardController
   public function __construct($request, $response)
   {
     parent::__construct($request, $response);
-    $co = $request->params['named']['co'];
-    $configData = $this->RciamStatsViewer->getConfiguration($request->params['named']['co']);
-    $this->utils = new RciamStatsViewerUtils($configData);
+    $this->utils = new RciamStatsViewerUtils($this->RciamStatsViewer->getConfiguration($request->params['named']['co']));
   }
 
   /**
@@ -54,15 +52,17 @@ class RciamStatsViewerServicesController extends StandardController
         $this->utils->getTotalLoginCounts($conn, 30),
         $this->utils->getTotalLoginCounts($conn, 365)
       );
-
+      
       $vv_logincount_per_idp = ($this->utils->getLoginCountPerIdp($conn, 0)) ?: array();
       $vv_logincount_per_sp = ($this->utils->getLoginCountPerSp($conn, 0)) ?: array();
-
+      $vv_logincount_per_month = ($this->utils->getLoginCountByRanges($conn)) ?: array();
       // Return the existing data if any
       $this->set('vv_totalloginscount', $vv_totalloginscount);
       $this->set('vv_logincount_per_sp', $vv_logincount_per_sp);
       $this->set('vv_logincount_per_idp', $vv_logincount_per_idp);
       $this->set('vv_logincount_per_day', $vv_logincount_per_day);
+      $this->set('vv_logincount_per_month', $vv_logincount_per_month);
+
     } catch (MissingConnectionException $e) {
       $this->log(__METHOD__ . ':: Database Connection failed. Error Message::' . $e->getMessage(), LOG_DEBUG);
       $this->Flash->set(_txt('er.rciam_stats_viewer.db.connect', array($e->getMessage())), array('key' => 'error'));
@@ -80,6 +80,7 @@ class RciamStatsViewerServicesController extends StandardController
         $this->set('vv_logincount_per_sp', array());
         $this->set('vv_logincount_per_idp', array());
         $this->set('vv_logincount_per_day', array());
+        $this->set('vv_logincount_per_month',array());
       }
     }
   }
@@ -94,8 +95,11 @@ class RciamStatsViewerServicesController extends StandardController
   public function getdataforuserstiles()
   {
     $this->log(__METHOD__ . '::@', LOG_DEBUG);
+    // We accept only Ajax Requests
+    if(!$this->request->is('Ajax')) {
+      return;
+    }
     $this->autoRender = false; // We don't render a view
-    $this->request->onlyAllow('ajax'); // No direct access via browser URL
     $this->layout = null;
 
     $data = [];
@@ -145,12 +149,13 @@ class RciamStatsViewerServicesController extends StandardController
   }
 
   /**
-   * getdataforuserschart
-   *
+   * getdataforcolumnschart
+   * Is used at cou and registered users tab
+   * 
    * @return void
    */
 
-  public function getdataforuserschart()
+  public function getdataforcolumnchart()
   {
     $this->log(__METHOD__ . '::@', LOG_DEBUG);
     $this->autoRender = false; // We don't render a view
@@ -158,14 +163,30 @@ class RciamStatsViewerServicesController extends StandardController
     $this->layout = null;
     $co_id = $this->request->params['named']['co'];
     $range = $this->request->query['range'];
-    if ($range == null || $range == 'monthly') {
-      $sql = "select count(*), date_trunc( 'month', created ) as range_date from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=$co_id AND status='A' AND created >
-      date_trunc('month', CURRENT_DATE) - INTERVAL '1 year' group by date_trunc( 'month', created ) ORDER BY date_trunc( 'month', created ) DESC";
-    } else if ($range == 'yearly')
-      $sql = "select count(*), date_trunc( 'year', created ) as range_date from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=$co_id AND status='A' group by date_trunc( 'year', created ) ORDER BY date_trunc( 'year', created ) DESC";
-    else if ($range == 'weekly')
-      $sql = "select count(*), date_trunc( 'week', created ) as range_date from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=$co_id AND status='A' AND created >
-      date_trunc('month', CURRENT_DATE) - INTERVAL '6 months' group by date_trunc( 'week', created ) ORDER BY date_trunc( 'week', created ) DESC";
+    $tab = $this->request->query['tab'];
+    if($tab === null || $tab === 'registered'){
+      $table = 'cm_co_people';
+      $tableColumn = 'co_person_id';
+      $status = 'AND status=\'A\'';
+      $selectExtra = '';
+      $whereExtra = '';
+    }
+    else {
+      $table = 'cm_cous';
+      $tableColumn = 'cou_id';
+      $status = '';
+      $selectExtra = ", string_agg(name,', ') as names, string_agg(to_char(created, 'YYYY-MM-DD'),', ') as created_date, string_agg(description,'|| ') as description";
+      $whereExtra = " AND parent_id IS NULL ";
+    }
+    if (RciamStatsViewerDateTruncEnum::type[$range] === RciamStatsViewerDateTruncEnum::monthly) {
+      $sql = "select count(*), date_trunc( 'month', created ) as range_date, min(created) as min_date $selectExtra from $table where $tableColumn IS NULL AND NOT DELETED AND co_id=$co_id $status $whereExtra AND created >
+      date_trunc('month', CURRENT_DATE) - INTERVAL '1 year' group by date_trunc( 'month', created ) ORDER BY date_trunc( 'month', created ) ASC";
+    } 
+    else if (RciamStatsViewerDateTruncEnum::type[$range] === null || RciamStatsViewerDateTruncEnum::type[$range]  == RciamStatsViewerDateTruncEnum::yearly)
+      $sql = "select count(*), date_trunc( 'year', created ) as range_date, min(created) as min_date $selectExtra from $table where $tableColumn IS NULL AND NOT DELETED AND co_id=$co_id $status $whereExtra group by date_trunc( 'year', created ) ORDER BY date_trunc( 'year', created ) ASC";
+    else if (RciamStatsViewerDateTruncEnum::type[$range] == RciamStatsViewerDateTruncEnum::weekly)
+      $sql = "select count(*), date_trunc( 'week', created ) as range_date, min(created) as min_date $selectExtra from $table where $tableColumn IS NULL AND NOT DELETED AND co_id=$co_id $status $whereExtra AND created >
+      date_trunc('month', CURRENT_DATE) - INTERVAL '6 months' group by date_trunc( 'week', created ) ORDER BY date_trunc( 'week', created ) ASC";
 
     $data = $this->RciamStatsViewer->query($sql);
 
@@ -196,22 +217,31 @@ class RciamStatsViewerServicesController extends StandardController
     $groupBy = $this->request->query['groupBy'];
 
     $data = [];
-    if ($dateFrom != null && $dateTo != null && $dateTo > $dateFrom) {
+    if ($dateFrom != null && $dateTo != null && $dateTo >= $dateFrom) {
 
-      if ($type === null || $type === 'registered') {
-        if ($groupBy === 'daily')
-          $trunc_by = 'day';
-        else if ($groupBy === 'weekly')
-          $trunc_by = 'week';
-        else if ($groupBy === 'monthly')
-          $trunc_by = 'month';
-        else if ($groupBy === 'yearly')
-          $trunc_by = 'year';
+      if ($type === null || $type === 'registered' || $type === 'cou') {
+        if (RciamStatsViewerDateTruncEnum::type[$groupBy] !== null)
+          $trunc_by = RciamStatsViewerDateTruncEnum::type[$groupBy];
         else
-          $trunc_by = 'month';
-        $sql = "select count(*), date_trunc('" . $trunc_by . "', created) as range_date, date_trunc('" . $trunc_by . "', created) as show_date from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=" . $co_id . " AND status='A' AND  created BETWEEN '" . $dateFrom . "' AND '" . $dateTo . "' group by date_trunc('" . $trunc_by . "',created)";
+          $trunc_by = RciamStatsViewerDateTruncEnum::monthly;
+          
+        if($type == null || $type == 'registered'){
+            $table = 'cm_co_people';
+            $tableColumn = 'co_person_id';
+            $status = 'AND status=\'A\'';
+            $selectExtra = "";
+            $whereExtra = '';
+          }
+          else {
+            $table = 'cm_cous';
+            $tableColumn = 'cou_id';
+            $status = '';
+            $selectExtra = ", string_agg(name,', ') as names, string_agg(to_char(created, 'YYYY-MM-DD'),', ') as created_date, string_agg(description,'|| ') as description";
+            $whereExtra = ' AND parent_id IS NULL ';
+          }
+        $sql = "select count(*), date_trunc('" . $trunc_by . "', created) as range_date, date_trunc('" . $trunc_by . "', created) as show_date, min(created) as min_date $selectExtra from $table where $tableColumn IS NULL AND NOT DELETED AND co_id=" . $co_id . " $status $whereExtra AND  created BETWEEN '" . $dateFrom . "' AND '" . $dateTo . "' group by date_trunc('" . $trunc_by . "',created)";
         $data = $this->RciamStatsViewer->query($sql);
-      } 
+      }   
       else 
       {
         $fail = false;
@@ -222,6 +252,10 @@ class RciamStatsViewerServicesController extends StandardController
             $data["idps"] = $this->utils->getLoginCountPerIdp($conn, 0, $identifier, $dateFrom, $dateTo);
           } else if ($type === 'sp' || $type === 'idpSpecific') {
             $data["sps"] = $this->utils->getLoginCountPerSp($conn, 0, $identifier, $dateFrom, $dateTo);
+          }
+          else if ($type === 'dashboard') 
+          {
+            $data = $this->utils->getLoginCountByRanges($conn, $dateFrom, $dateTo, $groupBy);
           }
         } catch (MissingConnectionException $e) {
           $this->log(__METHOD__ . ':: Database Connection failed. Error Message::' . $e->getMessage(), LOG_DEBUG);
@@ -238,6 +272,7 @@ class RciamStatsViewerServicesController extends StandardController
             // Initialize frontend placeholders
             $data["sps"] = [];
             $data["idps"] = [];
+            $data = [];
           }
         }
       }
@@ -271,11 +306,31 @@ class RciamStatsViewerServicesController extends StandardController
       $identifier = (isset($this->request->query['identifier']) ? $this->request->query['identifier'] : null);
       $type = (isset($this->request->query['type']) && $this->request->query['type'] != '' ? $this->request->query['type'] : null);
 
-      if ($type === null) {
+      if ($type === null) { //Dashboard Summary
         $vv_logincount_per_day['range'] = $this->utils->getLoginCountPerDayForProvider($conn, $days);
         $vv_logincount_per_day['idps'] = $this->utils->getLoginCountPerIdp($conn, $days);
         $vv_logincount_per_day['sps'] = $this->utils->getLoginCountPerSp($conn, $days);
-      } else if ($type === "idp") {
+        
+        $dateTo = date("Y-m-d");
+        if($days === 365){
+          $dateFrom = date('Y-m-d', strtotime('-364 days'));
+          $groupBy = RciamStatsViewerDateEnum::monthly;
+        }
+        else if($days === 30){
+          $dateFrom = date('Y-m-d', strtotime('-29 days'));
+          $groupBy = RciamStatsViewerDateEnum::daily;
+        }
+        else if($days === 7) {
+          $dateFrom = date('Y-m-d', strtotime('-6 days'));
+          $groupBy = RciamStatsViewerDateEnum::daily;
+        }
+        else if($days === 1){
+          $dateFrom = date('Y-m-d', strtotime('-0 days'));
+          $groupBy = RciamStatsViewerDateEnum::daily;
+        }
+        $vv_logincount_per_day['datatable'] = $this->utils->getLoginCountByRanges($conn, $dateFrom, $dateTo, $groupBy);
+      } 
+      else if ($type === "idp") {
         $vv_logincount_per_day['range'] = $this->utils->getLoginCountPerDayForProvider($conn, $days, $identifier, $type);
         $vv_logincount_per_day['sps'] = $this->utils->getLoginCountPerSp($conn, $days, $identifier);
       } else if ($type === "sp") {
@@ -390,6 +445,10 @@ class RciamStatsViewerServicesController extends StandardController
       'prefix' => 'registered',
       'ctpName' => 'tab',
     );
+    /*$tab_settings["cou"] = array(
+      'prefix' => 'cou',
+      'ctpName' => 'cou',
+    );*/
     $this->set('vv_tab_settings', $tab_settings);
   }
 
@@ -424,19 +483,36 @@ class RciamStatsViewerServicesController extends StandardController
     $this->log(__METHOD__ . "::@", LOG_DEBUG);
     $roles = $this->Role->calculateCMRoles();
 
+    // Have we configured a privileged Group
+    $roles['privileged'] = false;
+    $cfg = $this->RciamStatsViewer->getConfiguration($this->cur_co['Co']['id']);
+    if(!empty($cfg['RciamStatsViewer']['privileged_co_group_id'])) {
+      // Find if my user is a member in this group
+      $args = array();
+      $args['conditions']['CoGroupMember.co_group_id'] = $cfg['RciamStatsViewer']['privileged_co_group_id'];
+      $args['conditions']['CoGroupMember.co_person_id'] = $this->Session->read('Auth.User.co_person_id');
+      $args['contain'] = false;
+      $co_person_membership = $this->Co->CoGroup->CoGroupMember->find('all', $args);
+      if(!empty($co_person_membership)) {
+        $roles['privileged'] = true;
+      }
+    }
+
     // Construct the permission set for this user, which will also be passed to the view.
     $p = array();
 
     // Determine what operations this user can perform
-    $p['index'] = ($roles['comember'] || $roles['cmadmin'] || $roles['coadmin'] || $roles['couadmin']);
-    $p['getdataforsp'] = ($roles['comember'] || $roles['cmadmin'] || $roles['coadmin'] || $roles['couadmin']);
-    $p['getdataforidp'] = ($roles['comember'] || $roles['cmadmin'] || $roles['coadmin'] || $roles['couadmin']);
-    $p['getlogincountperday'] = ($roles['comember'] || $roles['cmadmin'] || $roles['coadmin'] || $roles['couadmin']);
+    $p['index'] = ($roles['comember'] || $roles['cmadmin'] || $roles['coadmin'] || $roles['couadmin'] || $roles['privileged']);
+    $p['getdataforsp'] = ($roles['comember'] || $roles['cmadmin'] || $roles['coadmin'] || $roles['couadmin'] || $roles['privileged']);
+    $p['getdataforidp'] = ($roles['comember'] || $roles['cmadmin'] || $roles['coadmin'] || $roles['couadmin'] || $roles['privileged']);
+    $p['getlogincountperday'] = ($roles['comember'] || $roles['cmadmin'] || $roles['coadmin'] || $roles['couadmin'] || $roles['privileged']);
+    $p['getdataforcolumnchart']  = ($roles['cmadmin'] || $roles['coadmin'] || $roles['couadmin'] || $roles['privileged']);
 
     // Tab Permissions
-    $p['idp'] = ($roles['cmadmin'] || $roles['coadmin'] || $roles['couadmin']);
-    $p['sp'] = ($roles['cmadmin'] || $roles['coadmin'] || $roles['couadmin']);
-    $p['registered'] = ($roles['cmadmin'] || $roles['coadmin']);
+    $p['idp'] = ($roles['cmadmin'] || $roles['coadmin'] || $roles['couadmin'] || $roles['privileged']);
+    $p['sp'] = ($roles['cmadmin'] || $roles['coadmin'] || $roles['couadmin'] || $roles['privileged']);
+    $p['registered'] = ($roles['cmadmin'] || $roles['coadmin'] || $roles['privileged']);
+    //$p['cou'] = ($roles['cmadmin'] || $roles['coadmin'] || $roles['privileged']);
     $this->set('vv_permissions', $p);
 
     return ($p[$this->action]);

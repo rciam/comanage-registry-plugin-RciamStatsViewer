@@ -62,12 +62,15 @@ print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker
 <script type="text/javascript">
     //Global Variables
     var defaultdataIdp, defaultdataSp;
-    var datatableExport = <?php print (($vv_permissions['idp']) ? 1 : 0) ?>;
+    var datatableExport = <?php print (($vv_permissions['registered']) ? 1 : 0) ?>;
     var overallText = [];
     var specificText = [];
     var specificTextDataTable = [];
     var registeredUsersBy = [];
     var urlByType = [];
+    var vAxisTitle = [];
+    var tooltipDescription = [];
+    var defaultExportTitle = [];
     overallText['idp'] = '<?php print _txt('pl.rciamstatsviewer.idp.overall'); ?>'
     overallText['sp'] = '<?php print _txt('pl.rciamstatsviewer.sp.overall'); ?>'
     specificText['idp'] = '<?php print _txt('pl.rciamstatsviewer.idp.specific'); ?>'
@@ -77,6 +80,13 @@ print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker
     registeredUsersBy['weekly'] = '<?php print _txt('pl.rciamstatsviewer.registered.users.weekly'); ?>'
     registeredUsersBy['monthly'] = '<?php print _txt('pl.rciamstatsviewer.registered.users.monthly'); ?>'
     registeredUsersBy['yearly'] = '<?php print _txt('pl.rciamstatsviewer.registered.users.yearly'); ?>'
+    vAxisTitle['registered'] = '<?php print _txt('pl.rciamstatsviewer.registered.column'); ?>';
+    vAxisTitle['cou'] = '<?php print _txt('pl.rciamstatsviewer.cou.column'); ?>';
+    vAxisTitle['dashboard'] = '<?php print _txt('pl.rciamstatsviewer.dashboard.column'); ?>';
+    tooltipDescription['registered'] = '<?php print _txt('pl.rciamstatsviewer.registered.tooltip'); ?>';
+    tooltipDescription['cou'] = '<?php print _txt('pl.rciamstatsviewer.cou.tooltip'); ?>';
+    defaultExportTitle['registered'] = '<?php print _txt('pl.rciamstatsviewer.registered.defaultexporttitle'); ?>';
+    defaultExportTitle['cou'] = '<?php print _txt('pl.rciamstatsviewer.cou.defaultexporttitle'); ?>';
     var dataTableExportButtonText ='<?php print _txt('pl.rciamstatsviewer.datatable.export');?>'
 
     urlByType['idp'] = '<?php print $this->Html->url(array(
@@ -91,10 +101,10 @@ print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker
                             'action' => 'getdataforsp',
                             'co'  => $cur_co['Co']['id']
                         )); ?>';
-    var url_str_userschart = '<?php print $this->Html->url(array(
+    var url_str_columnchart = '<?php print $this->Html->url(array(
                             'plugin' => Inflector::singularize(Inflector::tableize($this->plugin)),
                             'controller' => 'rciam_stats_viewer_services',
-                            'action' => 'getdataforuserschart',
+                            'action' => 'getdataforcolumnchart',
                             'co'  => $cur_co['Co']['id']
                         )); ?>';
     var url_str_userstiles = '<?php print $this->Html->url(array(
@@ -137,10 +147,37 @@ print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker
         // Initialize Date Range Format (DataTable)
         from_to_range()
 
+        
         var options = {}
+        options['idDataTable'] = 'dashboardDatatable'
+        data = <?php print json_encode($vv_logincount_per_month);?>;
+        options['title'] = 'Number of Logins per month'
+        i = 0;
+        data.forEach(function (item){
+                    newDate = new Date(item[0]['range_date'].split(" ")[0]);
+                    if(i == 0)
+                        minDate = new Date(item[0]['min_date']);
+                    i++;
+                    fDate = newDate.getMonth()+1
+                    if (fDate < 10)
+                        fDate = '0' + fDate
+                    //item[0]['show_date'] = fDate + "/" + newDate.getFullYear();
+                    item[0]['show_date'] =  newDate.getFullYear() + '-' + fDate;
+
+                })
+        
+        // Initialize Date Ranges startDate and endDate for idp, sp, summary and modal
+        $("input[id$=DateFrom]:not(input[id=couDateFrom],input[id=registeredDateFrom]), input[id$=DateTo]:not(input[id=couDateTo],input[id=registeredDateTo])").each(function(){
+                
+            $(this).datepicker('setStartDate', minDate);
+            
+        })
+        createDataTable($('#dashboardDatatableContainer'), data, "dashboard", options)
         options['idDataTable'] = 'idpDatatable'
+        options['title'] = 'Number of Logins per Identity Provider'
         createDataTable($("#idpDatatableContainer"), <?php print json_encode($vv_logincount_per_idp); ?>, "idp", options)
         options['idDataTable'] = 'spDatatable'
+        options['title'] = 'Number of Logins per Service Provider'
         createDataTable($("#spDatatableContainer"), <?php print json_encode($vv_logincount_per_sp); ?>, "sp", options)
 
         // when clear filter is clicked
@@ -229,8 +266,10 @@ print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker
         })
 
         // When change Period at RegisteredUsers Column Chart
-        $(document).on("change", "#dateRegisteredUsersSelect", function (){
-            updateColumnChart(document.getElementById("registeredsChartDetail"), $(this).val());
+        $(document).on("change", "#dateRegisteredSelect, #dateCouSelect", function (){
+            tab =  $(this).closest(".box").attr("data-type")
+            elementId = $(this).closest(".box").find(".columnChart").attr("id")
+            updateColumnChart(document.getElementById(elementId), $(this).val(), false, tab);
         })
 
         // Draw IdP/ Sp  Charts when click at the tab or backToTotal for the first time 
@@ -244,9 +283,13 @@ print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker
                 drawPieChart(document.getElementById('spsChartDetail'), defaultdataSp, "sp");
                 $(this).attr("data-draw", "")
             }
-            else if ($(this).attr("data-draw") == "drawUsersChart"){ //Initialize whole tab
-                dataTiles = getDataForUsersTiles();
-                updateColumnChart(document.getElementById("registeredsChartDetail"), 'monthly', true);
+            else if ($(this).attr("data-draw") == "drawUsersChart"){ //Initialize whole registered users tab
+                dataTiles = getDataForUsersTiles("registereds");
+                updateColumnChart(document.getElementById("registeredsChartDetail"), 'yearly', true, 'registered');
+                $(this).attr("data-draw", "")
+            }
+            else if ($(this).attr("data-draw") == "drawCousChart"){ //Initialize whole cous tab
+                updateColumnChart(document.getElementById("cousChartDetail"), 'yearly', true, 'cou');
                 $(this).attr("data-draw", "")
             }
         })
@@ -295,13 +338,13 @@ print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker
             <ul class="tabset_tabs" width="100px">
                 <li><a href='#dashboardTab'><?php print _txt('pl.rciamstatsviewer.summary'); ?></a></li>
                 <?php if ($vv_permissions["idp"]): ?>
-                    <li><a data-draw="drawIdpsChart" href='#idpTab'><?php print _txt('pl.rciamstatsviewer.idp_details.pl'); ?></a></li>
+                    <li><a data-draw="drawIdpsChart" href='#idpTab'><?php print _txt('pl.rciamstatsviewer.idp.tabname.pl'); ?></a></li>
                 <?php endif; ?>
                 <?php if ($vv_permissions["sp"]): ?>
-                    <li><a data-draw="drawSpsChart" href='#spTab'><?php print _txt('pl.rciamstatsviewer.sp_details.pl'); ?></a></li>
+                    <li><a data-draw="drawSpsChart" href='#spTab'><?php print _txt('pl.rciamstatsviewer.sp.tabname.pl'); ?></a></li>
                 <?php endif; ?>
                 <?php if ($vv_permissions["registered"]): ?>
-                    <li><a data-draw="drawUsersChart" href='#registeredTab'><?php print _txt('pl.rciamstatsviewer.registered_details.pl'); ?></a></li>
+                    <li><a data-draw="drawUsersChart" href='#registeredTab'><?php print _txt('pl.rciamstatsviewer.registered.tabname.pl'); ?></a></li>
                 <?php endif; ?>
             </ul>
             <?php
