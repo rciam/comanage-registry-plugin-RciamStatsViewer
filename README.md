@@ -1,6 +1,7 @@
 # RciamStatsViewer
+
 Rciam Statistics Viewer Plugin is used for presenting Statistics per **CO**llaboration in COmanage.
-The plugin requires the [proxystatistics-simplesamlphp-module](https://github.com/CESNET/proxystatistics-simplesamlphp-module) by CESNET to be installed and active in the Proxy, since some of the presented statistics utilize its data Model. 
+The plugin requires the [proxystatistics-simplesamlphp-module](https://github.com/CESNET/proxystatistics-simplesamlphp-module) by CESNET to be installed and active in the Proxy, since some of the presented statistics utilize its data Model.
 
 Specifically this plugin presents:
 1. Summary of IdP/SP logins
@@ -15,18 +16,19 @@ Specifically this plugin presents:
    - CO administrators
    - Members of the privileged Group defined by the CO Administrator
 
-
 ## Installation
 
 1. Run `git clone https://github.com/rciam/comanage-registry-plugin-RciamStatsViewer.git /path/to/comanage/local/Plugin/RciamStatsViewer`
 2. Run `cd /path/to/comanage/app`
-3. Run `Console/cake schema create --file schema.php --path /path/to/comanage/local/Plugin/RciamStatsViewer/Config/Schema`
-4. 🍺
+3. Run `su -c "Console/clearcache" ${APACHE_USER}` [COManage Reference](https://spaces.at.internet2.edu/display/COmanage/Installing+and+Enabling+Registry+Plugins)
+4. Run `Console/cake schema create --file schema.php --path /path/to/comanage/local/Plugin/RciamStatsViewer/Config/Schema`
+5. 🍺
 
 ## Schema update
+
 1. Run `Console/cake schema update --file schema.php --path /path/to/comanage/local/Plugin/RciamStatsViewer/Config/Schema`
-   - During updates database alternations, which refer to constraints, have to be deployed manually 
- 
+   - During updates database alternations, which refer to constraints, have to be deployed manually
+
 ## Configuration
 
 After the installation, you have to configure the plugin before using it. 
