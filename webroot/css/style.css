@@ -133,6 +133,77 @@
     #myModal #specificDataTableContainer{
         margin-top:20px;
     }
+    /* Map Style*/
+    .map {
+        width:100%;
+        height:100%;
+    }
+    .map svg{
+        height:100%;
+    }
+    .mapael .zoomButton {
+        background-color: #fff;
+        border: 1px solid #ccc;
+        color: #000;
+        width: 15px;
+        height: 15px;
+        line-height: 15px;
+        text-align: center;
+        border-radius: 3px;
+        cursor: pointer;
+        position: absolute;
+        top: 0;
+        font-weight: bold;
+        left: 10px;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -o-user-select: none;
+        user-select: none;
+    }
+
+    .mapael .zoomReset {
+        top: 10px;
+    }
+
+    .mapael .zoomIn {
+        top: 30px;
+    }
+
+    .mapael .zoomOut {
+        top: 50px;
+    }
+
+    .mapael .mapTooltip {
+        position: absolute;
+        background-color: #474c4b;
+        moz-opacity: 0.70;
+        opacity: 0.70;
+        filter: alpha(opacity=70);
+        border-radius: 10px;
+        padding: 10px;
+        z-index: 1000;
+        max-width: 200px;
+        display: none;
+        color: #fff;
+    }
+    .areaLegend {
+      background-color: #f5f5f5;
+      border: 1px solid #e3e3e3;
+      position: absolute;
+      top: 20px;
+      right: 40px;
+      padding: 10px;
+
+    }
+    .areaLegend tspan {
+      font: inherit;
+      padding-bottom: 24px;
+      border-bottom: 1px solid #ccc;
+    }
+    .reportButton {
+        margin-top: 15px;
+    }
     @media (min-width: 768px) {
         .modal-dialog {
             width: 80%;

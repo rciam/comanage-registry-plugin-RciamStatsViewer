@@ -72,6 +72,7 @@ class RciamStatsViewerDateEnum
     const yearly    = 'yearly';
 
     const type      = array(
+        'daily'     => 'daily',
         'weekly'    => 'weekly',
         'monthly'   => 'monthly',
         'yearly'    => 'yearly',
