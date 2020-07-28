@@ -81,6 +81,7 @@ $cm_rciam_stats_viewer_texts['en_US'] = array(
   'pl.rciamstatsviewer.coucolumn.chart'         => 'Number of Communities created per Period',
   'pl.rciamstatsviewer.cou.column'              => 'Number of Communities',
   'pl.rciamstatsviewer.cou.tooltip'             => 'Communities',
+  'pl.rciamstatsviewer.cou.statistics'          => 'Statistics Per Community',
   'pl.rciamstatsviewer.dashboard.column'        => 'Number of Logins',
   'pl.rciamstatsviewer.dashboard.logins'        => 'Number of Logins',
 

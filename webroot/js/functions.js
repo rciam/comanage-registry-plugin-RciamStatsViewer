@@ -4,6 +4,47 @@ $(document).on('click','input[id$=DateFrom], input[id$=DateTo]', function(e) {
     
  });
 
+$(document).on('change', 'select[class=couStatsSelect]', function (e) {
+    description = $(this).children('option:selected').data("description")
+    title = $(this).children('option:selected').data("title")
+    created = $(this).children('option:selected').data("created")
+    if ($(this).val()) {
+        $.ajax({
+            url: url_str_statspercou,
+            data: {
+                cou_id: $(this).val(),
+            },
+            success: function (data) {
+                content = "<h3>" + title + "</h3><hr/><p>Created: " + created + "</p><p>" + description + "</p>";
+
+                for (let [keyEnum, valueEnum] of Object.entries(statusEnum)) {
+                    found = false;
+                    if (data[0] != undefined) {
+                        for (let [key, value] of Object.entries(data)) {
+                            if (statusEnum[data[key]['CoPersonRole']["status"]] == statusEnum[keyEnum]) {
+                                content += "<p> " + statusEnum[data[key]['CoPersonRole']["status"]] + " Users: " +
+                                    data[key][0]["count"] + "</p>"
+                                found = true;
+                            }
+
+                        }
+                        if (found === false) {
+                            content += "<p> " + statusEnum[keyEnum] + " Users: 0" + "</p>"
+                        }
+
+                    }
+                    else
+                        content += "<p> " + statusEnum[keyEnum] + " Users: 0" + "</p>"
+                }
+
+                $(".perCouStatsContent").html(content)
+            }
+        })
+    }
+    else {
+        $(".perCouStatsContent").html("")
+    }
+})
 $(document).tooltip({
     items: "[data-date-column]",
     position: {
@@ -97,8 +138,8 @@ $(document).on("click", ".groupDataByDate", function () {
         $(".overlay").hide();       
         noty({
             text: 'You must fill both Dates From and To',
-            type: 'erro',
-            timeout: 1200,
+            type: 'error',
+            timeout: 2000,
             dismissQueue: true,
             layout: 'topCenter',
             theme: 'comanage',
@@ -512,7 +553,7 @@ function updateColumnChart(elementId, range = null, init = false, tab) {
                 options['idDataTable'] = tab + 'Datatable'
                 options['title'] = defaultExportTitle[tab];
                 createDataTable($("#" + tab + "DatatableContainer"), data , tab, options)
-
+           
             }
             $(".overlay").hide();
         },

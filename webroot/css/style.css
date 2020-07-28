@@ -115,6 +115,11 @@
     .rowList {
         padding-bottom: 5px; 
     }
+
+    .perCouStatsContent{
+        margin-top:30px;
+    }
+    
     #myModal .dataTableDateFilter input{
         height: 31px;
     }
