@@ -8,11 +8,14 @@ Specifically this plugin presents:
    - Accessible by all Registered Users
 2. Identity Providers details. Accessible by:
    - CO(U) administrators
-   - Members of the privileged Group defined by the CO Administrator 
+   - Members of the privileged Group defined by the CO Administrator
 3. Service Providers details. Accessible by:
    - CO(U) administrators
    - Members of the privileged Group defined by the CO Administrator
 4. Registered users. Accessible by:
+   - CO administrators
+   - Members of the privileged Group defined by the CO Administrator
+5. Communities. Accessible by:
    - CO administrators
    - Members of the privileged Group defined by the CO Administrator
 
