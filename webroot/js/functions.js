@@ -187,90 +187,6 @@ function createTile(row, bgClass, value, text, days, type = null) {
     }
 }
 
-// Create Modal
-function createModal(){
-    modalContent = '<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">'+
-        '<div class="modal-dialog modal-xl" role="document">'+
-            '<div class="modal-content  overlay-wrapper">'+
-            '<div class="modal-header">'+
-                '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+
-                '<h1 class="modal-title" id="myModalLabel">Modal title</h1>'+
-            '</div>'+
-            '<div class="modal-body">'+
-                '<div class="specificData" id="specificData">'+         
-                    '<p class="subTitle"></p>'+
-                    '<div class="row">'+
-                        '<div class="col-lg-3 col-xs-6">'+
-                            '<!-- small box -->'+
-                    '</div>'+
-                        '<!-- ./col -->'+
-                    '<div class="col-lg-3 col-xs-6">'+
-                            '<!-- small box -->'+
-                    '</div>'+
-                        '<!-- ./col -->'+
-                    '<div class="col-lg-3 col-xs-6">'+
-                            '<!-- small box -->'+
-                    '</div>'+
-                        '<!-- ./col -->'+
-                    '<div class="col-lg-3 col-xs-6">'+
-                            '<!-- small box -->'+
-                    '</div>'+
-                        '<!-- ./col -->'+
-                    '</div>'+
-                        '<div class="row">'+
-                            '<div class="col-lg-12">'+
-                                '<div class="box">'+
-                                    '<div class="box-header with-border">'+
-                                        '<h3 class="box-title"></h3>'+
-                                    '</div>'+
-                                    '<div class="lineChart" id="loginLineChart">'+
-                                        '<div id="modalline_div"></div>'+
-                                        '<div id="modalcontrol_div" style="height:50px"></div>'+
-                                    '</div>'+
-                                '</div>'+
-                            '</div>'+
-                        '</div>'+
-                        '<div class="row">'+
-                            '<div class="col-lg-12">'+
-                                '<div class="box">'+
-                                    '<div class="box-header with-border">'+
-                                        '<h3 class="box-title"></h3>'+
-                                    '</div>'+
-                                    '<div class="pieChart" id="specificChart"></div>'+
-                                '</div>'+
-                                '<div class="box" data-type="">'+
-                                    '<div class="box-header with-border">'+
-                                        '<h3 class="box-title">Datatable</h3>'+
-                                    '</div>'+
-                                    '<div class="box-body dataTableWithFilter">'
-    if(datatableExport){
-        modalContent += '<div class="dataTableDateFilter bg-box-silver">'+
-            'From: &nbsp;<input type="text" id="specificDateFrom" name="specificDateFrom" data-provide="datepicker" />'+
-            '&nbsp;&nbsp;&nbsp;To: &nbsp;<input type="text" id="specificDateTo" name="specificDateTo" data-provide="datepicker" />'+
-            '&nbsp;&nbsp;'+
-                '<button type="button" class="btn btn-default groupDataByDate" data-value="daily">Filter</button>'+
-        '</div>'
-    }
-    modalContent += '<div class="dataTableContainer" id="specificDataTableContainer"></div>'+
-                                    '</div>'+
-                                '</div>'+
-                            '</div>'+
-                        '</div>'+
-                        '<!-- ./col -->'+
-                '</div>'+
-            '</div>'+
-            '<div class="modal-footer">'+
-            '<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>'+
-            '</div>'+
-            '<div class="overlay">'+
-                '<div id="coSpinnerModal"></div>'+
-            '</div>'+
-        '</div>'+
-    '</div>'+
-'</div>'
-$("body").append(modalContent);
-}
-
 // This is for Dates with no logins, we have to set 0 for these dates
 function setZerosIfNoDate(dataTable) {
     var datePattern = 'd.M.yy';
@@ -498,21 +414,16 @@ function updateColumnChart(elementId, range = null, init = false, tab) {
                 $('.' + tab + 'Names').html("");
                 cous = [];
                 
-                data.forEach(function (item) {
-                    
+                data.forEach(function (item) {                  
                     valueRange = item[0]['created_date']
                     valueRange = valueRange.split(", ")
-                    description = item[0]['description'].split("|| ")
-                    
+                    description = item[0]['description'].split("|| ")                   
                     item[0]['names'].split(", ").forEach(function (name, index){
                         cous.push({name:name, created: valueRange[index], description: description[index]})
-
                     })
-                   
                 })
                  // sort by value
                 cous = cous.sort(function (a, b) {
-                   
                     var nameA = a.name.toUpperCase(); // ignore upper and lowercase
                     var nameB = b.name.toUpperCase(); // ignore upper and lowercase
                     if (nameA < nameB) {
@@ -530,7 +441,6 @@ function updateColumnChart(elementId, range = null, init = false, tab) {
                })
             }
             if(init === true){//initialize datatable
-
                 //initialize from_to_range
                 from_to_range()
                 i = 0;
@@ -553,7 +463,6 @@ function updateColumnChart(elementId, range = null, init = false, tab) {
                 options['idDataTable'] = tab + 'Datatable'
                 options['title'] = defaultExportTitle[tab];
                 createDataTable($("#" + tab + "DatatableContainer"), data , tab, options)
-           
             }
             $(".overlay").hide();
         },
@@ -618,7 +527,6 @@ function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
                     pieId = $(element + " .pieChart").attr("id");
                 }
                 drawPieChart(document.getElementById(pieId), dataIdp, "idp");
-
                 //Initialize DataTable Date Range
                 $(element + " .dataTableContainer").closest(".box").find('input[id$="DateFrom"],input[id$="DateTo"]').each(function(){
                     $(this).val("")
@@ -653,7 +561,6 @@ function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
                 
             }
             if (tabId == 'dashboard' || (tabId == 'sp' && specific == 'total') || (tabId == 'idp' && specific == 'specific')) {
-
                 fValues = [];
                 dataValues = "";
                 fValues.push(['service', 'serviceIdentifier', 'Count'])
@@ -666,14 +573,12 @@ function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
                 })
 
                 var dataSp = new google.visualization.arrayToDataTable(fValues);
-
                 if (tabId == 'dashboard') {
                     pieId = $(element + " .pieChart").eq(0).attr("id");
                 }
                 else {
                     pieId = $(element + " .pieChart").attr("id");
                 }
-
                 drawPieChart(document.getElementById(pieId), dataSp, "sp");
                 //Initialize DataTable Date Range
                 $(element + " .dataTableContainer").closest(".box").find('input[id$="DateFrom"],input[id$="DateTo"]').each(function(){
@@ -726,7 +631,6 @@ function goToSpecificProvider(identifier, legend, type) {
     $("#specificData .more-info").each(function () {
         $(this).attr("identifier", identifier);
         $(this).parent().removeClass("inactive");
-
     })
 
     $("#" + type + "SpecificData").find(".back-to-overall").each(function () {
@@ -736,18 +640,15 @@ function goToSpecificProvider(identifier, legend, type) {
     })
 
     if (type == "idp") {
-        
         obj = { idp: identifier };
     }
     else {
-        
         obj = { sp: identifier };
     }
     $.ajax({
         url: urlByType[type],
         data: obj,
         success: function (data) {
-        
             $(".modal-body .specificData .bg-aqua h3").text(data['tiles'][0] != null ? data['tiles'][0] : 0);
             setHiddenElements($(".modal-body .specificData .bg-aqua"), data['tiles'][0])
             $(".modal-body .specificData .bg-green h3").text(data['tiles'][1] != null ? data['tiles'][1] : 0);
@@ -758,14 +659,12 @@ function goToSpecificProvider(identifier, legend, type) {
             setHiddenElements($(".modal-body .specificData .bg-red"), data['tiles'][3])
             $("h1.modal-title").html(legend);
             $(".modal-body .specificData > p").html("<b>Identifier:</b> " + identifier);
-        
             fValues = [];
             dataValues = "";
             if (type == 'idp') {
                 columnNames = ['service', 'serviceIdentifier', 'Count'];
                 dataCol = 'sp';
                 columns = ['spname', 'service', 'count'];
-                
             }
             else {
                 columnNames = ['sourceIdp', 'sourceIdPEntityId', 'Count'];
@@ -783,7 +682,6 @@ function goToSpecificProvider(identifier, legend, type) {
             })
 
             var dataTable = new google.visualization.arrayToDataTable(fValues);
-
             $("#specificChart").closest(".box").find(".box-title").html(specificText[type])
             if (type == "idp")
                 drawPieChart(document.getElementById("specificChart"), dataTable, "sp");
@@ -830,12 +728,13 @@ function convertDate(jsDate){
     date = null;
     if (jsDate != null && jsDate instanceof Date) {
         month = (jsDate.getMonth() + 1).toString()
-        if (month.length < 2)
+        if(month.length < 2) {
             month = '0' + month;
+        }
         day = jsDate.getDate().toString()
-        if (day.length < 2)
+        if(day.length < 2) {
             day = '0' + day;
-        
+        }
        date = jsDate.getFullYear() + '-' + month + '-' + day;
         
     }
@@ -843,36 +742,36 @@ function convertDate(jsDate){
 }
 
 function convertDateByGroup(jsDate, groupBy) {
-    
     month = (jsDate.getMonth() + 1).toString()
-    if (month.length < 2)
+    if(month.length < 2) {
         month = '0' + month;
-    day = jsDate.getDate().toString()
-    if (day.length < 2)
-        day = '0' + day;
-    if (groupBy == 'daily'){
-     //   showDate = day + '/' + month + '/' + jsDate.getFullYear();
-     showDate = jsDate.getFullYear()+ '-' + month + '-' +  day;
     }
-    else if (groupBy == 'weekly') {
-        //showDate = day + '/' + month + '/' + jsDate.getFullYear();
+    day = jsDate.getDate().toString()
+    if(day.length < 2) {
+        day = '0' + day;
+    }
+    if(groupBy == 'daily') {
+        showDate = jsDate.getFullYear()+ '-' + month + '-' +  day;
+    }
+    else if(groupBy == 'weekly') {
         showDate = jsDate.getFullYear() + '-' + month + '-' + day;
         var nextWeek = new Date(jsDate.setDate(jsDate.getDate() + 6));
         month = (nextWeek.getMonth() + 1).toString()
-        if (month.length < 2)
+        if (month.length < 2) {
             month = '0' + month;
+        }
         day = nextWeek.getDate().toString()
-        if (day.length < 2)
+        if (day.length < 2) {
             day = '0' + day;
-    
+        }
         showDate += " to " + nextWeek.getFullYear() + '-' + month + '-' + day;
     }
-    else if (groupBy == 'monthly'){
+    else if(groupBy == 'monthly') {
         showDate = jsDate.getFullYear() + '-' +  month;
     }
-    else if (groupBy == 'yearly')
+    else if(groupBy == 'yearly') {
         showDate = jsDate.getFullYear();
-    
+    }
     return showDate;
 }
 // From - To Functionality 
@@ -880,12 +779,11 @@ function from_to_range() {
     
     $('input[id$="DateFrom"],input[id$="DateTo"]').each(function () {
         id = $(this).attr("id")
-        if(id.indexOf("DateTo")!= -1)
-        {
+        if(id.indexOf("DateTo")!= -1) {
             $(this).datepicker({ changeMonth: true, changeYear: true, 
                 format: "yyyy-mm-dd", autoclose: true, endDate: new Date() });
         }
-        else{
+        else {
             $(this).datepicker({ changeMonth: true, changeYear: true, 
                 format: "yyyy-mm-dd", autoclose: true, endDate: new Date() });
         }
@@ -904,13 +802,11 @@ function getDataForUsersTiles(elementId) {
             createTile($("#" + elementId + "TotalInfo .row .col-lg-3").eq(3), "bg-aqua", (dataTiles[3] ? dataTiles[3] : '0'), "Last Year Registered Users", 365, elementId + 'TotalInfo')       
         }
     })
-    
 }
 
 // Create Datatables
 function createDataTable(element, data, type, options = null) {
-
-    if (type == "idp") {
+    if(type == "idp") {
         column1 = 'idpname'
         column2 = 'count'
         data_param = 'sourceidp'
@@ -920,7 +816,7 @@ function createDataTable(element, data, type, options = null) {
         '<th>Number of Logins</th>'
         sort_order = 2
     }
-    else if (type == "sp") {
+    else if(type == "sp") {
         column1 = 'spname'
         column2 = 'count'
         data_param = 'service'
@@ -940,8 +836,7 @@ function createDataTable(element, data, type, options = null) {
         '<th>' + 'Names' + '</th>'
         sort_order = 0
     }
-    else if (type == "registered" || type == "dashboard") {
-        
+    else if(type == "registered" || type == "dashboard") {
         column1 = 'show_date'
         column2 = 'count'
         data_param = false
@@ -949,17 +844,14 @@ function createDataTable(element, data, type, options = null) {
         ths = '<th> Date </th>' +
         '<th> ' + vAxisTitle[type] + ' </th>' 
         sort_order = 0
-        
     }
     
     dataAppend = '';
-
     data.forEach(function (item) {
         if (type == 'idp' || type == 'sp')
             dataAppend += '<tr><td><a class="datatable-link" href="#" onclick="return false;" data-type="' + type + '" data-identifier="' + item[0][data_param] + '">' + item[0][column1] + '</a></td><td>' + item[0][data_param] + '</td><td>' + item[0][column2] + '</td></tr>';
         else if (type == 'cou') {
             lis = ''
-
             item[0][data_param].split(", ").sort(function (a, b) {
                 var nameA = a.toUpperCase(); // ignore upper and lowercase
                 var nameB = b.toUpperCase(); // ignore upper and lowercase
@@ -982,7 +874,6 @@ function createDataTable(element, data, type, options = null) {
 
     title = (options != null && options['title'] != null ? options['title'] : '')
     id = (options != null && options['idDataTable'] != null ? options['idDataTable'] : type + 'SpecificDatatable');
-
     element.html('<table id="' + id + '" class="stripe row-border hover">' +
         '<thead>' +
         '<tr>' +
