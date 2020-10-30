@@ -271,31 +271,31 @@ print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker
 
         // Draw IdP/ Sp  Charts when click at the tab or backToTotal for the first time 
         $(document).on("click", ".tabset_tabs li a", function() {
-            if ($(this).attr("data-draw") == "drawIdpsChart") {
+            if($(this).attr("data-draw") == "drawIdpsChart") {
                 drawPieChart(document.getElementById('idpsChartDetail'), defaultdataIdp, "idp");
                 $(this).attr("data-draw", "")
-
-            } else if ($(this).attr("data-draw") == "drawSpsChart") {
+            } else if($(this).attr("data-draw") == "drawSpsChart") {
                 drawPieChart(document.getElementById('spsChartDetail'), defaultdataSp, "sp");
                 $(this).attr("data-draw", "")
-            } else if ($(this).attr("data-draw") == "drawUsersChart") { //Initialize whole registered users tab
+            } else if($(this).attr("data-draw") == "drawUsersChart") { //Initialize whole registered users tab
                 dataTiles = getDataForUsersTiles("registereds");
                 updateColumnChart(document.getElementById("registeredsChartDetail"), 'yearly', true, 'registered');
                 $(this).attr("data-draw", "")
-            } else if ($(this).attr("data-draw") == "drawCousChart") { //Initialize whole cous tab
-                if (cou_general_stats) // permission to see general stats for cous
-                    updateColumnChart(document.getElementById("cousChartDetail"), 'yearly', true, 'cou');
-                $.ajax({
-                    url: url_str_userscousowner,
-                    success: function(data) {
-                        //console.log(data)
-                        options = '<option></option>';
-                        data.forEach(function(name, index) {
-                            options += "<option data-created='" + data[index]["Cou"]["created"] + "' data-title='" + data[index]["Cou"]["name"] + "' data-description='" + data[index]["Cou"]["description"] + "' value='" + data[index]["CoGroup"]["cou_id"] + "'>" + data[index]["Cou"]["name"] + "</option>"
-                        })
-                        $(".perCouStatsSelect").append('Select Community: <select class="couStatsSelect">' + options + '</select>')
-                    }
+            } else if($(this).attr("data-draw") == "drawCousChart") { //Initialize whole cous tab
+                if(cou_general_stats) { // permission to see general stats for cous
+                  updateColumnChart(document.getElementById("cousChartDetail"), 'yearly', true, 'cou');
+                }
+                let jqxhr = $.ajax({
+                  url: url_str_userscousowner
                 })
+                jqxhr.done((data) => {  
+                  options = '<option></option>';
+                  data.forEach(function(name, index) {
+                    options += "<option data-created='" + data[index]["Cou"]["created"] + "' data-title='" + data[index]["Cou"]["name"] + "' data-description='" + data[index]["Cou"]["description"] + "' value='" + data[index]["CoGroup"]["cou_id"] + "'>" + data[index]["Cou"]["name"] + "</option>"
+                  })
+                  $(".perCouStatsSelect").append('Select Community: <select class="couStatsSelect">' + options + '</select>')
+                })
+                jqxhr.fail((xhr, textStatus, error) => { handleFail(xhr, textStatus, error) })
                 $(this).attr("data-draw", "")
             }
         })
