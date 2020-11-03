@@ -129,6 +129,10 @@
         position: relative;
         height: 32px;
     }
+
+    #myModal #specificDataTableContainer{
+        margin-top:20px;
+    }
     @media (min-width: 768px) {
         .modal-dialog {
             width: 80%;
