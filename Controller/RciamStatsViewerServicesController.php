@@ -428,6 +428,10 @@ class RciamStatsViewerServicesController extends StandardController
           $dateFrom = date('Y-m-d', strtotime('-0 days'));
           $groupBy = RciamStatsViewerDateEnum::daily;
         }
+        else {
+          $groupBy = NULL;
+          $dateFrom = NULL;
+        }
         $vv_logincount_per_day['datatable'] = $this->utils->getLoginCountByRanges($conn, $dateFrom, $dateTo, $groupBy);
       } else if($type === "idp") {
         $vv_logincount_per_day['range'] = $this->utils->getLoginCountPerDayForProvider($conn, $days, $identifier, $type);
