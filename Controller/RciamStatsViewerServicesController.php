@@ -117,31 +117,31 @@ class RciamStatsViewerServicesController extends StandardController
     //last year
     $data[] = $this->CoPerson->find('count', array(
       'conditions' => array(
-        'CoPerson.co_person_id' => NULL,
         'CoPerson.deleted' => false,
         'CoPerson.co_id' => $this->request->params['named']['co'],
-        'CoPerson.status' => 'A',
+        'CoPerson.status' => StatusEnum::Active,
       ),
+      'contain' => false,
     ));
     //last 7 days 
     $data[] = $this->CoPerson->find('count', array(
       'conditions' => array(
-        'CoPerson.co_person_id' => NULL,
         'CoPerson.deleted' => false,
         'CoPerson.co_id' => intVal($this->request->params['named']['co']),
-        'CoPerson.status' => 'A',
+        'CoPerson.status' => StatusEnum::Active,
         'CoPerson.created > CURRENT_DATE - INTERVAL \'7 days\'',
       ),
+      'contain' => false,
     ));
     //last 30 days
     $data[] = $this->CoPerson->find('count', array(
       'conditions' => array(
-        'CoPerson.co_person_id' => NULL,
         'CoPerson.deleted' => false,
         'CoPerson.co_id' => intVal($this->request->params['named']['co']),
-        'CoPerson.status' => 'A',
+        'CoPerson.status' => StatusEnum::Active,
         'CoPerson.created > CURRENT_DATE - INTERVAL \'30 days\'',
       ),
+      'contain' => false,
     ));
     //last year
     $data[] = $this->CoPerson->find('count', array(
@@ -149,9 +149,10 @@ class RciamStatsViewerServicesController extends StandardController
         'CoPerson.co_person_id' => NULL,
         'CoPerson.deleted' => false,
         'CoPerson.co_id' => intVal($this->request->params['named']['co']),
-        'CoPerson.status' => 'A',
+        'CoPerson.status' => StatusEnum::Active,
         'CoPerson.created > CURRENT_DATE - INTERVAL \'1 year\'',
       ),
+      'contain' => false,
     ));
     $this->response->type('json');
     $this->response->statusCode(201);
