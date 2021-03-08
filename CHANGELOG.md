@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.2.0] - 2021-03-08
+### Added
+- Map visualisation for logins' country origin
+- Map visualisation per idp and sp (logins' country origin)
+- Map visualisation for registered users' country origin
+- Map visualisation per community (users' country origin)
+
 ## [v1.1.3] - 2020-11-27
 ### Fixed
 - Fix registered users tiles regarding the calculation
