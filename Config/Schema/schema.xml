@@ -51,6 +51,8 @@
         <field name="statisticsTableName" type="C" size="128" />
         <field name="identityProvidersMapTableName" type="C" size="128" />
         <field name="serviceProvidersMapTableName" type="C" size="128" />
+        <field name="countryStatisticsTableName" type="C" size="128" />
+        <field name="userCountryStatisticsTableName" type="C" size="128" />
         <!-- Changelog Required fields -->
         <field name="created" type="T" />
         <field name="revision" type="I" />
