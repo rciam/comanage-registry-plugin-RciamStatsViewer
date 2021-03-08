@@ -66,6 +66,8 @@ class AppSchema extends CakeSchema {
     'statisticsTableName' => array('type' => 'string', 'null' => true, 'default' => null, 'length' => 128),
     'identityProvidersMapTableName' => array('type' => 'string', 'null' => true, 'default' => null, 'length' => 128),
     'serviceProvidersMapTableName' => array('type' => 'string', 'null' => true, 'default' => null, 'length' => 128),
+    'countryStatisticsTableName' => array('type' => 'string', 'null' => true, 'default' => null, 'length' => 128),
+    'userCountryStatisticsTableName' => array('type' => 'string', 'null' => true, 'default' => null, 'length' => 128),
     'actor_identifier' => array('type' => 'string', 'null' => true, 'default' => null, 'length' => 256),
     'created' => array('type' => 'datetime', 'null' => true, 'default' => null),
     'modified' => array('type' => 'datetime', 'null' => true, 'default' => null),

@@ -1,52 +1,93 @@
 $(document).on('click','input[id$=DateFrom], input[id$=DateTo]', function(e) {
     e.preventDefault();
-    $(this).attr("autocomplete", "off");  
-    
+    $(this).attr("autocomplete", "off");   
  });
 
 $(document).on('change', 'select[class=couStatsSelect]', function (e) {
     description = $(this).children('option:selected').data("description")
     title = $(this).children('option:selected').data("title")
     created = $(this).children('option:selected').data("created")
-    if ($(this).val()) {
-      let jqxhr = $.ajax({
+    if($(this).val() != "") {
+        let jqxhr = $.ajax({
             url: url_str_statspercou,
             data: {
                 cou_id: $(this).val(),
             }
-          });
+        });
 
-      jqxhr.done((data)=> {
-                content = "<h3>" + title + "</h3><hr/><p>Created: " + created + "</p><p>" + description + "</p>";
-
-                for (let [keyEnum, valueEnum] of Object.entries(statusEnum)) {
-                    found = false;
-                    if (data[0] != undefined) {
-                        for (let [key, value] of Object.entries(data)) {
-                            if (statusEnum[data[key]['CoPersonRole']["status"]] == statusEnum[keyEnum]) {
-                                content += "<p> " + statusEnum[data[key]['CoPersonRole']["status"]] + " Users: " +
-                                    data[key][0]["count"] + "</p>"
-                                found = true;
-                            }
-
+        jqxhr.done((data) => {
+            $(".status-box").show();
+            $("#world-map-cous").show();
+            // First format the data for map
+            other_statuses = 0;
+            if(Object.keys(data['map']).length > 0) {
+                map = [];
+                i=0;
+                for(countryItem in data['map']) {
+                    map[i] = [];
+                    map[i][0] = {sum: 0, country: `${countryItem}`};
+                    map[i][0]["additional_text"] = '';
+                    other = 0; // for other statuses
+                    for (status in data['map'][countryItem]) {
+                        
+                        map[i][0]["sum"] += data['map'][countryItem][status]["sum"]
+                        map[i][0]["countrycode"] = data['map'][countryItem][status]["countrycode"]
+                        if(statusEnum[status] !== undefined) {
+                            map[i][0]["additional_text"] += statusEnum[status] + ": " + data['map'][countryItem][status]["sum"] + "<br/>";
                         }
-                        if (found === false) {
-                            content += "<p> " + statusEnum[keyEnum] + " Users: 0" + "</p>"
+                        else {
+                            other += data['map'][countryItem][status]["sum"];
                         }
-
                     }
-                    else
-                        content += "<p> " + statusEnum[keyEnum] + " Users: 0" + "</p>"
+                    if(other > 0) {
+                        map[i][0]["additional_text"] += "Other Status: " + other;
+                    }
+                    i++;
                 }
+                createMap(map, "world-map-cous", "Number of Users", "Users")
+            }
+            data = data['cou']
+            content = "<h3>" + title + "</h3><hr/><p>Created: " + created + "</p><p>" + description + "</p>";
+            for (let [keyEnum, valueEnum] of Object.entries(statusEnum)) {
+                found = false;
+                if (data[0] != undefined) {
+                    for (let [key, value] of Object.entries(data)) {
+                        if (statusEnum[data[key]['CoPersonRole']["status"]] == statusEnum[keyEnum]) {
+                            elementClass = statusEnum[data[key]['CoPersonRole']["status"]].toLowerCase().replace(/ /g, '')
+                            $("." + elementClass + "-users .description-header").text(data[key][0]["count"])
+                            found = true;
+                        }
+                    }
+                    if (found === false) {
+                        elementClass = statusEnum[keyEnum].toLowerCase().replace(/ /g, '')
+                        $("." + elementClass + "-users .description-header").text(0)
+                    }
 
-                $(".perCouStatsContent").html(content)
+                }
+                else { // Didnt find anything
+                    elementClass = statusEnum[keyEnum].toLowerCase().replace(/ /g, '')
+                    $("." + elementClass + "-users .description-header").text(0)
+                }
+            }
+            // Find users with other statuses
+            data.forEach(function(user_status){
+                if(statusEnum[user_status["CoPersonRole"]["status"]] !== 'undefined') {
+                    other_statuses++;
+                }
+            })   
+            $(".other-users .description-header").text(other_statuses)
+  
+            $(".perCouStatsContent").html(content)
         })
-      jqxhr.fail((xhr, textStatus, error) => { handleFail(xhr, textStatus, error) })
+        jqxhr.fail((xhr, textStatus, error) => { handleFail(xhr, textStatus, error) })
     }
     else {
+        $(".status-box").hide();
+        $("#world-map-cous").hide();
         $(".perCouStatsContent").html("")
     }
 })
+// Tooltip for Cous
 $(document).tooltip({
     items: "[data-date-column]",
     position: {
@@ -55,15 +96,13 @@ $(document).tooltip({
     },
     content: function () {
         var element = $(this);
-
         if (element.is("[data-date-column]")) {
-
             return "<b>" + element.text() + "</b><br/> Created Date: " + element.attr("data-date-column") + "<br/>" + element.attr("data-descr");
         }
-
     }
 })
 
+// when clicking groupBy
 $(document).on("click", ".groupDataByDate", function () {
     
     $(".overlay").show();
@@ -95,33 +134,98 @@ $(document).on("click", ".groupDataByDate", function () {
               }
             }
           })
-        jqxhr.done((data) => {   
-                if(type == 'registered' || type == 'cou' || type == 'dashboard'){
-                    data.forEach(function (item) {
-                        jsDate = new Date(item[0]['show_date'].split(" ")[0]);
-                        item[0]['show_date'] = convertDateByGroup (jsDate, groupBy)
-                    })
-                    typeDataTable = type;
-                    basis = ' in ' + groupBy + ' basis'
+        jqxhr.done((data) => {
+            // Initialize classes and map id
+            date_specific_class = 'date-specific-modal';
+            map_container_class = 'map-container-modal';
+            map_id = 'world-map-modal';
+
+            if(type == 'dashboard' || type == 'registered') {
+                date_specific_class = 'date-specific-' + type;
+                map_container_class = 'map-container-' + type;
+                map_id = 'world-map-' + type;
+            }
+            // Create Map only for Dashboard, Registered Users Tab and Modal
+            if(data['map'] !== undefined && data['map'].length > 0 && type != 'idp' && type != 'sp') {
+                // If tab is "Registered Users" we must take into account dates user put otherwise we take into account 
+                // dates that we actually have data
+                date_from_to = type == 'registered' ? [dateFrom, dateTo] : calculateMinMax(data['map'])
+                // Create element for map
+                $("." + map_container_class).html(
+                    '<div id="' + map_id + '" style="height:500px">'
+                    + '<div class="map"></div>'
+                    + '<div class="areaLegend"></div>'
+                    + '</div>'
+                )
+                // Put Date Ranges to the title of the map
+                $(".box-map ." + date_specific_class).html(" from " + date_from_to[0] + " to " + date_from_to[1])
+                
+                if (type == 'registered') {
+                    createMap(data['map'], map_id, "Number of Users", "Users")
+                }   
+                else {
+                    containerName = type == "idpSpecific" || type == "spSpecific" ? "modal" : type
+                    if(type == "idpSpecific" || type == "spSpecific") {
+                        containerName = "modal"
+                        options = { title: 'Number of Logins per country for period ' + dateFrom + ' to ' + dateTo + ' for ' + $("h1.modal-title").html() } 
+                    }
+                    else {
+                        containerName = type
+                        options = null
+                    }
+                    createMapElement(data['map'], "map-container-" + containerName , map_id, type, options)
                 }
-                else if (type == 'idp' || type == 'spSpecific') {
-                    data = data["idps"]
-                    typeDataTable = 'idp'
-                    basis = ''
+            }
+            else {
+                date_specific = (dateFrom != '' && dateTo != '' ? " from " + dateFrom + " to " + dateTo : "")
+                $(".box-map ." + date_specific_class).html(date_specific)
+                $("." + map_container_class).html("No data available.")
+            }
+
+            // Creation of Datatable
+            if(type == 'registered' || type == 'cou' || type == 'dashboard') {
+                if(type == 'dashboard') {
+                    data = data['dashboard'];
                 }
-                else if (type == 'sp' || type == 'idpSpecific') {
-                    data = data["sps"]
-                    typeDataTable = 'sp'
-                    basis = ''
+                else if(type == 'registered' || type == 'cou') {
+                    data = data['data'];
                 }
                 
-                var options = {}
-                options['idDataTable'] = dataTableToUpdate.attr("id").replace("Container","")
-                options['title'] = boxTitle +' for period ' + dateFrom + ' to ' + dateTo + basis;
-                
-                createDataTable(dataTableToUpdate, data, typeDataTable, options)
-                $(".overlay").hide();
-          })
+                // We put an extra column with Countries for this tabs
+                data.forEach(function (item) {
+                    jsDate = new Date(item[0]['show_date'].split(" ")[0]);
+                    item[0]['show_date'] = convertDateByGroup(jsDate, groupBy)
+                    // Transformation of countries array to plain text to render it at the datatable
+                    if(item[0]['countries'] !== undefined) {
+                        item[0]['plain_countries'] = '';
+                        for(country in item[0]['countries']) {
+                            item[0]['plain_countries'] += country + ': ' + item[0]['countries'][country]['count'] + '|| ';
+                        }
+                        // Remove last comma with space
+                        item[0]['plain_countries'] = item[0]['plain_countries'].slice(0, -3)
+                    }
+                })
+                typeDataTable = type;
+                basis = ' in ' + groupBy + ' basis'
+            }
+            else if (type == 'idp' || type == 'spSpecific') {
+                data = data["idps"]
+                typeDataTable = 'idp'
+                basis = ''
+            }
+            else if (type == 'sp' || type == 'idpSpecific') {
+                data = data["sps"]
+                typeDataTable = 'sp'
+                basis = ''
+            }
+
+            var options = {}
+            options['idDataTable'] = dataTableToUpdate.attr("id").replace("Container", "")
+            // Title for exporting datatable
+            options['title'] = boxTitle + ' for period ' + dateFrom + ' to ' + dateTo + basis;
+            createDataTable(dataTableToUpdate, data, typeDataTable, options)
+            $(".overlay").hide();
+        })
         jqxhr.fail((xhr, textStatus, error) => { handleFail(xhr, textStatus, error) })
             
     }
@@ -222,7 +326,6 @@ function setZerosIfNoDate(dataTable) {
 
 // Hide more-info link/ show no data for 0 logins
 function setHiddenElements(element, value) {
-
     if (value == null || value == 0) {
         element.find(".more-info").addClass("hidden")
         element.find(".no-data").removeClass("hidden")
@@ -234,11 +337,9 @@ function setHiddenElements(element, value) {
 
 // Line Chart with Range
 function drawLineChart(elementId, data, type = '') {
-
     if (data.getNumberOfRows() > 0)
         data = setZerosIfNoDate(data);
     cur_dashboard = new google.visualization.Dashboard(document.getElementById(elementId));
-
     chartRangeFilter = new google.visualization.ControlWrapper({
         controlType: 'ChartRangeFilter',
         containerId: type + 'control_div',
@@ -391,7 +492,6 @@ function updateColumnChart(elementId, range = null, init = false, tab) {
         data: {
             range: range,
             tab: tab
-
         },
         statusCode: {
           403 : function() {
@@ -399,84 +499,103 @@ function updateColumnChart(elementId, range = null, init = false, tab) {
           }
         }
       })
-    jqxhr.done((data) => {          
-            fValues = [];
-            hticks = [];
-                fValues.push(['Date', 'Count' , {'type': 'string', 'role': 'tooltip', 'p': {'html': true}}])
-                
-                data.forEach(function (item) {
-                    var temp = [];    
-                    valueRange = new Date(item[0]['range_date']);
-                                   
-                    temp.push(valueRange);
-                    temp.push(parseInt(item[0]['count']));
-                    temp.push('<div style="padding:5px 5px 5px 5px;">' + convertDateByGroup (valueRange, range) + "<br/> " + tooltipDescription[tab] + ": " + parseInt(item[0]['count']) + '</div>');
-                    hticks.push({v: valueRange, f: getWeekNumber(valueRange)})
-                    fValues.push(temp);
-                })
-            
-            var dataRange = new google.visualization.arrayToDataTable(fValues);
-            drawColumnChart(elementId, dataRange, range, hticks, tab)
-            if(tab == 'cou'){ // we add a column to the right with cou names
-                $('.' + tab + 'Names').html("");
-                cous = [];
-                
-                data.forEach(function (item) {                  
-                    valueRange = item[0]['created_date']
-                    valueRange = valueRange.split(", ")
-                    description = item[0]['description'].split("|| ")                   
-                    item[0]['names'].split(", ").forEach(function (name, index){
-                        cous.push({name:name, created: valueRange[index], description: description[index]})
-                    })
-                })
-                 // sort by value
-                cous = cous.sort(function (a, b) {
-                    var nameA = a.name.toUpperCase(); // ignore upper and lowercase
-                    var nameB = b.name.toUpperCase(); // ignore upper and lowercase
-                    if (nameA < nameB) {
-                        return -1;
-                    }
-                    if (nameA > nameB) {
-                        return 1;
-                    }
-                    // names must be equal
-                    return 0;
-                });
-               
-               cous.forEach(function (name, index){
-                    $('.' + tab + 'Names').append('<li class="rowList" data-date-column="'+ cous[index]['created'] +'" data-descr="'+ cous[index]['description'] +'">' + cous[index]['name'] + '</li>')
-               })
-            }
-            if(init === true){//initialize datatable
-                //initialize from_to_range
-                from_to_range()
-                i = 0;
-                data.forEach(function (item){
-                    newDate = new Date(item[0]['range_date']);
-                    if (i == 0){                        
-                        minDate = new Date(item[0]['min_date']);
-                    }  
-                    i++;
-                    fDate = newDate.getMonth()+1
-                    if (fDate < 10)
-                        fDate = '0' + fDate
-                    item[0]['show_date'] =  newDate.getFullYear()
-                })
-                //Set minimum Date
-                $("#" + tab + "DateFrom, #" + tab + "DateTo").each(function(){
-                    $(this).datepicker('setStartDate', minDate);
-                })
-                var options = {}
-                options['idDataTable'] = tab + 'Datatable'
-                options['title'] = defaultExportTitle[tab];
-                createDataTable($("#" + tab + "DatatableContainer"), data , tab, options)
-            }
-            $(".overlay").hide();
+    jqxhr.done((data) => {
         
+        if(tab == 'registered' || tab =='cou') {
+            dataMap = data['map'] !== undefined && data['map'].length > 0 ? data['map'] : [];
+            data = data['data'];          
+        }        
+        fValues = [];
+        hticks = [];
+        fValues.push(['Date', 'Count', { 'type': 'string', 'role': 'tooltip', 'p': { 'html': true } }])
+
+        data.forEach(function (item) {
+            var temp = [];
+            valueRange = new Date(item[0]['range_date']);
+
+            temp.push(valueRange);
+            temp.push(parseInt(item[0]['count']));
+            temp.push('<div style="padding:5px 5px 5px 5px;">' + convertDateByGroup(valueRange, range) + "<br/> " + tooltipDescription[tab] + ": " + parseInt(item[0]['count']) + '</div>');
+            hticks.push({ v: valueRange, f: getWeekNumber(valueRange) })
+            fValues.push(temp);
+        })
+
+        var dataRange = new google.visualization.arrayToDataTable(fValues);
+        drawColumnChart(elementId, dataRange, range, hticks, tab)
+        if(tab == 'cou'){ // we add a column to the right with cou names
+            $('.' + tab + 'Names').html("");
+            cous = [];
+            
+            data.forEach(function (item) {                  
+                valueRange = item[0]['created_date']
+                valueRange = valueRange.split(", ")
+                description = item[0]['description'].split("|| ")
+                
+                item[0]['names'].split("|| ").forEach(function (name, index){
+                    cous.push({name:name, created: valueRange[index], description: description[index]})
+                })
+            })
+                // sort by value
+            cous = cous.sort(function (a, b) {
+                var nameA = a.name.toUpperCase(); // ignore upper and lowercase
+                var nameB = b.name.toUpperCase(); // ignore upper and lowercase
+                if (nameA < nameB) {
+                    return -1;
+                }
+                if (nameA > nameB) {
+                    return 1;
+                }
+                // names must be equal
+                return 0;
+            });
+            
+            cous.forEach(function (name, index){
+                $('.' + tab + 'Names').append('<li class="rowList" data-date-column="'+ cous[index]['created'] +'" data-descr="'+ cous[index]['description'] +'">' + cous[index]['name'] + '</li>')
+            })
+        }
+        if(init === true){ // initialize datatable
+            // initialize from_to_range
+            from_to_range()
+            i = 0;
+            data.forEach(function (item){
+                newDate = new Date(item[0]['range_date']);
+                if (i == 0){                        
+                    minDate = new Date(item[0]['min_date']);
+                }  
+                i++;
+                fDate = newDate.getMonth()+1
+                if (fDate < 10)
+                    fDate = '0' + fDate
+                item[0]['show_date'] =  newDate.getFullYear()
+                // Transformation of countries array to plain text, for adding
+                // a new column for countries to datatable
+                if(item[0]['countries'] !== undefined) {
+                    item[0]['plain_countries'] = '';
+                    for(country in item[0]['countries']) {
+                        item[0]['plain_countries'] += country + ': ' + item[0]['countries'][country]['count'] + '|| ';
+                    }
+                    // Remove last comma with space
+                    item[0]['plain_countries'] = item[0]['plain_countries'].slice(0,-3)
+                }
+            })
+            //Set minimum Date
+            $("#" + tab + "DateFrom, #" + tab + "DateTo").each(function(){
+                $(this).datepicker('setStartDate', minDate);
+            })
+            var options = {}
+            options['idDataTable'] = tab + 'Datatable'
+            options['title'] = defaultExportTitle[tab];
+            createDataTable($("#" + tab + "DatatableContainer"), data , tab, options)
+        }
+        if(tab == 'registered' && dataMap.length > 0) {
+            createMap(dataMap, 'world-map-registered', 'Number of Users', 'Users')
+        }
+        $(".overlay").hide();                 
     })
     jqxhr.fail((xhr, textStatus, error) => { handleFail(xhr, textStatus, error) })
 }
 
+// When clicking on tiles
 function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
     let jqxhr = $.ajax({
         url: url_str,
@@ -517,7 +636,7 @@ function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
           fValues = [];
           dataValues = "";
           fValues.push(['sourceIdp', 'sourceIdPEntityId', 'Count'])
-          
+
           data['idps'].forEach(function (item) {
               var temp = [];
               temp.push(item[0]["idpname"]);
@@ -528,40 +647,51 @@ function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
           var dataIdp = new google.visualization.arrayToDataTable(fValues);
 
           // Dashboard has 2 pieCharts
-          pieId = (tabId == 'dashboard' ? $(element + " .pieChart").eq(0).attr("id") : $(element + " .pieChart").attr("id")); 
-          
+          pieId = (tabId == 'dashboard' ? $(element + " .pieChart").eq(0).attr("id") : $(element + " .pieChart").attr("id"));
+
           drawPieChart(document.getElementById(pieId), dataIdp, "idp");
           //Initialize DataTable Date Range
-          $(element + " .dataTableContainer").closest(".box").find('input[id$="DateFrom"],input[id$="DateTo"]').each(function(){
+          $(element + " .dataTableContainer").closest(".box").find('input[id$="DateFrom"],input[id$="DateTo"]').each(function () {
               $(this).val("")
           })
-          if (tabId == 'sp' && specific == 'specific'){
+          if(tabId == 'sp' && specific == 'specific') {
               var options = {}
               options['title'] = 'Number of logins the last ' + days + ' days per Identity Provider'
               createDataTable($(element + " .dataTableContainer"), data['idps'], "idp", options)
+              // Map Visualisation
+              options['title'] = 'Number of logins the last ' + days + ' days per Country for ' + $("h1.modal-title").html() 
+              createMapElement(data['map'], 'map-container-modal', 'world-map-modal', tabId + 'Specific', options)
+              
           }
-          else if (tabId == 'idp' && specific == 'total'){ //for Identity Providers Details Tab
+          else if(tabId == 'idp' && specific == 'total') { //for Identity Providers Details Tab
               var options = {}
               options['idDataTable'] = 'idpDatatable'
               options['title'] = 'Number of logins the last ' + days + ' days per Identity Provider'
               createDataTable($(element + " .dataTableContainer"), data['idps'], "idp", options)
           }
-          else if(tabId == 'dashboard'){
+          else if(tabId == 'dashboard') {
               var options = {}
               options['idDataTable'] = 'dashboardDatatable'
               data['datatable'].forEach(function (item) {
-                  
-                  groupBy = (days == 365 || days == 0 ?  'monthly' : 'daily')
+                  groupBy = (days == 365 || days == 0 ? 'monthly' : 'daily')
                   jsDate = new Date(item[0]['show_date']);
-                  item[0]['show_date'] = convertDateByGroup (jsDate, groupBy)
+                  item[0]['show_date'] = convertDateByGroup(jsDate, groupBy)
+                  // Now must transform countries array to plain text
+                  if (item[0]['countries'] !== undefined) {
+                      item[0]['plain_countries'] = '';
+                      for (country in item[0]['countries']) {
+                          item[0]['plain_countries'] += country + ': ' + item[0]['countries'][country]['count'] + '|| ';
+                      }
+                      // Remove last comma with space
+                      item[0]['plain_countries'] = item[0]['plain_countries'].slice(0, -3)
+                  }
               })
               options['title'] = 'Number of logins the last ' + days + ' days'
               createDataTable($(element + " .dataTableContainer"), data['datatable'], "dashboard", options)
+              createMapElement(data['map'], 'map-container-dashboard', 'world-map-dashboard')
           }
-
-          
       }
-      if (tabId == 'dashboard' || (tabId == 'sp' && specific == 'total') || (tabId == 'idp' && specific == 'specific')) {
+      if ((tabId == 'sp' && specific == 'total') || (tabId == 'idp' && specific == 'specific')) {
           fValues = [];
           dataValues = "";
           fValues.push(['service', 'serviceIdentifier', 'Count'])
@@ -581,9 +711,12 @@ function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
               $(this).val("")
           })      
           if (tabId == 'idp' && specific == 'specific'){
+              
               var options = {}
               options['title'] = 'Number of logins the last ' + days + ' days per Service Provider'
               createDataTable($(element + " .dataTableContainer"), data['sps'], "sp", options)
+              options['title'] = 'Number of logins the last ' + days + ' days per Country for ' + $("h1.modal-title").html() 
+              createMapElement(data['map'], 'map-container-modal', 'world-map-modal', tabId + 'Specific', options)
           }
           else if (tabId == 'sp' && specific == 'total') { //for Service Providers Details Tab
               var options = {}
@@ -601,7 +734,8 @@ function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
 
 // Modal Functionality
 function goToSpecificProvider(identifier, legend, type) {
-    $("#myModal").modal()  
+    $("#myModal").modal()
+    $("#tabs-modal").tabs({active: 0});
     // Bug Fix For DatePicker Position When scrolling on modal
     $("#myModal").on("scroll", function() {
         $('#myModal input[id$="DateFrom"],#myModal input[id$="DateTo"]').datepicker('place')
@@ -707,7 +841,13 @@ function goToSpecificProvider(identifier, legend, type) {
         })
         $("#specificDataTableContainer").closest(".box").attr("data-type", type + 'Specific')
         $("#specificDataTableContainer").closest(".box").attr("data-identifier", identifier) 
+        
         createDataTable($("#specificDataTableContainer"), data[dataCol], dataCol)
+        // Create Map Element
+        var options = {};
+        options['title'] = 'Number of Logins per country for ' + legend;
+        createMapElement(data['map'], 'map-container-modal' , 'world-map-modal', type + 'Specific',  options)     
+        
         $(".modal .overlay").hide();        
     });
     jqxhr.fail((xhr, textStatus, error) => { handleFail(xhr, textStatus, error) })
@@ -821,46 +961,64 @@ function createDataTable(element, data, type, options = null) {
         column1 = 'show_date'
         column2 = 'count'
         data_param = 'names'
-        th = 'Dates'
         ths = '<th> Date </th>' +
         '<th>' + vAxisTitle[type] + '</th>' +
         '<th>' + 'Names' + '</th>'
         sort_order = 0
     }
-    else if(type == "registered" || type == "dashboard") {
+    else if(type == "dashboard") {
         column1 = 'show_date'
         column2 = 'count'
-        data_param = false
-        th = 'Dates'
+        data_param = 'plain_countries'
         ths = '<th> Date </th>' +
-        '<th> ' + vAxisTitle[type] + ' </th>' 
+        '<th> ' + vAxisTitle[type] + ' </th>'  +
+        '<th>' + 'Logins per Country' + '</th>'
         sort_order = 0
     }
-    
+    else if(type == "registered") { 
+        column1 = 'show_date'
+        column2 = 'count'
+        data_param = 'plain_countries'
+        ths = '<th> Date </th>' +
+        '<th> ' + vAxisTitle[type] + ' </th>' +
+        '<th>' + 'Registered Users per Country' + '</th>'
+        sort_order = 0
+    }
+    else if(type == "map") {
+        column1 = 'country'
+        column2 = 'sum'
+        ths = '<th> Country </th>' +
+        '<th>' + 'Logins' + '</th>'
+        sort_order = 0
+        asc_desc = 'asc'
+    }
     dataAppend = '';
     data.forEach(function (item) {
         if (type == 'idp' || type == 'sp')
             dataAppend += '<tr><td><a class="datatable-link" href="#" onclick="return false;" data-type="' + type + '" data-identifier="' + item[0][data_param] + '">' + item[0][column1] + '</a></td><td>' + item[0][data_param] + '</td><td>' + item[0][column2] + '</td></tr>';
-        else if (type == 'cou') {
+        else if (type == 'cou' || type == 'registered' || type == 'dashboard') {
             lis = ''
-            item[0][data_param].split(", ").sort(function (a, b) {
-                var nameA = a.toUpperCase(); // ignore upper and lowercase
-                var nameB = b.toUpperCase(); // ignore upper and lowercase
-                if (nameA < nameB) {
-                    return -1;
-                }
-                if (nameA > nameB) {
-                    return 1;
-                }
-                // names must be equal
-                return 0;
-            }).forEach(function (value) {
-                lis += '<li>' + value.trim() + '</li>'
-            })
+            if(item[0][data_param] !== undefined) {
+                item[0][data_param].split("|| ").sort(function (a, b) {
+                    var nameA = a.toUpperCase(); // ignore upper and lowercase
+                    var nameB = b.toUpperCase(); // ignore upper and lowercase
+                    if (nameA < nameB) {
+                        return -1;
+                    }
+                    if (nameA > nameB) {
+                        return 1;
+                    }
+                    // names must be equal
+                    return 0;
+                    
+                }).forEach(function (value) {
+                    lis += '<li>' + value.trim() + '</li>'
+                })
+            }
             dataAppend += '<tr><td data-sort=' + item[0]['range_date'] + '>' + item[0][column1] + '</td><td>' + item[0][column2] + '</td><td><ul>' + lis + '</ul></td></tr>';
         }
-        else if (type == 'registered' || type == 'dashboard')
-            dataAppend += '<tr><td data-sort=' + item[0]['range_date'] + '>' + item[0][column1] + '</td><td>' + item[0][column2] + '</td></tr>';
+        else if (type == 'map')
+            dataAppend += '<tr><td>' + item[0][column1] + '</td><td>' + item[0][column2] + '</td></tr>';
     })
 
     title = (options != null && options['title'] != null ? options['title'] : '')
@@ -879,7 +1037,7 @@ function createDataTable(element, data, type, options = null) {
     if(datatableExport){
         $("#" + id).DataTable({
             dom: 'Bfrtip',
-            order: [[sort_order, 'desc']],
+            order: [sort_order, typeof asc_desc !== 'undefined' ? asc_desc : 'desc'],
             buttons: [
                 {
                     extend: 'collection',
@@ -891,8 +1049,6 @@ function createDataTable(element, data, type, options = null) {
                                 stripHtml: false,
                                 format: {
                                     body: function (data, row, column, node) {
-                                        // Strip $ from salary column to make it numeric
-
                                         if (column === 2)
                                             return data.replace(/<li>/g, "").replace(/<\/li>/g, ",").replace(/<ul>/g, "").replace(/<\/ul>/g, "")
                                         else
@@ -908,8 +1064,6 @@ function createDataTable(element, data, type, options = null) {
                                 stripHtml: false,
                                 format: {
                                     body: function (data, row, column, node) {
-                                        // Strip $ from salary column to make it numeric
-
                                         if (column === 2)
                                             return data.replace("<li>","").replace(/<li>/g, ", ").replace(/<\/li>/g, "").replace(/<ul>/g, "").replace(/<\/ul>/g, "")
                                         else
@@ -925,8 +1079,6 @@ function createDataTable(element, data, type, options = null) {
                                 stripHtml: false,
                                 format: {
                                     body: function (data, row, column, node) {
-                                        // Strip $ from salary column to make it numeric
-
                                         if (column === 2)
                                             return data.replace("<li>","").replace(/<li>/g, ", ").replace(/<\/li>/g, "").replace(/<ul>/g, "").replace(/<\/ul>/g, "")
                                         else
@@ -942,8 +1094,6 @@ function createDataTable(element, data, type, options = null) {
                                 stripHtml: false,
                                 format: {
                                     body: function (data, row, column, node) {
-                                        // Strip $ from salary column to make it numeric
-
                                         if (column === 2)
                                             return data.replace(/<li>/g, "• ").replace(/<\/li>/g, "\n").replace(/<ul>/g, "").replace(/<\/ul>/g, "")
                                         else
@@ -961,16 +1111,128 @@ function createDataTable(element, data, type, options = null) {
             ]
         });
     }
-    else
+    else {
         $("#" + id).DataTable({
-            order: [0, 'desc']
+            order: [0, typeof asc_desc !== 'undefined' ? asc_desc : 'desc']
         });
+    }
+}
+
+function createMapElement(dataMap, elementContainer, elementId, type, options = null) {
+    if(dataMap !== undefined && dataMap.length >0) {
+        dateSpecificClass = "date-specific"
+        if (type == "idpSpecific" || type == "spSpecific") {
+            $("#tabs-modal").tabs({active: 0});
+            createDataTable($("#specificDataTableMapContainer"), dataMap, 'map', options)
+            dateSpecificClass = "date-specific-modal"
+        }
+
+        $("." + elementContainer).html(
+            '<div id="' + elementId + '" style="height:500px">'
+            + '<div class="map"></div>'
+            + '<div class="areaLegend"></div>'
+            + '</div>'
+        )
+        date_from_to = calculateMinMax(dataMap)
+        $("." + dateSpecificClass).html(" from " + date_from_to[0] + " to " + date_from_to[1]);
+        createMap(dataMap, elementId);
+        
+    }
+    else {
+      $("." + elementContainer).html("No data available.")
+      if (type == "idpSpecific" || type == "spSpecific") { 
+          $("#specificDataTableMapContainer").html("No data available")
+      }
+    }
 }
 
 function reloadPage(){ 
     location.reload();
 };
 
+function createMap(mapData, id, legendLabel = 'Number of Logins', tooltipLabel = 'Logins') {
+    areas = {};
+    i = 1;
+    maxSum = 0;
+    mapData.forEach(function (mapRow) {
+        mapRow = mapRow[0]
+        contentTooltip = "<span style=\"font-weight:bold;\">" + mapRow.country + "</span><br />" + tooltipLabel + " : " + mapRow.sum
+        contentTooltip += mapRow.additional_text !== undefined ? '<hr style="border-color:#fff; margin:5px 0px"/>' + mapRow.additional_text : '';
+        areas[mapRow.countrycode] = {
+            value: mapRow.sum,
+            tooltip: { content: contentTooltip }
+        }
+        if (mapRow.sum > maxSum) {
+            maxSum = mapRow.sum;
+        }
+        i++;
+    })
+    // Set Number of Legends
+    numLegends = maxSum < 5 ? maxSum : 5;
+    spaces = Math.round(maxSum / numLegends);
+    legends = [];
+    fill = ["#09EBEE", "#19CEEB", "#28ACEA", "#388EE9", "#3D76E0"];
+    for(i = 0; i < numLegends; i++) {
+        maxValue = ((i + 1) != numLegends ? ((i + 1) * spaces) : maxSum);
+        legend = {
+            min: i * spaces,
+            max: maxValue,
+            attrs: {
+                fill: fill[i]
+            },
+            label: i * spaces + "-" + maxValue
+        }
+        legends.push(legend)
+    }
+
+    $("#" + id).mapael({
+        map: {
+            name: "world_countries_mercator",
+            zoom: {
+                enabled: true,
+                maxLevel: 15,
+                init: {
+                    latitude: 40.717079,
+                    longitude: -74.00116,
+                    level: 5
+                }
+            },
+            defaultArea: {
+                attrs: {
+                    fill: "#ccc", // my function for color i want to define
+                    stroke: "#5d5d5d",
+                    "stroke-width": 0.2,
+                    "stroke-linejoin": "round",
+
+                },
+                attrsHover: {
+                    fill: "#E98300",
+                    animDuration: 300
+                },
+
+            },
+        },
+        legend: {
+            area: {
+                title: legendLabel,
+                titleAttrs: { "font": "unset", "font-size": "12px", "font-weight": "bold" },
+                slices: legends
+            }
+        },
+        areas: areas
+    })
+}
+// Find the min and max values at an Array
+function calculateMinMax(dataArray) {
+    let min = dataArray[0][0]['min'], max = dataArray[0][0]['max'] 
+    for (let i = 1; i < dataArray.length; i++) {
+        let minValue = dataArray[i][0]['min']
+        let maxValue = dataArray[i][0]['max']
+        min = (minValue < min) ? minValue : min
+        max = (maxValue > max) ? maxValue : max
+      }
+    return [min, max]
+}
 // Generate flash notifications for messages
 function generateSessionExpiredNotification(text, type) {
      noty({

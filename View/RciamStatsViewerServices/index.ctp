@@ -58,6 +58,14 @@ print $this->Html->script("https://www.gstatic.com/charts/loader.js", array('inl
 print $this->Html->script('/RciamStatsViewer/js/functions.js', array('inline' => false));
 print $this->Html->script('/RciamStatsViewer/js/bootstrap.min.js', array('inline' => false));
 print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker.min.js', array('inline' => false));
+
+// Map
+print $this->Html->script('/RciamStatsViewer/js/jquery-mousewheel/jquery.mousewheel.js');
+print $this->Html->script('/RciamStatsViewer/js/raphael/raphael.min.js');
+print $this->Html->script('/RciamStatsViewer/js/jquery-mapael/jquery.mapael.min.js');
+print $this->Html->script('/RciamStatsViewer/js/jquery-mapael/maps/world_countries.min.js');
+print $this->Html->script('/RciamStatsViewer/js/jquery-mapael/maps/world_countries_mercator.min.js');
+
 ?>
 <script type="text/javascript">
     //Global Variables
@@ -159,7 +167,17 @@ print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker
 
         var options = {}
         options['idDataTable'] = 'dashboardDatatable'
+
         data = <?php print json_encode($vv_logincount_per_month); ?>;
+        map_data = <?php print json_encode($vv_logins_per_country); ?>;
+        if(map_data !== undefined && map_data.length > 0) {
+            date_from_to = calculateMinMax(map_data)
+            $(".date-specific-dashboard").html(" from " + date_from_to[0] + " to " + date_from_to[1]);
+            createMap(map_data, "world-map-dashboard")
+        }
+        else {
+            $(".box-map").hide();
+        }
         options['title'] = 'Number of Logins per month'
         i = 0;
         data.forEach(function(item) {
@@ -172,6 +190,15 @@ print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker
                 fDate = '0' + fDate
             //item[0]['show_date'] = fDate + "/" + newDate.getFullYear();
             item[0]['show_date'] = newDate.getFullYear() + '-' + fDate;
+            // Now must transform countries array to plain text
+            
+            if (item[0]['countries'] !== undefined) {
+                item[0]['plain_countries'] = '';
+                for (country in item[0]['countries']) {
+                    item[0]['plain_countries'] += country + ': ' + item[0]['countries'][country]['count'] + '|| ';
+                }
+                item[0]['plain_countries'] = item[0]['plain_countries'].slice(0, -3)
+            }
         })
 
         // Initialize Date Ranges startDate and endDate for idp, sp, summary and modal
@@ -283,19 +310,22 @@ print $this->Html->script('/RciamStatsViewer/js/datepicker3/bootstrap-datepicker
                 $(this).attr("data-draw", "")
             } else if($(this).attr("data-draw") == "drawCousChart") { //Initialize whole cous tab
                 if(cou_general_stats) { // permission to see general stats for cous
-                  updateColumnChart(document.getElementById("cousChartDetail"), 'yearly', true, 'cou');
+                    updateColumnChart(document.getElementById("cousChartDetail"), 'yearly', true, 'cou');
                 }
+
                 let jqxhr = $.ajax({
-                  url: url_str_userscousowner
+                    url: url_str_userscousowner
                 })
-                jqxhr.done((data) => {  
-                  options = '<option></option>';
-                  data.forEach(function(name, index) {
-                    options += "<option data-created='" + data[index]["Cou"]["created"] + "' data-title='" + data[index]["Cou"]["name"] + "' data-description='" + data[index]["Cou"]["description"] + "' value='" + data[index]["CoGroup"]["cou_id"] + "'>" + data[index]["Cou"]["name"] + "</option>"
-                  })
-                  $(".perCouStatsSelect").append('Select Community: <select class="couStatsSelect">' + options + '</select>')
+                jqxhr.done((data) => {
+                    options = '<option></option>';
+                    data.forEach(function(name, index) {
+                        options += "<option data-created='" + data[index]["Cou"]["created"] + "' data-title='" + data[index]["Cou"]["name"] + "' data-description='" + data[index]["Cou"]["description"] + "' value='" + data[index]["CoGroup"]["cou_id"] + "'>" + data[index]["Cou"]["name"] + "</option>"
+                    })
+                    $(".perCouStatsSelect").append('Select Community: <select class="couStatsSelect">' + options + '</select>')
                 })
-                jqxhr.fail((xhr, textStatus, error) => { handleFail(xhr, textStatus, error) })
+                jqxhr.fail((xhr, textStatus, error) => {
+                    handleFail(xhr, textStatus, error)
+                })
                 $(this).attr("data-draw", "")
             }
         })

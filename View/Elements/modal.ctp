@@ -9,22 +9,11 @@
                 <div class="specificData" id="specificData">
                     <p class="subTitle"></p>
                     <div class="row">
+                    <?php for($i = 0; $i <= 3; $i ++) : ?>
                         <div class="col-lg-3 col-xs-6">
-                            <!-- small box -->
+                        <!-- small box -->
                         </div>
-                        <!-- ./col -->
-                        <div class="col-lg-3 col-xs-6">
-                            <!-- small box -->
-                        </div>
-                        <!-- ./col -->
-                        <div class="col-lg-3 col-xs-6">
-                            <!-- small box -->
-                        </div>
-                        <!-- ./col -->
-                        <div class="col-lg-3 col-xs-6">
-                            <!-- small box -->
-                        </div>
-                        <!-- ./col -->
+                    <?php endfor; ?>
                     </div>
                     <div class="row">
                         <div class="col-lg-12">
@@ -52,10 +41,12 @@
                                     <h3 class="box-title"></h3>
                                 </div>
                                 <div class="box-body dataTableWithFilter">
-                                    <?php if($datatableExport): ?>
+                                    <?php if($datatableExport) : ?>
                                     <div class="dataTableDateFilter bg-box-silver">
-                                        <?php print _txt('pl.rciamstatsviewer.ranges.from'); ?>: &nbsp;<input type="text" id="specificDateFrom" name="specificDateFrom" data-provide="datepicker" />
-                                        &nbsp;&nbsp;&nbsp;<?php print _txt('pl.rciamstatsviewer.ranges.to'); ?>: &nbsp;<input type="text" id="specificDateTo" name="specificDateTo" data-provide="datepicker" />
+                                        <?php print _txt('pl.rciamstatsviewer.ranges.from'); ?>: &nbsp;
+                                        <input type="text" id="specificDateFrom" name="specificDateFrom" data-provide="datepicker" />
+                                        &emsp;
+                                        <?php print _txt('pl.rciamstatsviewer.ranges.to'); ?>: &nbsp;<input type="text" id="specificDateTo" name="specificDateTo" data-provide="datepicker" />
                                         &nbsp;&nbsp;
                                         <button type="button" class="btn btn-default groupDataByDate" data-value="daily"><?php print _txt('pl.rciamstatsviewer.ranges.filter.button'); ?></button>
                                     </div>
@@ -67,6 +58,29 @@
                     </div>
                     <!-- ./col -->
                 </div>
+                <div id="tabs-modal">
+                    <ul>
+                        <li><a href="#tabs-map">Map</a></li>
+                        <li><a href="#tabs-datatable">Datatable</a></li>
+                    </ul>
+                    <div id="tabs-map">
+                        <div class="box box-map">
+                            <div class="box-header with-border">
+                                <h3 class="box-title"><?php print _txt('pl.rciamstatsviewer.dashboard.logins.countries') ?><span class="date-specific-modal" style="font: inherit;"></span></h3>
+                            </div>
+                            <div class="box-body map-container-modal" style="position:relative">
+                                <div id="world-map-modal" style="height:500px">
+                                    <div class="map"></div>
+                                    <div class="areaLegend"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="tabs-datatable">
+                        <div id="specificDataTableMapContainer"></div>
+                    </div>
+                </div>
+
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal"><?php print _txt('pl.rciamstatsviewer.modal.close'); ?></button>
