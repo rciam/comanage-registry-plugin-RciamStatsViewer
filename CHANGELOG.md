@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [v1.2.0] - 2021-03-08
 ### Added
 - Map visualisation for logins' country origin
-- Map visualisation per idp and sp (logins' country origin)
+- Map visualisation per identity providers and service providers (logins' country origin)
 - Map visualisation for registered users' country origin
 - Map visualisation per community (users' country origin)
 
