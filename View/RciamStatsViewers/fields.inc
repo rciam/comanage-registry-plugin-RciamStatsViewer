@@ -299,6 +299,38 @@
                   <li>
                     <div class="field-name">
                       <div class="field-title">
+                        <?php print _txt('pl.rciamstatsviewer.countryStatisticsTableName'); ?>
+                        <span class="required">*</span>
+                      </div>
+                      <div class="field-desc"><?php print _txt('pl.rciamstatsviewer.countryStatisticsTableName.desc'); ?></div>
+                    </div>
+                    <div class="field-info">
+                      <?php
+                        $value = empty($vv_rciam_stats_viewers['RciamStatsViewer']['countryStatisticsTableName']) ? ''
+                        : filter_var($vv_rciam_stats_viewers['RciamStatsViewer']['countryStatisticsTableName'],FILTER_SANITIZE_SPECIAL_CHARS);
+                        print $this->Form->input('countryStatisticsTableName', array('size' => 50,'value' => $value));
+                      ?>
+                    </div>
+                  </li>
+                  <li>
+                    <div class="field-name">
+                      <div class="field-title">
+                        <?php print _txt('pl.rciamstatsviewer.userCountryStatisticsTableName'); ?>
+                        <span class="required">*</span>
+                      </div>
+                      <div class="field-desc"><?php print _txt('pl.rciamstatsviewer.userCountryStatisticsTableName.desc'); ?></div>
+                    </div>
+                    <div class="field-info">
+                      <?php
+                        $value = empty($vv_rciam_stats_viewers['RciamStatsViewer']['userCountryStatisticsTableName']) ? ''
+                        : filter_var($vv_rciam_stats_viewers['RciamStatsViewer']['userCountryStatisticsTableName'],FILTER_SANITIZE_SPECIAL_CHARS);
+                        print $this->Form->input('userCountryStatisticsTableName', array('size' => 50,'value' => $value));
+                      ?>
+                    </div>
+                  </li>
+                  <li>
+                    <div class="field-name">
+                      <div class="field-title">
                         <?php print _txt('pl.rciamstatsviewer.privileged.group'); ?>
                       </div>
                       <div class="field-desc"><?php print _txt('pl.rciamstatsviewer.privileged.group.desc'); ?></div>
@@ -328,7 +360,6 @@
                       ?>
                     </div>
                   </li>
-
                 </ul>
             </div>
           </li>

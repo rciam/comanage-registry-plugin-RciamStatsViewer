@@ -59,6 +59,11 @@ $cm_rciam_stats_viewer_texts['en_US'] = array(
   'pl.rciamstatsviewer.serviceProvidersMapTableName.desc'    => 'Name of the service providers table at the database',
   'pl.rciamstatsviewer.identityProvidersMapTableName'        => 'Identity Providers Map Table Name',
   'pl.rciamstatsviewer.identityProvidersMapTableName.desc'   => 'Name of the identity providers table at the database',
+  'pl.rciamstatsviewer.countryStatisticsTableName'           => 'Country Statistics Table Name',
+  'pl.rciamstatsviewer.countryStatisticsTableName.desc'      => 'Name of the country statistics table at the database',
+  'pl.rciamstatsviewer.userCountryStatisticsTableName'       => 'User\'s Country Statistics Table Name',
+  'pl.rciamstatsviewer.userCountryStatisticsTableName.desc'  => 'Name of the user\'s country statistics table at the database',
+
 
   'pl.rciamstatsviewer.dashboard.overall'       => 'Overall number of logins per day',
   'pl.rciamstatsviewer.dashboard.idp'           => 'Overall number of logins per IdP',
@@ -89,6 +94,9 @@ $cm_rciam_stats_viewer_texts['en_US'] = array(
   'pl.rciamstatsviewer.dashboard.column'        => 'Number of Logins',
   'pl.rciamstatsviewer.dashboard.logins'        => 'Number of Logins',
 
+  'pl.rciamstatsviewer.dashboard.logins.countries'           => 'Number of Logins per Country',
+  'pl.rciamstatsviewer.registered.logged_in_users.countries' => 'Number of Users per Country',
+  
   'pl.rciamstatsviewer.registered.defaultexporttitle' => 'Registered Users per Year',
   'pl.rciamstatsviewer.cou.defaultexporttitle'        => 'Communities Created per Year',
 
@@ -110,7 +118,6 @@ $cm_rciam_stats_viewer_texts['en_US'] = array(
   'fd.server.persistent'               => 'Persistent',
   'fd.server.encoding'                 => 'Encoding',
   'fd.server.test_connection'          => 'Test Connection',
-
 
   //Database
   'er.rciam_stats_viewer.db.save'    => 'Save failed',
