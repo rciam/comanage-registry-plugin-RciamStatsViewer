@@ -84,6 +84,9 @@ $cm_rciam_stats_viewer_texts['en_US'] = array(
   'pl.rciamstatsviewer.ranges.filter.button'    => 'Filter',
   'pl.rciamstatsviewer.modal.close'             => 'Close',
   'pl.rciamstatsviewer.datatable.export'        => 'Export',
+  'pl.rciamstatsviewer.uniquelogins'            => 'Unique Logins',
+  'pl.rciamstatsviewer.uniquelogins.desc'       => 'By enabling this option, all data below will refer to unique logins',
+  'pl.rciamstatsviewer.dateranges.desc'         => 'From ',
   'pl.rciamstatsviewer.registered.column'       => 'Number of Registered Users',
   'pl.rciamstatsviewer.registered.tooltip'      => 'Registered Users',
   'pl.rciamstatsviewer.registeredcolumn.chart'  => 'Number of Registered Users created per Period',
@@ -93,7 +96,11 @@ $cm_rciam_stats_viewer_texts['en_US'] = array(
   'pl.rciamstatsviewer.cou.statistics'          => 'Statistics Per Community',
   'pl.rciamstatsviewer.dashboard.column'        => 'Number of Logins',
   'pl.rciamstatsviewer.dashboard.logins'        => 'Number of Logins',
-
+  'pl.rciamstatsviewer.logins.today'            => 'Todays Logins',
+  'pl.rciamstatsviewer.logins.week'             => 'Last 7 days Logins',
+  'pl.rciamstatsviewer.logins.month'            => 'Last 30 days Logins',
+  'pl.rciamstatsviewer.logins.year'             => 'Last Year Logins',
+  'pl.rciamstatsviewer.logins.na'               => 'N/A',
   'pl.rciamstatsviewer.dashboard.logins.countries'           => 'Number of Logins per Country',
   'pl.rciamstatsviewer.registered.logged_in_users.countries' => 'Number of Users per Country',
   

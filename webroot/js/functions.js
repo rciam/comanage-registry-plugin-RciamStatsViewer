@@ -102,9 +102,13 @@ $(document).tooltip({
     }
 })
 
+$(document).on("click", ".unique-logins-text", function(e) {
+    checkbox =$(this).parent().find("input[type=checkbox]")
+    checkbox.prop("checked", !checkbox.prop("checked")).change();
+})
+
 // when clicking groupBy
-$(document).on("click", ".groupDataByDate", function () {
-    
+$(document).on("click", ".groupDataByDate", function () {    
     $(".overlay").show();
     dataTableToUpdate = $(this).closest(".dataTableWithFilter").find(".dataTableContainer")
     boxTitle = $(this).closest(".box").find(".box-title").text();
@@ -120,11 +124,15 @@ $(document).on("click", ".groupDataByDate", function () {
     
     if (dateFrom != null && dateTo != null && dateTo >= dateFrom) {
         groupBy = $(this).attr('data-value')
-        if(type.includes("Specific"))
+        if(type.includes("Specific")) {
             identifier =  $(this).closest(".box").attr("data-identifier")
-        else
+            unique_logins = $("#unique-logins-modal").is(":checked")
+        }
+        else {
             identifier = null;
-        dates = { dateFrom: dateFrom, dateTo: dateTo, groupBy: groupBy, type: type, identifier: identifier }
+            unique_logins = $("#unique-logins-" + type).is(":checked")
+        }
+        dates = { dateFrom: dateFrom, dateTo: dateTo, groupBy: groupBy, type: type, identifier: identifier, unique_logins: unique_logins  }
         let jqxhr = $.ajax({
             url: url_str_datatable_ranges,
             data: dates,
@@ -276,7 +284,7 @@ function createTile(row, bgClass, value, text, days, type = null) {
     if (type != 'registeredsTotalInfo') {
         row.html('<div class="small-box ' + bgClass + '">' +
             '<div class="inner">' +
-            '<h3>' + (value != 0 ? value : 0) + '</h3>' +
+            '<h3>' + (value != 0 ? value : loginsNotAvailable) + '</h3>' +
             '<p>' + text + '</p>' +
             '</div>' +
             '<div class="small-box-footer no-data ' + nodata + '">No data</div>' +
@@ -337,9 +345,19 @@ function setHiddenElements(element, value) {
 
 // Line Chart with Range
 function drawLineChart(elementId, data, type = '') {
-    if (data.getNumberOfRows() > 0)
-        data = setZerosIfNoDate(data);
     cur_dashboard = new google.visualization.Dashboard(document.getElementById(elementId));
+    if(data.getNumberOfRows() > 0) {
+        data = setZerosIfNoDate(data);
+    }
+    else {
+        // No Data available so we must initialize data variable
+        fValue = ['Date', 'Count']
+        var temp = [new Date(), 0];
+        fValues.push(temp);
+        data = new google.visualization.arrayToDataTable(fValues);
+        data = setZerosIfNoDate(data);
+    }
+    
     chartRangeFilter = new google.visualization.ControlWrapper({
         controlType: 'ChartRangeFilter',
         containerId: type + 'control_div',
@@ -369,7 +387,6 @@ function drawLineChart(elementId, data, type = '') {
 
 // Pie Chart
 function drawPieChart(elementId, data, type) {
-
     data.sort([{
         column: 2,
         desc: true
@@ -425,7 +442,9 @@ function drawPieChart(elementId, data, type) {
         if (selection.length) {
             var identifier = data.getValue(selection[0].row, 1);
             var legend = data.getValue(selection[0].row, 0);
-            goToSpecificProvider(identifier, legend, type);
+            activeTab = $("ul.tabset_tabs li.ui-tabs-active").attr("aria-controls").replace("Tab","");
+            unique_logins = $("#myModal").is(':visible') ? $("#unique-logins-modal").is(":checked") : $("#unique-logins-"+activeTab).is(":checked");
+            goToSpecificProvider(identifier, legend, type, unique_logins);
         }
     }
 }
@@ -512,7 +531,6 @@ function updateColumnChart(elementId, range = null, init = false, tab) {
         data.forEach(function (item) {
             var temp = [];
             valueRange = new Date(item[0]['range_date']);
-
             temp.push(valueRange);
             temp.push(parseInt(item[0]['count']));
             temp.push('<div style="padding:5px 5px 5px 5px;">' + convertDateByGroup(valueRange, range) + "<br/> " + tooltipDescription[tab] + ": " + parseInt(item[0]['count']) + '</div>');
@@ -529,8 +547,7 @@ function updateColumnChart(elementId, range = null, init = false, tab) {
             data.forEach(function (item) {                  
                 valueRange = item[0]['created_date']
                 valueRange = valueRange.split(", ")
-                description = item[0]['description'].split("|| ")
-                
+                description = item[0]['description'].split("|| ")               
                 item[0]['names'].split("|| ").forEach(function (name, index){
                     cous.push({name:name, created: valueRange[index], description: description[index]})
                 })
@@ -596,13 +613,14 @@ function updateColumnChart(elementId, range = null, init = false, tab) {
 }
 
 // When clicking on tiles
-function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
+function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific, unique_logins = null) {
     let jqxhr = $.ajax({
         url: url_str,
         data: {
             days: days,
             identifier: identifier,
-            type: type
+            type: type,
+            unique_logins: unique_logins
         },
         statusCode: {
           403: function() {            
@@ -626,17 +644,72 @@ function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
               temp.push(new Date(item[0]["year"], item[0]["month"] - 1, item[0]["day"]));
               temp.push(parseInt(item[0]["count"]));
               fValues.push(temp);
-          })
-          
+          })       
           var dataRange = new google.visualization.arrayToDataTable(fValues);
+         
           drawLineChart($(element + " .lineChart"), dataRange, type)
       }
-      if (tabId == 'dashboard' || (tabId == 'idp' && specific == 'total') || (tabId == 'sp' && specific == 'specific')) {
-          //Summary. Idp Total or SP specific
+      if(tabId == 'dashboard'){
+        //Summary. Idp Total or SP specific
+        fValues = [];
+        dataValues = "";
+        fValues.push(['sourceIdp', 'sourceIdPEntityId', 'Count'])
+
+        data['idps'].forEach(function (item) {
+            var temp = [];
+            temp.push(item[0]["idpname"]);
+            temp.push(item[0]["sourceidp"])
+            temp.push(parseInt(item[0]["count"]));
+            fValues.push(temp);
+        })
+        var dataIdp = new google.visualization.arrayToDataTable(fValues);
+
+        // Dashboard has 2 pieCharts
+        pieId = $(element + " .pieChart").eq(0).attr("id");
+        drawPieChart(document.getElementById(pieId), dataIdp, "idp");
+          
+        fValues = [];
+        dataValues = "";
+        fValues.push(['service', 'serviceIdentifier', 'Count'])
+        data['sps'].forEach(function (item) {
+            var temp = [];
+            temp.push(item[0]["spname"]);
+            temp.push(item[0]["service"])
+            temp.push(parseInt(item[0]["count"]));
+            fValues.push(temp);
+        })
+        
+        var dataSp = new google.visualization.arrayToDataTable(fValues);
+        drawPieChart(document.getElementById($(element + " .pieChart").eq(1).attr("id")), dataSp, "sp");
+        //Initialize DataTable Date Range
+        $(element + " .dataTableContainer").closest(".box").find('input[id$="DateFrom"],input[id$="DateTo"]').each(function () {
+            $(this).val("")
+        })
+        var options = {}
+        options['idDataTable'] = 'dashboardDatatable'
+        data['datatable'].forEach(function (item) {
+            groupBy = (days == 365 || days == 0 ? 'monthly' : 'daily')
+            jsDate = new Date(item[0]['show_date']);
+            item[0]['show_date'] = convertDateByGroup(jsDate, groupBy)
+            // Now must transform countries array to plain text
+            if (item[0]['countries'] !== undefined) {
+                item[0]['plain_countries'] = '';
+                for (country in item[0]['countries']) {
+                    item[0]['plain_countries'] += country + ': ' + item[0]['countries'][country]['count'] + '|| ';
+                }
+                // Remove last comma with space
+                item[0]['plain_countries'] = item[0]['plain_countries'].slice(0, -3)
+            }
+        })
+        options['title'] = 'Number of logins the last ' + days + ' days'
+        createDataTable($(element + " .dataTableContainer"), data['datatable'], "dashboard", options)
+        createMapElement(data['map'], 'map-container-dashboard', 'world-map-dashboard')
+      }
+      else if ((tabId == 'idp' && specific == 'total') || (tabId == 'sp' && specific == 'specific')) {
+        //Summary. Idp Total or SP specific
           fValues = [];
           dataValues = "";
           fValues.push(['sourceIdp', 'sourceIdPEntityId', 'Count'])
-
           data['idps'].forEach(function (item) {
               var temp = [];
               temp.push(item[0]["idpname"]);
@@ -647,9 +720,9 @@ function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
           var dataIdp = new google.visualization.arrayToDataTable(fValues);
 
           // Dashboard has 2 pieCharts
-          pieId = (tabId == 'dashboard' ? $(element + " .pieChart").eq(0).attr("id") : $(element + " .pieChart").attr("id"));
-
+          pieId = $(element + " .pieChart").attr("id");
           drawPieChart(document.getElementById(pieId), dataIdp, "idp");
+
           //Initialize DataTable Date Range
           $(element + " .dataTableContainer").closest(".box").find('input[id$="DateFrom"],input[id$="DateTo"]').each(function () {
               $(this).val("")
@@ -660,35 +733,13 @@ function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
               createDataTable($(element + " .dataTableContainer"), data['idps'], "idp", options)
               // Map Visualisation
               options['title'] = 'Number of logins the last ' + days + ' days per Country for ' + $("h1.modal-title").html() 
-              createMapElement(data['map'], 'map-container-modal', 'world-map-modal', tabId + 'Specific', options)
-              
+              createMapElement(data['map'], 'map-container-modal', 'world-map-modal', tabId + 'Specific', options)              
           }
           else if(tabId == 'idp' && specific == 'total') { //for Identity Providers Details Tab
               var options = {}
               options['idDataTable'] = 'idpDatatable'
               options['title'] = 'Number of logins the last ' + days + ' days per Identity Provider'
               createDataTable($(element + " .dataTableContainer"), data['idps'], "idp", options)
-          }
-          else if(tabId == 'dashboard') {
-              var options = {}
-              options['idDataTable'] = 'dashboardDatatable'
-              data['datatable'].forEach(function (item) {
-                  groupBy = (days == 365 || days == 0 ? 'monthly' : 'daily')
-                  jsDate = new Date(item[0]['show_date']);
-                  item[0]['show_date'] = convertDateByGroup(jsDate, groupBy)
-                  // Now must transform countries array to plain text
-                  if (item[0]['countries'] !== undefined) {
-                      item[0]['plain_countries'] = '';
-                      for (country in item[0]['countries']) {
-                          item[0]['plain_countries'] += country + ': ' + item[0]['countries'][country]['count'] + '|| ';
-                      }
-                      // Remove last comma with space
-                      item[0]['plain_countries'] = item[0]['plain_countries'].slice(0, -3)
-                  }
-              })
-              options['title'] = 'Number of logins the last ' + days + ' days'
-              createDataTable($(element + " .dataTableContainer"), data['datatable'], "dashboard", options)
-              createMapElement(data['map'], 'map-container-dashboard', 'world-map-dashboard')
           }
       }
       if ((tabId == 'sp' && specific == 'total') || (tabId == 'idp' && specific == 'specific')) {
@@ -704,14 +755,13 @@ function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
           })
 
           var dataSp = new google.visualization.arrayToDataTable(fValues);
-          pieId = (tabId == 'dashboard' ? $(element + " .pieChart").eq(1).attr("id") : $(element + " .pieChart").attr("id"))
+          pieId = $(element + " .pieChart").attr("id")
           drawPieChart(document.getElementById(pieId), dataSp, "sp");
           //Initialize DataTable Date Range
           $(element + " .dataTableContainer").closest(".box").find('input[id$="DateFrom"],input[id$="DateTo"]').each(function(){
               $(this).val("")
           })      
           if (tabId == 'idp' && specific == 'specific'){
-              
               var options = {}
               options['title'] = 'Number of logins the last ' + days + ' days per Service Provider'
               createDataTable($(element + " .dataTableContainer"), data['sps'], "sp", options)
@@ -725,17 +775,158 @@ function getLoginCountPerDay(url_str, days, identifier, type, tabId, specific) {
               createDataTable($(element + " .dataTableContainer"), data['sps'], "sp", options)
           }
       }
-
-      $(".overlay").hide();
-        
+      $(".overlay").hide();        
     })
     jqxhr.fail((xhr, textStatus, error) => { handleFail(xhr, textStatus, error) })
 }
 
+function getDataForTabs(tab) {
+    $(".overlay").show();
+    unique_logins = $("#unique-logins-" + tab).is(":checked")
+    let jqxhr =  $.ajax({
+        url: urlRefreshTab,
+        data: {unique_logins: unique_logins},
+        statusCode: {
+          403 : function() {
+            generateSessionExpiredNotification("Sorry, your session has expired. Please click here to renew your session.", "error");
+          }
+        }
+    });
+    jqxhr.done((data, textStatus, xhr) => { 
+        refreshTabs(tab ,data)
+        $(".overlay").hide();
+    });
+    jqxhr.fail((xhr, textStatus, error) => { handleFail(xhr, textStatus, error) })
+}
+
+function refreshTabs(tab, data) {
+    
+    // Initialize Tiles
+    item = tab + "Tab";
+    type = tab + "sTotalInfo";
+    if ($("#" + item).length > 0) {
+        createTile($("#" + item + " .row .col-lg-3").eq(0), "bg-aqua", data['tiles'][0] != null && data['tiles'][0] != 0 ? data['tiles'][0] : loginsNotAvailable, todaysLoginsText, 1, type)
+        createTile($("#" + item + " .row .col-lg-3").eq(1), "bg-green", data['tiles'][1] != null && data['tiles'][1] != 0 ? data['tiles'][1] : loginsNotAvailable, weekLoginsText, 7, type)
+        createTile($("#" + item + " .row .col-lg-3").eq(2), "bg-yellow", data['tiles'][2] != null && data['tiles'][2] != 0 ? data['tiles'][2] : loginsNotAvailable, monthLoginsText, 30, type)
+        createTile($("#" + item + " .row .col-lg-3").eq(3), "bg-red", data['tiles'][3] != null && data['tiles'][3] != 0 ? data['tiles'][3] : loginsNotAvailable, yearLoginsText, 365, type)
+    }
+    columnNames = {};
+    dataCol = [];
+    dataValues = {};
+    dataTable = {};
+    columns = {};
+    if (tab == 'sp') {
+        columnNames['sp'] = ['service', 'serviceIdentifier', 'Count'];
+        dataCol = ['sp'];
+        columns['sp'] = ['spname', 'service', 'count'];       
+    }
+    else if(tab == 'idp') {
+        columnNames['idp'] = ['sourceIdp', 'sourceIdPEntityId', 'Count'];
+        dataCol = ['idp'];
+        columns['idp'] = ['idpname', 'sourceidp', 'count']
+    }
+    else { // dashboard
+        columnNames['idp'] = ['sourceIdp', 'sourceIdPEntityId', 'Count'];
+        columnNames['sp'] = ['service', 'serviceIdentifier', 'Count'];
+        columns['idp'] = ['idpname', 'sourceidp', 'count']
+        columns['sp'] = ['spname', 'service', 'count'];
+        dataCol = ['idp', 'sp']
+        charts = ['summaryIdPChart', 'summarySpChart']
+    }
+    dataCol.forEach(function (type) {
+        fValues = [];
+        fValues.push(columnNames[type])
+        data[type].forEach(function (item) {
+            var temp = [];
+            temp.push(item[0][columns[type][0]]);
+            temp.push(item[0][columns[type][1]])
+            temp.push(parseInt(item[0][columns[type][2]]));
+            dataValues[type] += "[" + new Date(item[0]["year"], item[0]["month"] - 1, item[0]["day"]), parseInt(item[0]["count"]) + "],";
+            fValues.push(temp);
+        })        
+        dataTable[type] = new google.visualization.arrayToDataTable(fValues);
+    });  
+      
+    if(tab == "idp" || tab == "sp") {
+        drawPieChart(document.getElementById(tab + "sChartDetail"), dataTable[tab], tab);
+        $("#" + tab + "DatatableContainer").closest(".box").find('input[id$="DateFrom"],input[id$="DateTo"]').each(function () {
+            $(this).val("")
+        })
+        var options = { idDataTable: tab + 'Datatable' }
+        createDataTable($("#" + tab + "DatatableContainer"), data[tab], tab, options)
+
+        // Update SubTile Date Ranges
+        fValues = [];
+        fValues.push(['Date', 'Count'])
+        data['dashboard'].forEach(function (item) {
+            var temp = [];
+            temp.push(new Date(item[0]["year"], item[0]["month"] - 1, item[0]["day"]));
+            temp.push(parseInt(item[0]["count"]));
+            fValues.push(temp);
+        })
+        var dataTable = new google.visualization.arrayToDataTable(fValues);
+        updateSubtitleDateRanges(tab, dataTable);
+    }
+    else { // Dashboard
+        drawPieChart(document.getElementById("summaryIdPChart"), dataTable['idp'], "idp");
+        drawPieChart(document.getElementById("summarySpChart"), dataTable['sp'], "sp");
+        //Draw Line - Range Chart
+        fValues = [];
+        fValues.push(['Date', 'Count'])
+        data['dashboard'].forEach(function (item) {
+            var temp = [];
+            temp.push(new Date(item[0]["year"], item[0]["month"] - 1, item[0]["day"]));
+            temp.push(parseInt(item[0]["count"]));
+            fValues.push(temp);
+        })
+        var dataTable = new google.visualization.arrayToDataTable(fValues);
+        drawLineChart(document.getElementById("loginsDashboard"), dataTable, '')
+        var options = {};
+        data['datatable_dashboard'].forEach(function(item) {
+            newDate = new Date(item[0]['range_date'].split(" ")[0]);
+            //if (i == 0)
+            //    minDate = new Date(item[0]['min_date']);
+            i++;
+            fDate = newDate.getMonth() + 1
+            if (fDate < 10)
+                fDate = '0' + fDate
+
+            item[0]['show_date'] = newDate.getFullYear() + '-' + fDate;
+            // Now must transform countries array to plain text            
+            if (item[0]['countries'] !== undefined) {
+                item[0]['plain_countries'] = '';
+                for (country in item[0]['countries']) {
+                    item[0]['plain_countries'] += country + ': ' + item[0]['countries'][country]['count'] + '|| ';
+                }
+                item[0]['plain_countries'] = item[0]['plain_countries'].slice(0, -3)
+            }
+        })
+
+        updateSubtitleDateRanges('dashboard', dataTable);
+        createDataTable($("#"+tab+"DatatableContainer"), data['datatable_dashboard'], tab)
+        createMap(data['map'], "world-map-dashboard")
+    }
+}
+function updateSubtitleDateRanges(element, data) {
+    subTitleElement = $("." + element + "-data-dates")
+    startDate = convertDate(new Date(data.getColumnRange(0).min));
+    endDate = convertDate(new Date(data.getColumnRange(0).max));
+    subTitleElement.html(startDate + " to " + endDate);
+}
 // Modal Functionality
-function goToSpecificProvider(identifier, legend, type) {
-    $("#myModal").modal()
+function goToSpecificProvider(identifier, legend, type, unique_logins = false) {
+    $("#myModal").modal();
     $("#tabs-modal").tabs({active: 0});
+    $("#unique-logins-modal").attr("data-identifier", identifier)
+    $("#unique-logins-modal").attr("data-type", type)
+    $("#unique-logins-modal").attr("data-legend", legend)
+    if(unique_logins === true){
+        if($("#unique-logins-modal").prop('checked') === false) {
+            $("#unique-logins-modal").prop('checked', true);
+        }
+    }
+    else
+    $("#unique-logins-modal").prop('checked', false);
     // Bug Fix For DatePicker Position When scrolling on modal
     $("#myModal").on("scroll", function() {
         $('#myModal input[id$="DateFrom"],#myModal input[id$="DateTo"]').datepicker('place')
@@ -746,12 +937,11 @@ function goToSpecificProvider(identifier, legend, type) {
      }, 'slow');
      
     item="specificData";
-
     //initialize tiles
-    createTile($("#" + item + " .row .col-lg-3").eq(0), "bg-aqua", "0", "Todays Logins", 1, type+"SpecificData")
-    createTile($("#" + item + " .row .col-lg-3").eq(1), "bg-green", "0", "Last 7 days Logins", 7, type+"SpecificData")
-    createTile($("#" + item + " .row .col-lg-3").eq(2), "bg-yellow", "0", "Last 30 days Logins", 30, type+"SpecificData")
-    createTile($("#" + item + " .row .col-lg-3").eq(3), "bg-red", "0", "Last Year Logins", 365, type+"SpecificData")
+    createTile($("#" + item + " .row .col-lg-3").eq(0), "bg-aqua", loginsNotAvailable, todaysLoginsText, 1, type+"SpecificData")
+    createTile($("#" + item + " .row .col-lg-3").eq(1), "bg-green", loginsNotAvailable, weekLoginsText, 7, type+"SpecificData")
+    createTile($("#" + item + " .row .col-lg-3").eq(2), "bg-yellow", loginsNotAvailable, monthLoginsText, 30, type+"SpecificData")
+    createTile($("#" + item + " .row .col-lg-3").eq(3), "bg-red", loginsNotAvailable, yearLoginsText, 365, type+"SpecificData")
   
     $("#specificData .more-info").each(function () {
         $(this).attr("identifier", identifier);
@@ -765,11 +955,12 @@ function goToSpecificProvider(identifier, legend, type) {
     })
 
     if (type == "idp") {
-        obj = { idp: identifier };
+        obj = { idp: identifier, unique_logins: unique_logins };
     }
     else {
-        obj = { sp: identifier };
+        obj = { sp: identifier, unique_logins: unique_logins };
     }
+
     let jqxhr =  $.ajax({
         url: urlByType[type],
         data: obj,
@@ -779,14 +970,14 @@ function goToSpecificProvider(identifier, legend, type) {
           }
         }
     });
-    jqxhr.done((data, textStatus, xhr) => {    
-        $(".modal-body .specificData .bg-aqua h3").text(data['tiles'][0] != null ? data['tiles'][0] : 0);
+    jqxhr.done((data, textStatus, xhr) => {  
+        $(".modal-body .specificData .bg-aqua h3").text(data['tiles'][0] != null && data['tiles'][0] != 0 ? data['tiles'][0] : loginsNotAvailable);
         setHiddenElements($(".modal-body .specificData .bg-aqua"), data['tiles'][0])
-        $(".modal-body .specificData .bg-green h3").text(data['tiles'][1] != null ? data['tiles'][1] : 0);
+        $(".modal-body .specificData .bg-green h3").text(data['tiles'][1] != null && data['tiles'][1] != 0 ? data['tiles'][1] : loginsNotAvailable);
         setHiddenElements($(".modal-body .specificData .bg-green"), data['tiles'][1])
-        $(".modal-body .specificData .bg-yellow h3").text(data['tiles'][2] != null ? data['tiles'][2] : 0);
+        $(".modal-body .specificData .bg-yellow h3").text(data['tiles'][2] != null && data['tiles'][2] != 0 ? data['tiles'][2] : loginsNotAvailable);
         setHiddenElements($(".modal-body .specificData .bg-yellow"), data['tiles'][2])
-        $(".modal-body .specificData .bg-red h3").text(data['tiles'][3] != null ? data['tiles'][3] : 0);
+        $(".modal-body .specificData .bg-red h3").text(data['tiles'][3] != null && data['tiles'][3] != 0 ? data['tiles'][3] : loginsNotAvailable);
         setHiddenElements($(".modal-body .specificData .bg-red"), data['tiles'][3])
         $("h1.modal-title").html(legend);
         $(".modal-body .specificData > p").html("<b>Identifier:</b> " + identifier);
@@ -813,6 +1004,8 @@ function goToSpecificProvider(identifier, legend, type) {
         })
 
         var dataTable = new google.visualization.arrayToDataTable(fValues);
+        
+
         $("#specificChart").closest(".box").find(".box-title").html(specificText[type])
         if (type == "idp")
             drawPieChart(document.getElementById("specificChart"), dataTable, "sp");
@@ -825,12 +1018,12 @@ function goToSpecificProvider(identifier, legend, type) {
 
         data[type].forEach(function (item) {
             var temp = [];
-            temp.push(new Date(item[0]["year"], item[0]["month"] - 1, item[0]["day"]));
+            temp.push(new Date(item[0]["year"], item[0]["month"] - 1, item[0]["day"],2));
             temp.push(parseInt(item[0]["count"]));
             fValues.push(temp);
         })
         var dataTable = new google.visualization.arrayToDataTable(fValues);
-        
+        updateSubtitleDateRanges('modal', dataTable);
         $("#loginLineChart").closest(".box").find(".box-title").html(overallText[type])
         drawLineChart(document.getElementById("loginLineChart"), dataTable, 'modal')
         //Set DataTable Title
@@ -905,8 +1098,7 @@ function convertDateByGroup(jsDate, groupBy) {
     return showDate;
 }
 // From - To Functionality 
-function from_to_range() {
-    
+function from_to_range() {  
     $('input[id$="DateFrom"],input[id$="DateTo"]').each(function () {
         id = $(this).attr("id")
         if(id.indexOf("DateTo")!= -1) {
@@ -917,8 +1109,7 @@ function from_to_range() {
             $(this).datepicker({ changeMonth: true, changeYear: true, 
                 format: "yyyy-mm-dd", autoclose: true, endDate: new Date() });
         }
-    })
-   
+    }) 
 }
 
 // Initialize Tiles for Registered Users
@@ -937,6 +1128,7 @@ function getDataForUsersTiles(elementId) {
 
 // Create Datatables
 function createDataTable(element, data, type, options = null) {
+    asc_desc = '';
     if(type == "idp") {
         column1 = 'idpname'
         column2 = 'count'
@@ -1037,7 +1229,7 @@ function createDataTable(element, data, type, options = null) {
     if(datatableExport){
         $("#" + id).DataTable({
             dom: 'Bfrtip',
-            order: [sort_order, typeof asc_desc !== 'undefined' ? asc_desc : 'desc'],
+            order: [sort_order, typeof asc_desc != '' ? asc_desc : 'desc'],
             buttons: [
                 {
                     extend: 'collection',
@@ -1126,7 +1318,6 @@ function createMapElement(dataMap, elementContainer, elementId, type, options = 
             createDataTable($("#specificDataTableMapContainer"), dataMap, 'map', options)
             dateSpecificClass = "date-specific-modal"
         }
-
         $("." + elementContainer).html(
             '<div id="' + elementId + '" style="height:500px">'
             + '<div class="map"></div>'
@@ -1134,6 +1325,7 @@ function createMapElement(dataMap, elementContainer, elementId, type, options = 
             + '</div>'
         )
         date_from_to = calculateMinMax(dataMap)
+        
         $("." + dateSpecificClass).html(" from " + date_from_to[0] + " to " + date_from_to[1]);
         createMap(dataMap, elementId);
         

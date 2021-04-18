@@ -4,8 +4,12 @@
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h1 class="modal-title" id="myModalLabel"></h1>
+                <h4><?php print _txt('pl.rciamstatsviewer.dateranges.desc'); ?><span class='modal-data-dates'></span></h4>
             </div>
             <div class="modal-body">
+            <?php if(!empty($vv_country_table)) : ?>
+                <?php print $this->element('uniqueLoginsButton', array('type' => 'modal'));?>
+            <?php endif; ?>
                 <div class="specificData" id="specificData">
                     <p class="subTitle"></p>
                     <div class="row">
