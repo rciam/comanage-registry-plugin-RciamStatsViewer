@@ -1,6 +1,12 @@
 <div id="<?php print $prefix; ?>Tab">
   <div class="totalData" id="<?php print Inflector::pluralize($prefix); ?>TotalInfo">
+    <?php if(($prefix == 'sp' || $prefix == 'idp') && !empty($vv_country_table)) : ?>
+      <?php print $this->element('uniqueLoginsButton', array('type' => $prefix));?>
+    <?php endif; ?>
     <h1><?php print _txt('pl.rciamstatsviewer.' . $prefix . '.pl'); ?></h1>
+    <?php if($prefix == 'sp' || $prefix == 'idp') : ?>
+      <h4><?php print _txt('pl.rciamstatsviewer.dateranges.desc'); ?><span class='<?php print $prefix; ?>-data-dates'></span></h4>
+    <?php endif; ?>
     <div class="row">
       <?php for($i = 0; $i <= 3; $i ++) : ?>
         <div class="col-lg-3 col-xs-6">

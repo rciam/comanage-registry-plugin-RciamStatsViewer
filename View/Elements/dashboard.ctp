@@ -1,5 +1,9 @@
 <div id="dashboardTab">
+  <?php if(!empty($vv_country_table)) : ?>
+    <?php print $this->element('uniqueLoginsButton', array('type' => 'dashboard'));?>
+  <?php endif; ?>
   <h1><?php print _txt('pl.rciamstatsviewer.summary'); ?></h1>
+  <h4><?php print _txt('pl.rciamstatsviewer.dateranges.desc'); ?><span class='dashboard-data-dates'></span></h4>
   <div class="row">
   <?php for($i = 0; $i <= 3; $i ++) : ?>
     <div class="col-lg-3 col-xs-6">
