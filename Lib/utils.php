@@ -27,8 +27,43 @@ class RciamStatsViewerUtils
     public function getStatisticsUserCountryTableName() {
         return $this->configData['RciamStatsViewer']["userCountryStatisticsTableName"];
     }
+    
+    /**
+     * getInformationForProvider
+     *
+     * @param  mixed $conn
+     * @param  mixed $type
+     * @param  mixed $data
+     * @return object
+     */
+    public function getInformationForProvider($conn, $type, $data) {
+        $queryParams = array();
+        if($type == 'idp') {
+            $table_name = $this->configData['RciamStatsViewer']['identityProvidersMapTableName'];
+            $results = Hash::extract($data, '{n}.{n}.sourceidp');
+            $sql = "SELECT entityid, COALESCE(name,entityid) AS idpname FROM $table_name WHERE entityid IN ('". implode("','",$results)."')";
+            $providers = $this->execQuery($conn, $sql, $queryParams);
+            $providers = Hash::combine($providers, '{n}.{n}.entityid', '{n}.{n}');
+            foreach($data as $key => $provider){
+                $data[$key][0]['idpname'] =  !empty($providers[$provider[0]['sourceidp']]['idpname']) ? $providers[$provider[0]['sourceidp']]['idpname'] : $provider[0]['sourceidp'];
+            }
+        }
+        elseif($type == 'sp') {
+            $table_name = $this->configData['RciamStatsViewer']['serviceProvidersMapTableName'];
+            $results = Hash::extract($data, '{n}.{n}.service');
+            $sql = "SELECT identifier, COALESCE(name,identifier) AS spname FROM $table_name WHERE identifier IN ('". implode("','",$results)."')";
+            $providers = $this->execQuery($conn, $sql, $queryParams);
+            $providers = Hash::combine($providers, '{n}.{n}.identifier', '{n}.{n}');
+            foreach($data as $key => $provider){
+                $data[$key][0]['spname'] = !empty($providers[$provider[0]['service']]['spname']) ? $providers[$provider[0]['service']]['spname'] : $provider[0]['service'];
+            }
+        }
+        return $data;
+    }
 
     /**
+     * getTotalLoginCounts
+     * 
      * @param $conn
      * @param $days
      * @param null $sp
@@ -69,10 +104,9 @@ class RciamStatsViewerUtils
             $queryParams = array($days);
         }
         $result = $this->execQuery($conn, $sql, $queryParams);
-
         return !empty($result[0][0]['count']) ? $result[0][0]['count'] : 0;
     }
-        
+   
     /**
      * getLoginCountByRanges
      *
@@ -97,12 +131,13 @@ class RciamStatsViewerUtils
                 $trunc_by = RciamStatsViewerDateTruncEnum::monthly;
                 $sql = "select sum(count) as count, date_trunc('" . $trunc_by . "', CAST(CONCAT(year,'-',LPAD(CAST(month AS varchar),2,'0'),'-',LPAD(CAST(day AS varchar),2,'0')) AS date)) as range_date, date_trunc('" . $trunc_by . "', CAST(CONCAT(year,'-',LPAD(CAST(month AS varchar),2,'0'),'-',LPAD(CAST(day AS varchar),2,'0')) AS date)) as show_date, min(CAST(CONCAT(year,'-',LPAD(CAST(month AS varchar),2,'0'),'-',LPAD(CAST(day AS varchar),2,'0')) AS date)) as min_date from $table_name where service != ''  group by date_trunc('" . $trunc_by . "',CAST(CONCAT(year,'-',LPAD(CAST(month AS varchar),2,'0'),'-',LPAD(CAST(day AS varchar),2,'0')) AS date)) ORDER BY range_date ASC";
             }
-        }
-        
+        } 
         return $this->execQuery($conn, $sql, $queryParams);
     }
 
     /**
+     * getLoginCountPerIdp
+     * 
      * @param $conn
      * @param $days
      * @param null $sp
@@ -161,6 +196,8 @@ class RciamStatsViewerUtils
     }
 
     /**
+     * getLoginCountPerSp
+     * 
      * @param $conn
      * @param $days
      * @param null $idp
@@ -173,9 +210,6 @@ class RciamStatsViewerUtils
         $table_name =  $this->configData['RciamStatsViewer']['statisticsTableName'];
         $serviceProvidersMapTableName =  $this->configData['RciamStatsViewer']['serviceProvidersMapTableName'];
         $dbDriver = $this->configData['RciamStatsViewer']['type'];
-         // Service List Test
-//        $service = "'966c3bcf-0a24-4874-80f0-822ef8c7a5be', 'https://aai-dev.egi.eu/registry/shibboleth', 'https://aai-dev.egi.eu/oidc', '2C7823B4-8B5B-4A85-A912-E5D06D955809'";
-
         $subQuery = '';
         if($dateFrom != null && $dateTo != null && $dateTo > $dateFrom){ //ranges in datatable
             $subQuery = " CONCAT(year,'-',LPAD(CAST(month AS varchar),2,'0'),'-',LPAD(CAST(day AS varchar),2,'0')) BETWEEN '". $dateFrom ."' AND '". $dateTo ."'";          
@@ -218,11 +252,12 @@ class RciamStatsViewerUtils
                 $days
             );
         }
-
         return $this->execQuery($conn, $sql, $queryParams);
     }
 
     /**
+     * getLoginCountPerDayForProvider
+     * 
      * @param $conn
      * @param $days
      * @param $idpIdentifier
@@ -265,83 +300,62 @@ class RciamStatsViewerUtils
                 $days
             );
         }
-
         return $this->execQuery($conn, $sql, $queryParams);
     }
     
     /**
+     * getAccessCountPerIdpOrSp
+     * 
      * @param $conn
      * @param $days
      * @param $spIdentifier
      * @return mixed
      */
-    public function getAccessCountForServicePerIdentityProviders($conn, $days, $spIdentifier)
+    public function getAccessCountPerIdpOrSp($conn, $days, $identifier, $identifier_type)
     {
         $queryParams = array();  // Initialize
         assert($conn !== NULL);
         $table_name =  $this->configData['RciamStatsViewer']['statisticsTableName'];
-        $identityProvidersMapTableName =  $this->configData['RciamStatsViewer']['identityProvidersMapTableName'];
         $dbDriver = $this->configData['RciamStatsViewer']['type'];
+        switch($identifier_type)
+        {
+            case 'idp':
+                $providerMapTableName = $this->configData['RciamStatsViewer']['serviceProvidersMapTableName'];
+                $columnName = $dbDriver === 'PG' ? 'COALESCE(name,service) AS spname' : 'IFNULL(name,service) AS spname';
+                $joinColumns = 'service = identifier';
+                $groupByColumn = 'name';
+                $havingClause = "service != '' AND sourceIdp = ?";
 
-        if ($days === 0) {    // 0 = all time
-            if ($dbDriver === 'PG') {
-                $query = "SELECT sourceIdp, service, COALESCE(name,sourceIdp) AS idpname, SUM(count) AS count FROM $table_name LEFT OUTER JOIN $identityProvidersMapTableName ON sourceIdp = entityId GROUP BY sourceIdp, service, idpname HAVING sourceIdp != '' AND service = ? ORDER BY count DESC";
-            } else { // MYSQL
-                $query = "SELECT sourceIdp, service, IFNULL(name,sourceIdp) AS idpname, SUM(count) AS count FROM $table_name LEFT OUTER JOIN $identityProvidersMapTableName ON sourceIdp = entityId GROUP BY sourceIdp, service HAVING sourceIdp != '' AND service = ?  ORDER BY count DESC";
-            }
-            $queryParams = array(
-                $spIdentifier
-            );
-        } else {
-            if ($dbDriver === 'PG') {
-                $query = "SELECT year, month, day, sourceIdp, service, COALESCE(name,sourceIdp) AS idpname, SUM(count) AS count FROM $table_name LEFT OUTER JOIN $identityProvidersMapTableName ON sourceIdp = entityId WHERE CAST(CONCAT(year,'-',LPAD(CAST(month AS varchar),2,'0'),'-',LPAD(CAST(day AS varchar),2,'0')) AS date) > current_date - INTERVAL '1 days' * ? GROUP BY sourceIdp, service, idpname, year, month, day HAVING sourceIdp != '' AND service = ? ORDER BY count DESC";
-            } else { // MYSQL
-                $query = "SELECT year, month, day, sourceIdp, service, IFNULL(name,sourceIdp) AS idpname, SUM(count) AS count FROM $table_name LEFT OUTER JOIN $identityProvidersMapTableName ON sourceIdp = entityId WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE() GROUP BY sourceIdp, service HAVING sourceIdp != '' AND service = ? ORDER BY count DESC";
-            }
-            $queryParams = array(
-                $days, $spIdentifier
-            );
+            break;
+            case 'sp':
+                $providerMapTableName = $this->configData['RciamStatsViewer']['identityProvidersMapTableName'];
+                $columnName = $dbDriver === 'PG' ? 'COALESCE(name,sourceIdp) AS idpname' : 'IFNULL(name,sourceIdp) AS idpname';
+                $joinColumns = 'sourceIdp = entityId';
+                $groupByColumn = 'idpname';
+                $havingClause = "sourceIdp != '' AND service = ?";
+            break;
         }
-
-        return $this->execQuery($conn, $query, $queryParams);
-    }
-
-    /**
-     * @param $conn
-     * @param $days
-     * @param $idpEntityId
-     * @return mixed
-     */
-    public function getAccessCountForIdentityProviderPerServiceProviders($conn, $days, $idpEntityId)
-    {
-        $dbDriver = $this->configData['RciamStatsViewer']['type'];
-        $queryParams = array();  // Initialize
-        assert($conn !== NULL);
-        $table_name =  $this->configData['RciamStatsViewer']['statisticsTableName'];
-        $serviceProvidersMapTableName =  $this->configData['RciamStatsViewer']['serviceProvidersMapTableName'];
-
         if ($days === 0) {    // 0 = all time
             if ($dbDriver === 'PG') {
-                $query = "SELECT sourceIdp, service, COALESCE(name,service) AS spname, SUM(count) AS count FROM $table_name LEFT OUTER JOIN $serviceProvidersMapTableName ON service = identifier GROUP BY sourceIdp, service, name HAVING service != '' AND sourceIdp = ? ORDER BY count DESC";
+                $query = "SELECT sourceIdp, service, $columnName, SUM(count) AS count FROM $table_name LEFT OUTER JOIN $providerMapTableName ON $joinColumns GROUP BY sourceIdp, service, $groupByColumn HAVING $havingClause ORDER BY count DESC";
             } else { // MYSQL
-                $query = "SELECT sourceIdp, service, IFNULL(name,service) AS spname, SUM(count) AS count FROM $table_name LEFT OUTER JOIN $serviceProvidersMapTableName ON service = identifier GROUP BY sourceIdp, service HAVING service != '' AND sourceIdp = ? ORDER BY count DESC";
+                $query = "SELECT sourceIdp, service, $columnName, SUM(count) AS count FROM $table_name LEFT OUTER JOIN $providerMapTableName ON $joinColumns GROUP BY sourceIdp, service HAVING $havingClause ORDER BY count DESC";
             }
             $queryParams = array(
-                $idpEntityId,
+                $identifier,
             );
         } else {
             if ($dbDriver === 'PG') {
-                $query = "SELECT year, month, day, sourceIdp, service, COALESCE(name,service) AS spname, SUM(count) AS count FROM $table_name LEFT OUTER JOIN $serviceProvidersMapTableName ON service = identifier WHERE CAST(CONCAT(year,'-',LPAD(CAST(month AS varchar),2,'0'),'-',LPAD(CAST(day AS varchar),2,'0')) AS date) > current_date - INTERVAL '1 days' * ? GROUP BY sourceIdp, service, name, year, month, day HAVING service != '' AND sourceIdp = :idpEntityId ORDER BY count DESC";
+                $query = "SELECT year, month, day, sourceIdp, service, $columnName, SUM(count) AS count FROM $table_name LEFT OUTER JOIN $providerMapTableName ON $joinColumns WHERE CAST(CONCAT(year,'-',LPAD(CAST(month AS varchar),2,'0'),'-',LPAD(CAST(day AS varchar),2,'0')) AS date) > current_date - INTERVAL '1 days' * ? GROUP BY sourceIdp, service, $groupByColumn, year, month, day HAVING $havingClause ORDER BY count DESC";
             } else { // MYSQL
-                $query = "SELECT year, month, day, sourceIdp, service, IFNULL(name,service) AS spname, SUM(count) AS count FROM $table_name LEFT OUTER JOIN $serviceProvidersMapTableName ON service = identifier WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE() GROUP BY sourceIdp, service HAVING service != '' AND sourceIdp = ? ORDER BY count DESC";
+                $query = "SELECT year, month, day, sourceIdp, service, $columnName, SUM(count) AS count FROM $table_name LEFT OUTER JOIN $providerMapTableName ON $joinColumns WHERE CONCAT(year,'-',LPAD(month,2,'00'),'-',LPAD(day,2,'00')) BETWEEN CURDATE() - INTERVAL ? DAY AND CURDATE() GROUP BY sourceIdp, service HAVING $havingClause ORDER BY count DESC";
             }
             $queryParams = array(
                 $days,
-                $idpEntityId
+                $identifier
             );
         }
-
-        return $this->execQuery($conn, $query, $queryParams);
+        return $this->execQuery($conn, $query, $queryParams);   
     }
 
     /**

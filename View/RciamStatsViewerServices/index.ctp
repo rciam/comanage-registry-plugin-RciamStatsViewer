@@ -80,15 +80,20 @@ print $this->Html->script('/RciamStatsViewer/js/jquery-mapael/maps/world_countri
     var vAxisTitle = [];
     var tooltipDescription = [];
     var defaultExportTitle = [];
-    overallText['idp'] = '<?php print _txt('pl.rciamstatsviewer.idp.overall'); ?>'
-    overallText['sp'] = '<?php print _txt('pl.rciamstatsviewer.sp.overall'); ?>'
-    specificText['idp'] = '<?php print _txt('pl.rciamstatsviewer.idp.specific'); ?>'
-    specificText['sp'] = '<?php print _txt('pl.rciamstatsviewer.sp.specific'); ?>'
-    specificTextDataTable['idp'] = '<?php print _txt('pl.rciamstatsviewer.idp.specific.datatable'); ?>'
-    specificTextDataTable['sp'] = '<?php print _txt('pl.rciamstatsviewer.sp.specific.datatable'); ?>'
-    registeredUsersBy['weekly'] = '<?php print _txt('pl.rciamstatsviewer.registered.users.weekly'); ?>'
-    registeredUsersBy['monthly'] = '<?php print _txt('pl.rciamstatsviewer.registered.users.monthly'); ?>'
-    registeredUsersBy['yearly'] = '<?php print _txt('pl.rciamstatsviewer.registered.users.yearly'); ?>'
+    loginsNotAvailable = '<?php print _txt('pl.rciamstatsviewer.logins.na'); ?>';
+    todaysLoginsText = '<?php print _txt('pl.rciamstatsviewer.logins.today'); ?>';
+    weekLoginsText = '<?php print _txt('pl.rciamstatsviewer.logins.week'); ?>';
+    monthLoginsText = '<?php print _txt('pl.rciamstatsviewer.logins.month'); ?>';
+    yearLoginsText = '<?php print _txt('pl.rciamstatsviewer.logins.year'); ?>';
+    overallText['idp'] = '<?php print _txt('pl.rciamstatsviewer.idp.overall'); ?>';
+    overallText['sp'] = '<?php print _txt('pl.rciamstatsviewer.sp.overall'); ?>';
+    specificText['idp'] = '<?php print _txt('pl.rciamstatsviewer.idp.specific'); ?>';
+    specificText['sp'] = '<?php print _txt('pl.rciamstatsviewer.sp.specific'); ?>';
+    specificTextDataTable['idp'] = '<?php print _txt('pl.rciamstatsviewer.idp.specific.datatable'); ?>';
+    specificTextDataTable['sp'] = '<?php print _txt('pl.rciamstatsviewer.sp.specific.datatable'); ?>';
+    registeredUsersBy['weekly'] = '<?php print _txt('pl.rciamstatsviewer.registered.users.weekly'); ?>';
+    registeredUsersBy['monthly'] = '<?php print _txt('pl.rciamstatsviewer.registered.users.monthly'); ?>';
+    registeredUsersBy['yearly'] = '<?php print _txt('pl.rciamstatsviewer.registered.users.yearly'); ?>';
     vAxisTitle['registered'] = '<?php print _txt('pl.rciamstatsviewer.registered.column'); ?>';
     vAxisTitle['cou'] = '<?php print _txt('pl.rciamstatsviewer.cou.column'); ?>';
     vAxisTitle['dashboard'] = '<?php print _txt('pl.rciamstatsviewer.dashboard.column'); ?>';
@@ -96,7 +101,7 @@ print $this->Html->script('/RciamStatsViewer/js/jquery-mapael/maps/world_countri
     tooltipDescription['cou'] = '<?php print _txt('pl.rciamstatsviewer.cou.tooltip'); ?>';
     defaultExportTitle['registered'] = '<?php print _txt('pl.rciamstatsviewer.registered.defaultexporttitle'); ?>';
     defaultExportTitle['cou'] = '<?php print _txt('pl.rciamstatsviewer.cou.defaultexporttitle'); ?>';
-    var dataTableExportButtonText = '<?php print _txt('pl.rciamstatsviewer.datatable.export'); ?>'
+    var dataTableExportButtonText = '<?php print _txt('pl.rciamstatsviewer.datatable.export'); ?>';
     var statusEnum = <?php print json_encode($vv_status_enum); ?>;
     urlByType['idp'] = '<?php print $this->Html->url(array(
                             'plugin' => Inflector::singularize(Inflector::tableize($this->plugin)),
@@ -108,6 +113,12 @@ print $this->Html->script('/RciamStatsViewer/js/jquery-mapael/maps/world_countri
                             'plugin' => Inflector::singularize(Inflector::tableize($this->plugin)),
                             'controller' => 'rciam_stats_viewer_services',
                             'action' => 'getdataforsp',
+                            'co'  => $cur_co['Co']['id']
+                        )); ?>';
+    urlRefreshTab = '<?php print $this->Html->url(array(
+                            'plugin' => Inflector::singularize(Inflector::tableize($this->plugin)),
+                            'controller' => 'rciam_stats_viewer_services',
+                            'action' => 'getdatafortabs',
                             'co'  => $cur_co['Co']['id']
                         )); ?>';
     var url_str_columnchart = '<?php print $this->Html->url(array(
@@ -144,6 +155,10 @@ print $this->Html->script('/RciamStatsViewer/js/jquery-mapael/maps/world_countri
     $(function() {
         // Initialize Tabs
         var tabs = $("#tabs").tabs();
+        // Initialize Tooltip
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+        })
         // Initialize Modal
         $("body").append(`<?php print $this->element('modal', array('datatableExport' => $vv_permissions['registered'])) ?>`);
         // Initialize Spinners - we have one spinner for body and one for modal
@@ -155,10 +170,10 @@ print $this->Html->script('/RciamStatsViewer/js/jquery-mapael/maps/world_countri
         var tabsIds = ["dashboardTab", "idpsTotalInfo", "spsTotalInfo"];
         tabsIds.forEach(function(item) {
             if ($("#" + item).length > 0) {
-                createTile($("#" + item + " .row .col-lg-3").eq(0), "bg-aqua", <?php print !empty($vv_totalloginscount[0]) ? $vv_totalloginscount[0] : '0'; ?>, "Todays Logins", 1, item)
-                createTile($("#" + item + " .row .col-lg-3").eq(1), "bg-green", <?php print !empty($vv_totalloginscount[1]) ? $vv_totalloginscount[1] : '0'; ?>, "Last 7 days Logins", 7, item)
-                createTile($("#" + item + " .row .col-lg-3").eq(2), "bg-yellow", <?php print !empty($vv_totalloginscount[2]) ? $vv_totalloginscount[2] : '0'; ?>, "Last 30 days Logins", 30, item)
-                createTile($("#" + item + " .row .col-lg-3").eq(3), "bg-red", <?php print !empty($vv_totalloginscount[3]) ? $vv_totalloginscount[3] : '0'; ?>, "Last Year Logins", 365, item)
+                createTile($("#" + item + " .row .col-lg-3").eq(0), "bg-aqua", <?php print !empty($vv_totalloginscount[0]) ? $vv_totalloginscount[0] : '0'; ?>, todaysLoginsText, 1, item)
+                createTile($("#" + item + " .row .col-lg-3").eq(1), "bg-green", <?php print !empty($vv_totalloginscount[1]) ? $vv_totalloginscount[1] : '0'; ?>, weekLoginsText, 7, item)
+                createTile($("#" + item + " .row .col-lg-3").eq(2), "bg-yellow", <?php print !empty($vv_totalloginscount[2]) ? $vv_totalloginscount[2] : '0'; ?>, monthLoginsText, 30, item)
+                createTile($("#" + item + " .row .col-lg-3").eq(3), "bg-red", <?php print !empty($vv_totalloginscount[3]) ? $vv_totalloginscount[3] : '0'; ?>, yearLoginsText, 365, item)
             }
         });
 
@@ -219,7 +234,12 @@ print $this->Html->script('/RciamStatsViewer/js/jquery-mapael/maps/world_countri
             tabId = $(this).attr("data-tab");
             specific = ($(this).attr("data-spec") != undefined ? $(this).attr("data-spec") : false);
             identifier = ($(this).attr("identifier") != undefined ? $(this).attr("identifier") : null);
-
+            if (identifier == null) {
+                unique_logins = type == '' ? $("#unique-logins-dashboard").is(":checked") : $("#unique-logins-" + type).is(":checked")
+            }
+            else{
+                unique_logins = $("#unique-logins-modal").is(":checked")
+            }
             var row = $(this).closest(".row");
             $(".overlay").show();
 
@@ -241,16 +261,20 @@ print $this->Html->script('/RciamStatsViewer/js/jquery-mapael/maps/world_countri
                                 'action' => 'getlogincountperday',
                                 'co'  => $cur_co['Co']['id']
                             )); ?>';
-            getLoginCountPerDay(url_str, days, identifier, type, tabId, specific);
+            getLoginCountPerDay(url_str, days, identifier, type, tabId, specific, unique_logins);
 
         })
 
         // Get Data For Specific Days 
         $(document).on("click", ".more-info", function() {
-            type = $(this).attr("data-type") != undefined ? $(this).attr("data-type") : '';
+            type = $(this).attr("data-type") !== undefined ? $(this).attr("data-type") : '';
             tabId = $(this).attr("data-tab");
             specific = ($(this).attr("data-spec") != undefined ? $(this).attr("data-spec") : false);
             identifier = ($(this).attr("identifier") != undefined ? $(this).attr("identifier") : null);
+           
+            activeTab = $("ul.tabset_tabs li.ui-tabs-active").attr("aria-controls").replace("Tab","");
+            unique_logins = $("#myModal").is(':visible') ? $("#unique-logins-modal").is(":checked") : $("#unique-logins-"+activeTab).is(":checked");
+         
             $(".overlay").show();
             var active = $(this).closest(".small-box");
             var row = $(this).closest(".row");
@@ -278,7 +302,7 @@ print $this->Html->script('/RciamStatsViewer/js/jquery-mapael/maps/world_countri
                                 'action' => 'getlogincountperday',
                                 'co'  => $cur_co['Co']['id']
                             )); ?>';
-            getLoginCountPerDay(url_str, days, identifier, type, tabId, specific);
+            getLoginCountPerDay(url_str, days, identifier, type, tabId, specific, unique_logins);
         })
 
         // DataTable Links Functionality 
@@ -286,7 +310,24 @@ print $this->Html->script('/RciamStatsViewer/js/jquery-mapael/maps/world_countri
             identifier = $(this).attr("data-identifier")
             type = $(this).attr("data-type")
             legend = $(this).text();
-            goToSpecificProvider(identifier, legend, type);
+            // if modal is visible check for modal's unique-logins checkbox else get checkbox from the tab
+            activeTab = $("ul.tabset_tabs li.ui-tabs-active").attr("aria-controls").replace("Tab","");
+            unique_logins = $("#myModal").is(':visible') ? $("#unique-logins-modal").is(":checked") : $("#unique-logins-"+activeTab).is(":checked");
+            goToSpecificProvider(identifier, legend, type, unique_logins);
+        })
+        // When clicking unique logins at modal
+        $(document).on("change", "#unique-logins-modal", function(){
+            identifier = $(this).attr("data-identifier")
+            type = $(this).attr("data-type")
+            legend = $(this).attr("data-legend");
+            unique_logins = $("#unique-logins-modal").is(":checked") 
+            goToSpecificProvider(identifier, legend, type, unique_logins);
+        })
+
+        // When clicking unique logins at tab
+        $(document).on("change", "input[id^=unique-logins-][id!=unique-logins-modal]", function(){
+            type = $(this).attr("id").split("-")[2]
+            getDataForTabs(type);
         })
 
         // When change Period at RegisteredUsers Column Chart
@@ -344,6 +385,11 @@ print $this->Html->script('/RciamStatsViewer/js/jquery-mapael/maps/world_countri
             ?>
         ]);
         drawLineChart(document.getElementById("loginsDashboard"), data)
+
+        // Initialize Subtitle Date Ranges to tabs
+        updateSubtitleDateRanges('dashboard', data);
+        updateSubtitleDateRanges('idp', data);
+        updateSubtitleDateRanges('sp', data);
 
         defaultdataIdp = google.visualization.arrayToDataTable([
             ['sourceIdp', 'sourceIdPEntityId', 'Count'],

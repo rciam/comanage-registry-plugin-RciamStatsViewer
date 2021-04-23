@@ -40,8 +40,20 @@
 
     .overlay {
         display: none;
+        height:100%;
+        top: 0px;
+        position: absolute;
+        width: 100%;
     }
-
+    .unique-logins-button {
+        cursor: initial;
+    }
+    .unique-logins-text {
+        cursor: pointer;
+    }
+    .unique-logins-button:focus {
+        background-color: #3c8dbc;
+    }
     .subTitle {
         padding: 10px 0px;
         font-size: 1.1em;
@@ -132,6 +144,9 @@
 
     #myModal #specificDataTableContainer{
         margin-top:20px;
+    }
+    .float-right {
+        float:right;
     }
     /* Map Style*/
     .map {
