@@ -599,7 +599,9 @@ function updateColumnChart(elementId, range = null, init = false, tab) {
             })
             //Set minimum Date
             $("#" + tab + "DateFrom, #" + tab + "DateTo").each(function(){
-                $(this).datepicker('setStartDate', minDate);
+                if(tab!='registered') {
+                    $(this).datepicker('setStartDate', minDate);
+                }
             })
            
             
