@@ -393,7 +393,10 @@ class RciamStatsViewerServicesController extends StandardController
       if($tab === 'registered') {
         // find users that we want to find their countries (also first time initialize of tab)
         if(!empty($this->utils->getStatisticsUserCountryTableName()) && RciamStatsViewerDateTruncEnum::type[$range]  == RciamStatsViewerDateTruncEnum::yearly) {
-          $data = $this->findRegisteredUsersAndCountries(RciamStatsViewerDateTruncEnum::type[$range], $this->utils->getStatisticsUserCountryTableName(), $co_id, $status, NULL);       
+          //$data = $this->findRegisteredUsersAndCountries(RciamStatsViewerDateTruncEnum::type[$range], $this->utils->getStatisticsUserCountryTableName(), $co_id, $status, NULL);
+          $sql = "select count(*), date_trunc( 'year', created ) as range_date, min(created) as min_date from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=$co_id AND status='$status' AND created >
+            date_trunc('year', CURRENT_DATE) - INTERVAL '1 year' group by date_trunc( 'year', created ) ORDER BY date_trunc( 'year', created ) ASC";
+          $data['data'] = $this->RciamStatsViewer->query($sql);
         }
         else {
           if(RciamStatsViewerDateTruncEnum::type[$range] === RciamStatsViewerDateTruncEnum::monthly) {
@@ -1007,7 +1010,9 @@ class RciamStatsViewerServicesController extends StandardController
 
   function findRegisteredUsersAndCountries($truncBy, $users_country, $co_id, $status, $dateFromTo = NULL) {
     $status_sql = " AND cm_co_people.status='" . $status . "' ";
-    $between = !empty($dateFromTo) ? " AND cm_co_people.created BETWEEN '" . $dateFromTo[0] . "' AND '" . $dateFromTo[1] . "'" : '';
+    $date_minus_2 = strtotime(date('Y-m-d H:i:s').' -2 year');
+    $between = !empty($dateFromTo) ? " AND cm_co_people.created BETWEEN '" . $dateFromTo[0] . "' AND '" . $dateFromTo[1] . "'" 
+      : " AND cm_co_people.created BETWEEN '".date('Y-m-d H:i:s', $date_minus_2)."' AND '".date('Y-m-d H:i:s')."'";
     // Map: get countries for registered users, created at a specific date range
     $sql = "SELECT t.country,t.countrycode,count(t.country) as sum, min(min_date), max(max_date) ".
            "FROM (SELECT userid, country, countrycode, sum(count) as sum_count, min(date) as min_date, max(date) as max_date ".
