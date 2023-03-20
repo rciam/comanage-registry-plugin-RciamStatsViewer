@@ -109,7 +109,6 @@ $(document).on("click", ".unique-logins-text", function(e) {
 
 // when clicking groupBy
 $(document).on("click", ".groupDataByDate", function () {    
-    console.log("testmpaine")
     $(".overlay").show();
     dataTableToUpdate = $(this).closest(".dataTableWithFilter").find(".dataTableContainer")
     boxTitle = $(this).closest(".box").find(".box-title").text();
@@ -521,16 +520,24 @@ function updateColumnChart(elementId, range = null, init = false, tab) {
         }
       })
     jqxhr.done((data) => {
-        
+        if(tab=='registered') {
+            data_column = data['data_column'];
+            console.log(data)
+        }
+        else {
+            data_column = data['data']
+        }
         if(tab == 'registered' || tab =='cou') {
             dataMap = data['map'] !== undefined && data['map'].length > 0 ? data['map'] : [];
-            data = data['data'];          
-        }        
+            data = data['data']; 
+                  
+        }
+        
         fValues = [];
         hticks = [];
         fValues.push(['Date', 'Count', { 'type': 'string', 'role': 'tooltip', 'p': { 'html': true } }])
 
-        data.forEach(function (item) {
+        data_column.forEach(function (item) {
             var temp = [];
             valueRange = new Date(item[0]['range_date']);
             temp.push(valueRange);

@@ -394,9 +394,8 @@ class RciamStatsViewerServicesController extends StandardController
         // find users that we want to find their countries (also first time initialize of tab)
         if(!empty($this->utils->getStatisticsUserCountryTableName()) && RciamStatsViewerDateTruncEnum::type[$range]  == RciamStatsViewerDateTruncEnum::yearly) {
           $data = $this->findRegisteredUsersAndCountries(RciamStatsViewerDateTruncEnum::type[$range], $this->utils->getStatisticsUserCountryTableName(), $co_id, $status, NULL);
-          //$sql = "select count(*), date_trunc( 'year', created ) as range_date, min(created) as min_date from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=$co_id AND status='$status' AND created >
-          //  date_trunc('year', CURRENT_DATE) - INTERVAL '1 year' group by date_trunc( 'year', created ) ORDER BY date_trunc( 'year', created ) ASC";
-          //$data['data'] = $this->RciamStatsViewer->query($sql);
+          $sql = "select count(*), date_trunc( 'year', created ) as range_date, min(created) as min_date from cm_co_people where co_person_id IS NULL AND NOT DELETED AND co_id=$co_id AND status='$status' group by date_trunc( 'year', created ) ORDER BY date_trunc( 'year', created ) ASC";
+          $data['data_column'] = $this->RciamStatsViewer->query($sql);
         }
         else {
           if(RciamStatsViewerDateTruncEnum::type[$range] === RciamStatsViewerDateTruncEnum::monthly) {
@@ -411,6 +410,7 @@ class RciamStatsViewerServicesController extends StandardController
             date_trunc('month', CURRENT_DATE) - INTERVAL '6 months' group by date_trunc( 'week', created ) ORDER BY date_trunc( 'week', created ) ASC";
           }
           $data['data'] = $this->RciamStatsViewer->query($sql);
+          $data['data_column'] = $data['data'];
         }
       }
     } 
@@ -432,6 +432,7 @@ class RciamStatsViewerServicesController extends StandardController
         date_trunc('month', CURRENT_DATE) - INTERVAL '6 months' group by date_trunc( 'week', created ) ORDER BY date_trunc( 'week', created ) ASC";
       }
       $data['data'] = $this->RciamStatsViewer->query($sql);
+      $data['data_column'] = $data['data'];
     }
 
     $this->response->type('json');
