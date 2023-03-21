@@ -1011,9 +1011,9 @@ class RciamStatsViewerServicesController extends StandardController
 
   function findRegisteredUsersAndCountries($truncBy, $users_country, $co_id, $status, $dateFromTo = NULL) {
     $status_sql = " AND cm_co_people.status='" . $status . "' ";
-    $date_minus_2 = strtotime(date('Y-m-d H:i:s').' -2 year');
+    $date_minus_2 = strtotime(date('Y-m-d') . ' 00:00:00' . ' -2 year');
     $between = !empty($dateFromTo) ? " AND cm_co_people.created BETWEEN '" . $dateFromTo[0] . "' AND '" . $dateFromTo[1] . "'" 
-      : " AND cm_co_people.created BETWEEN '".date('Y-m-d H:i:s', $date_minus_2)."' AND '".date('Y-m-d H:i:s')."'";
+      : " AND cm_co_people.created BETWEEN '".date('Y-m-d H:i:s', $date_minus_2)."' AND '".date('Y-m-d').' 23:59:59'."'";
     // Map: get countries for registered users, created at a specific date range
     $sql = "SELECT t.country,t.countrycode,count(t.country) as sum, min(min_date), max(max_date) ".
            "FROM (SELECT userid, country, countrycode, sum(count) as sum_count, min(date) as min_date, max(date) as max_date ".
