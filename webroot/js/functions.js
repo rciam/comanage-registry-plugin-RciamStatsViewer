@@ -115,7 +115,6 @@ $(document).on("click", ".groupDataByDate", function () {
     type = $(this).closest(".box").attr("data-type")
     $(this).closest(".dataTableDateFilter").find('input[id$="DateFrom"]').each(function () {
         jsDate = ($(this).datepicker("getDate"))
-        console.log(jsDate)
         dateFrom = convertDate(jsDate);
     })
     $(this).closest(".dataTableDateFilter").find('input[id$="DateTo"]').each(function () {
@@ -522,7 +521,6 @@ function updateColumnChart(elementId, range = null, init = false, tab) {
     jqxhr.done((data) => {
         if(tab=='registered') {
             data_column = data['data_column'];
-            console.log(data)
         }
         else {
             data_column = data['data']
