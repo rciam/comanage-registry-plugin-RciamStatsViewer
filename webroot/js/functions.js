@@ -623,9 +623,9 @@ function updateColumnChart(elementId, range = null, init = false, tab) {
                 let dd = today.getDate();
                 if (dd < 10) dd = '0' + dd;
                 if (mm < 10) mm = '0' + mm;
-                $("#" + tab + "DateFrom").datepicker( "setDate", (yyyy-2)+'-'+mm+'-'+dd);
+                $("#" + tab + "DateFrom").datepicker( "setDate", (yyyy-1)+'-'+mm+'-'+dd);
                 $("#" + tab + "DateTo").datepicker( "setDate", yyyy+'-'+mm+'-'+dd);
-                $("#" + tab + "DateFrom").val((yyyy-2)+'-'+mm+'-'+dd);
+                $("#" + tab + "DateFrom").val((yyyy-1)+'-'+mm+'-'+dd);
                 $("#" + tab + "DateTo").val(yyyy+'-'+mm+'-'+dd);
                 $(".overlay").hide();
                 $('#registeredTab a.groupDataByDate[data-value="yearly"]').click();    
