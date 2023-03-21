@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Fix timeout when accessing Registered Users Tab due to a large number of users
+- Handle undefined country tables
 
 ## [v1.2.1] - 2021-04-23
 ### Added
