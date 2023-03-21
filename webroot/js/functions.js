@@ -519,16 +519,23 @@ function updateColumnChart(elementId, range = null, init = false, tab) {
         }
       })
     jqxhr.done((data) => {
-        
+        if(tab=='registered') {
+            data_column = data['data_column'];
+        }
+        else {
+            data_column = data['data']
+        }
         if(tab == 'registered' || tab =='cou') {
             dataMap = data['map'] !== undefined && data['map'].length > 0 ? data['map'] : [];
-            data = data['data'];          
-        }        
+            data = data['data']; 
+                  
+        }
+        
         fValues = [];
         hticks = [];
         fValues.push(['Date', 'Count', { 'type': 'string', 'role': 'tooltip', 'p': { 'html': true } }])
 
-        data.forEach(function (item) {
+        data_column.forEach(function (item) {
             var temp = [];
             valueRange = new Date(item[0]['range_date']);
             temp.push(valueRange);
@@ -570,7 +577,7 @@ function updateColumnChart(elementId, range = null, init = false, tab) {
                 $('.' + tab + 'Names').append('<li class="rowList" data-date-column="'+ cous[index]['created'] +'" data-descr="'+ cous[index]['description'] +'">' + cous[index]['name'] + '</li>')
             })
         }
-        if(init === true){ // initialize datatable
+        if(init){ // initialize datatable
             // initialize from_to_range
             from_to_range()
             i = 0;
@@ -597,17 +604,40 @@ function updateColumnChart(elementId, range = null, init = false, tab) {
             })
             //Set minimum Date
             $("#" + tab + "DateFrom, #" + tab + "DateTo").each(function(){
-                $(this).datepicker('setStartDate', minDate);
+                if(tab!='registered') {
+                    $(this).datepicker('setStartDate', minDate);
+                }
             })
+           
+            
             var options = {}
             options['idDataTable'] = tab + 'Datatable'
             options['title'] = defaultExportTitle[tab];
             createDataTable($("#" + tab + "DatatableContainer"), data , tab, options)
+
+            if (tab == 'registered') {
+                
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                let mm = today.getMonth() + 1; // Months start at 0!
+                let dd = today.getDate();
+                if (dd < 10) dd = '0' + dd;
+                if (mm < 10) mm = '0' + mm;
+                $("#" + tab + "DateFrom").datepicker( "setDate", (yyyy-1)+'-'+mm+'-'+dd);
+                $("#" + tab + "DateTo").datepicker( "setDate", yyyy+'-'+mm+'-'+dd);
+                $("#" + tab + "DateFrom").val((yyyy-1)+'-'+mm+'-'+dd);
+                $("#" + tab + "DateTo").val(yyyy+'-'+mm+'-'+dd);
+                $(".overlay").hide();
+                $('#registeredTab a.groupDataByDate[data-value="yearly"]').click();    
+            }
+
         }
         if(tab == 'registered' && dataMap.length > 0) {
             createMap(dataMap, 'world-map-registered', 'Number of Users', 'Users')
         }
-        $(".overlay").hide();                 
+        
+        $(".overlay").hide();
+                
     })
     jqxhr.fail((xhr, textStatus, error) => { handleFail(xhr, textStatus, error) })
 }
