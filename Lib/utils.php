@@ -16,7 +16,8 @@ class RciamStatsViewerUtils
      * @return string
      */
     public function getStatisticsCountryTableName() {
-        return $this->configData['RciamStatsViewer']["countryStatisticsTableName"];
+        return !empty($this->configData['RciamStatsViewer']["countryStatisticsTableName"]) ? 
+                    $this->configData['RciamStatsViewer']["countryStatisticsTableName"] : null;
     }
 
      /**
@@ -25,7 +26,8 @@ class RciamStatsViewerUtils
      * @return string
      */
     public function getStatisticsUserCountryTableName() {
-        return $this->configData['RciamStatsViewer']["userCountryStatisticsTableName"];
+        return !empty($this->configData['RciamStatsViewer']["userCountryStatisticsTableName"]) ? 
+                    $this->configData['RciamStatsViewer']["userCountryStatisticsTableName"] : null;
     }
     
     /**
