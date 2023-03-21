@@ -627,8 +627,6 @@ function updateColumnChart(elementId, range = null, init = false, tab) {
                 $("#" + tab + "DateTo").datepicker( "setDate", yyyy+'-'+mm+'-'+dd);
                 $("#" + tab + "DateFrom").val((yyyy-2)+'-'+mm+'-'+dd);
                 $("#" + tab + "DateTo").val(yyyy+'-'+mm+'-'+dd);
-                console.log( $("#" + tab + "DateFrom").val())
-                //$('.btn.btn-default.dropdown-toggle.filter-button').click();
                 $(".overlay").hide();
                 $('#registeredTab a.groupDataByDate[data-value="yearly"]').click();    
             }
